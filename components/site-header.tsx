@@ -37,12 +37,12 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          <Button variant="ghost" className="h-9 px-3" nativeButton={false} render={<a href="/sign-in" />}>
+          <a href="/sign-in" className="h-9 px-3 inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent">
             Sign in
-          </Button>
-          <Button className="h-9 px-4" nativeButton={false} render={<a href="/sign-up" />}>
+          </a>
+          <a href="/sign-up" className="h-9 px-4 inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90">
             Start Free
-          </Button>
+          </a>
         </div>
 
         <button
@@ -70,12 +70,12 @@ export function SiteHeader() {
               </a>
             ))}
             <div className="mt-2 flex flex-col gap-2">
-              <Button variant="outline" className="h-10 w-full" nativeButton={false} render={<a href="/sign-in" />}>
+              <a href="/sign-in" className="h-10 w-full inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground">
                 Sign in
-              </Button>
-              <Button className="h-10 w-full" nativeButton={false} render={<a href="/sign-up" />}>
+              </a>
+              <a href="/sign-up" className="h-10 w-full inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90">
                 Start Free
-              </Button>
+              </a>
             </div>
           </nav>
         </div>

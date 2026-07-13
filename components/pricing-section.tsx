@@ -87,14 +87,18 @@ export function PricingSection() {
                 ))}
               </ul>
 
-              <Button
-                variant={plan.featured ? "default" : "outline"}
-                className="mt-8 h-11 w-full text-sm"
-                nativeButton={false}
-                render={<a href={plan.href} target={plan.featured ? "_blank" : undefined} rel={plan.featured ? "noopener noreferrer" : undefined} />}
+              <a
+                href={plan.href}
+                target={plan.featured ? "_blank" : undefined}
+                rel={plan.featured ? "noopener noreferrer" : undefined}
+                className={`mt-8 h-11 w-full inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors ${
+                  plan.featured
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                    : "border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                }`}
               >
                 {plan.cta}
-              </Button>
+              </a>
             </div>
           ))}
         </div>
