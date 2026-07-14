@@ -14,7 +14,6 @@ export function DraftForm() {
     setLoading(true)
     setError(null)
     try {
-      // Points to root API to avoid 404
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
