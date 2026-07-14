@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const SITUATIONS = [
   { label: 'Late payment', val: 'Chasing a late payment' },
@@ -23,7 +24,20 @@ interface Reply {
   why: string;
 }
 
-export default function DraftForm() {
+interface DraftFormProps {
+  atLimit?: boolean;
+  upgradeUrl?: string;
+  usageCount?: number;
+  isPro?: boolean;
+}
+
+export function DraftForm({ 
+  atLimit = false, 
+  upgradeUrl = "/dashboard/billing", 
+  usageCount = 0,
+  isPro = false
+}: DraftFormProps) {
+  const router = useRouter();
   const [message, setMessage] = useState('');
   const [situation, setSituation] = useState('Chasing a late payment');
   const [tone, setTone] = useState('Diplomatic and warm, but clear');
@@ -62,8 +76,9 @@ export default function DraftForm() {
       const data = await response.json();
       if (data.replies) {
         setReplies(data.replies);
+        router.refresh();
       } else {
-        throw new Error('Invalid JSON shape returned');
+        throw new Error('Invalid JSON structure returned');
       }
     } catch (err) {
       console.error(err);
@@ -90,7 +105,7 @@ export default function DraftForm() {
         </header>
 
         <div className="board">
-          {/* Left Side: Interactive Note Card */}
+          {/* Left Side: Cursive Note Card */}
           <div className="card note-card">
             <span className="card-label">The message</span>
             <textarea 
@@ -133,18 +148,31 @@ export default function DraftForm() {
               </div>
             </div>
 
-            {/* Submit Button */}
+            {/* Submit Action */}
             <button 
               className="gen-btn" 
               onClick={handleGenerate} 
-              disabled={loading}
+              disabled={loading || atLimit}
             >
               {loading ? 'Drafting...' : 'Draft my reply'}
             </button>
             {status && <div className="status">{status}</div>}
+
+            {atLimit && (
+              <div className="mt-4 text-center">
+                <a 
+                  href={upgradeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-block rounded-lg bg-yellow-600 px-4 py-2 text-sm font-medium text-white hover:bg-yellow-500"
+                >
+                  Upgrade to Pro — $12/mo
+                </a>
+              </div>
+            )}
           </div>
 
-          {/* Right Side: Generated Replies */}
+          {/* Right Side: Generated Cards */}
           <div className="output-col">
             {replies.length === 0 && !loading && (
               <div className="empty-state">
@@ -154,7 +182,7 @@ export default function DraftForm() {
 
             {loading && (
               <div className="empty-state">
-                Claude is polishing up two smart, strategic replies for you...
+                Gemini is polishing up two smart, strategic replies for you...
               </div>
             )}
 
@@ -178,3 +206,6 @@ export default function DraftForm() {
     </div>
   );
 }
+
+// Export as default as well, guaranteeing compatibility with both import types!
+export default DraftForm;
