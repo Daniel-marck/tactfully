@@ -1,211 +1,119 @@
-'use client';
+"use client"
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState } from 'react'
+import { MessageSquare } from 'lucide-react'
 
-const SITUATIONS = [
-  { label: 'Late payment', val: 'Chasing a late payment' },
-  { label: 'Scope creep', val: 'Pushing back on scope creep' },
-  { label: 'Lowball offer', val: 'Responding to a lowball offer' },
-  { label: 'No response', val: 'Following up on no response' },
-  { label: 'Saying no', val: 'Saying no / declining the ask' },
-  { label: 'Something else', val: 'A general difficult message' },
-];
+export function DraftForm() {
+  const [incomingMessage, setIncomingMessage] = useState('what is your name?')
+  const [selectedTone, setSelectedTone] = useState('Formal')
+  const [draftResult, setDraftResult] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
 
-const TONES = [
-  { label: 'Diplomatic', val: 'Diplomatic and warm, but clear' },
-  { label: 'Firm', val: 'Firm and direct, no fluff' },
-  { label: 'Formal', val: 'Formal and businesslike' },
-];
-
-interface Reply {
-  label: string;
-  reply: string;
-  why: string;
-}
-
-interface DraftFormProps {
-  atLimit?: boolean;
-  upgradeUrl?: string;
-  usageCount?: number;
-  isPro?: boolean;
-}
-
-export function DraftForm({ 
-  atLimit = false, 
-  upgradeUrl = "/dashboard/billing", 
-  usageCount = 0,
-  isPro = false
-}: DraftFormProps) {
-  const router = useRouter();
-  const [message, setMessage] = useState('');
-  const [situation, setSituation] = useState('Chasing a late payment');
-  const [tone, setTone] = useState('Diplomatic and warm, but clear');
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState('');
-  const [replies, setReplies] = useState<Reply[]>([]);
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-
-  const sealSVG = () => (
-    <svg viewBox="0 0 24 24" fill="none">
-      <path d="M12 2L14.5 8.5L21 9.5L16 14L17.5 21L12 17.5L6.5 21L8 14L3 9.5L9.5 8.5L12 2Z" fill="#F5EFE1" opacity="0.9"/>
-    </svg>
-  );
-
-  const handleGenerate = async () => {
-    if (!message.trim()) {
-      setStatus('Paste the client message first.');
-      return;
-    }
-
-    setLoading(true);
-    setStatus('');
-    setReplies([]);
-
+  const handleDraftReply = async () => {
+    setLoading(true)
+    setError(null)
     try {
+      // Points to root API to avoid 404
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message, situation, tone }),
-      });
+        body: JSON.stringify({ message: incomingMessage, tone: selectedTone }),
+      })
 
-      if (!response.ok) {
-        throw new Error('Server returned an error');
-      }
-
-      const data = await response.json();
-      if (data.replies) {
-        setReplies(data.replies);
-        router.refresh();
-      } else {
-        throw new Error('Invalid JSON structure returned');
-      }
+      if (!response.ok) throw new Error('Server returned an error')
+      const data = await response.json()
+      setDraftResult(data.reply)
     } catch (err) {
-      console.error(err);
-      setStatus('Something went wrong drafting that. Try again.');
+      setError('Something went wrong drafting that. Try again.')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
-
-  const handleCopy = (text: string, index: number) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopiedIndex(index);
-      setTimeout(() => setCopiedIndex(null), 1500);
-    });
-  };
+  }
 
   return (
-    <div className="tactfully-theme">
-      <div className="wrap">
-        <header>
-          <div className="eyebrow">For freelancers &amp; solo consultants</div>
-          <h1>Tactfully</h1>
-          <p className="sub">Paste the message that's stressing you out. Get a reply worth sending — sealed and ready.</p>
-        </header>
+    <div className="w-full max-w-xl bg-slate-900/80 border border-slate-800 rounded-xl p-6 shadow-2xl flex flex-col gap-5 backdrop-blur-sm">
+      
+      {/* Workspace Header */}
+      <div className="border-b border-slate-800/60 pb-3">
+        <h1 className="text-lg font-semibold text-slate-100">Reply Generator</h1>
+        <p className="text-xs text-slate-400 mt-0.5">Draft polished professional messages instantly.</p>
+      </div>
 
-        <div className="board">
-          {/* Left Side: Cursive Note Card */}
-          <div className="card note-card">
-            <span className="card-label">The message</span>
-            <textarea 
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder='Paste what the client actually said... e.g. "Hey, can you just knock the price down a bit? My budget is tighter than I thought."'
-            />
+      {/* Incoming Message Input */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          Incoming Message
+        </label>
+        <textarea
+          value={incomingMessage}
+          onChange={(e) => setIncomingMessage(e.target.value)}
+          className="w-full h-24 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none font-normal leading-relaxed"
+          placeholder="Paste the message you received here..."
+        />
+      </div>
 
-            {/* Situation Selection */}
-            <div className="fieldgroup">
-              <span className="card-label">Situation</span>
-              <div className="pillrow">
-                {SITUATIONS.map((sit) => (
-                  <button
-                    key={sit.val}
-                    type="button"
-                    className={`pill ${situation === sit.val ? 'active' : ''}`}
-                    onClick={() => setSituation(sit.val)}
-                  >
-                    {sit.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Tone Selection */}
-            <div className="fieldgroup">
-              <span className="card-label">Tone</span>
-              <div className="pillrow">
-                {TONES.map((t) => (
-                  <button
-                    key={t.val}
-                    type="button"
-                    className={`pill ${tone === t.val ? 'active' : ''}`}
-                    onClick={() => setTone(t.val)}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Submit Action */}
-            <button 
-              className="gen-btn" 
-              onClick={handleGenerate} 
-              disabled={loading || atLimit}
+      {/* Tone Selection Buttons */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          Select Desired Tone
+        </label>
+        <div className="grid grid-cols-3 gap-2">
+          {['Formal', 'Casual', 'Diplomatic'].map((tone) => (
+            <button
+              key={tone}
+              onClick={() => setSelectedTone(tone)}
+              type="button"
+              className={`py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${
+                selectedTone === tone
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/10'
+                  : 'bg-slate-950 border border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+              }`}
             >
-              {loading ? 'Drafting...' : 'Draft my reply'}
+              {tone}
             </button>
-            {status && <div className="status">{status}</div>}
-
-            {atLimit && (
-              <div className="mt-4 text-center">
-                <a 
-                  href={upgradeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-3 inline-block rounded-lg bg-yellow-600 px-4 py-2 text-sm font-medium text-white hover:bg-yellow-500"
-                >
-                  Upgrade to Pro — $12/mo
-                </a>
-              </div>
-            )}
-          </div>
-
-          {/* Right Side: Generated Cards */}
-          <div className="output-col">
-            {replies.length === 0 && !loading && (
-              <div className="empty-state">
-                Your two reply options will appear here, each with a quick note on why it works.
-              </div>
-            )}
-
-            {loading && (
-              <div className="empty-state">
-                Gemini is polishing up two smart, strategic replies for you...
-              </div>
-            )}
-
-            {replies.map((r, idx) => (
-              <div key={idx} className="reply-card">
-                <div className="seal">{sealSVG()}</div>
-                <div className="reply-label">{r.label}</div>
-                <div className="reply-text">{r.reply}</div>
-                <div className="why">{r.why}</div>
-                <button 
-                  className="copy-btn"
-                  onClick={() => handleCopy(r.reply, idx)}
-                >
-                  {copiedIndex === idx ? 'Copied' : 'Copy reply'}
-                </button>
-              </div>
-            ))}
-          </div>
+          ))}
         </div>
       </div>
-    </div>
-  );
-}
 
-// Export as default as well, guaranteeing compatibility with both import types!
-export default DraftForm;
+      {/* Draft Trigger Button */}
+      <div className="flex flex-col gap-3">
+        <button
+          onClick={handleDraftReply}
+          disabled={loading}
+          type="button"
+          className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/10 active:scale-[0.98]"
+        >
+          {loading ? (
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <>
+              <MessageSquare className="w-3.5 h-3.5" />
+              Draft my reply
+            </>
+          )}
+        </button>
+
+        {/* Error Feedback */}
+        {error && (
+          <div className="text-xs text-rose-400 font-medium text-center bg-rose-500/5 border border-rose-500/10 py-2 rounded-lg">
+            ⚠️ {error}
+          </div>
+        )}
+      </div>
+
+      {/* Draft Generation Output */}
+      {draftResult && (
+        <div className="border-t border-slate-800 pt-4 flex flex-col gap-1.5">
+          <label className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">
+            Suggested Response
+          </label>
+          <div className="bg-slate-950 border border-indigo-500/10 rounded-lg p-3.5 text-sm text-slate-200 leading-relaxed font-normal">
+            <p className="whitespace-pre-wrap">{draftResult}</p>
+          </div>
+        </div>
+      )}
+
+    </div>
+  )
+}
