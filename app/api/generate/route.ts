@@ -2,46 +2,57 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
-    const { message, situation, tone } = await req.json();
+    const { incomingMessage, tone, userContext } = await req.json();
 
-    if (!message) {
-      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: 'GEMINI_API_KEY is not configured.' },
+        { status: 500 }
+      );
     }
 
-    const systemPrompt = `You help freelancers and consultants respond to awkward client messages professionally. Given a client's message, a situation type, and a desired tone, produce exactly 2 distinct reply drafts the freelancer could send. Each should take a genuinely different strategic angle (e.g. one more accommodating, one more boundary-setting) while both matching the requested tone. Keep each reply concise (3-6 sentences), ready to send as-is, written in first person as the freelancer. Respond ONLY with valid JSON, no markdown fences, no preamble, in this exact shape: {"replies":[{"label":"short 2-4 word label for this approach","reply":"the full reply text","why":"one sentence on why this approach works"},{"label":"...","reply":"...","why":"..."}]}`;
+    // Build your prompt
+    const prompt = `Draft a business reply to this message: "${incomingMessage}". 
+Use a ${tone} tone. 
+Additional context: ${userContext || 'None'}`;
 
-    const userPrompt = `Client's message: "${message}"\nSituation: ${situation}\nDesired tone: ${tone}`;
-
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY || '', 
-        "anthropic-version": "2023-06-01"
-      },
-      body: JSON.stringify({
-        model: "claude-3-5-sonnet-20241022",
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: [{ role: "user", content: userPrompt }]
-      })
-    });
+    // Direct fetch call to the Gemini REST API
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: prompt }]
+            }
+          ],
+          systemInstruction: {
+            parts: [{ text: "You are Tactfully, an AI reply composer for support and revenue teams. Craft highly effective, concise, clear, and professional business communication." }]
+          }
+        }),
+      }
+    );
 
     if (!response.ok) {
-      const errText = await response.text();
-      console.error("Anthropic Error:", errText);
-      return NextResponse.json({ error: "Failed to generate from Anthropic" }, { status: response.status });
+      const errorData = await response.json();
+      return NextResponse.json(
+        { error: errorData.error?.message || 'Failed to generate response' },
+        { status: response.status }
+      );
     }
 
     const data = await response.json();
-    const textBlock = data.content.map((b: any) => b.text || '').join('');
-    const clean = textBlock.replace(/```json|```/g, '').trim();
     
-    const parsed = JSON.parse(clean);
-    return NextResponse.json(parsed);
+    // Extract the generated text from Gemini's response structure
+    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
+    return NextResponse.json({ reply: replyText });
   } catch (error: any) {
-    console.error("Server Route Error:", error);
-    return NextResponse.json({ error: error.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
