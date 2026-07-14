@@ -5,35 +5,26 @@ import { DraftForm } from "./draft-form"
 
 export default async function DashboardPage() {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
+
   if (!user) {
-    redirect("/sign-in")
+    redirect("/login")
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("plan, draft_count")
-    .eq("id", user.id)
-    .single()
-
   return (
-    <div className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center px-4">
-      <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
-      <p className="mt-2 text-muted-foreground">Signed in as {user.email}</p>
-
-      <div className="mt-8">
-        <DraftForm
-          initialPlan={profile?.plan ?? "free"}
-          initialDraftCount={profile?.draft_count ?? 0}
-          userEmail={user.email ?? ""}
-        />
-      </div>
-
-      <div className="mt-6">
+    // Locks the dashboard to the screen size on Windows/Mac and removes vertical scroll
+    <div className="h-screen w-screen bg-slate-950 text-slate-100 flex flex-col overflow-hidden select-none">
+      
+      {/* 1. MINIMALIST HEADER (No emails or greetings, just clean layout) */}
+      <header className="h-14 border-b border-slate-800/80 bg-slate-900/50 backdrop-blur-md px-6 flex items-center justify-between shrink-0">
+        <span className="font-semibold text-base tracking-tight text-indigo-400">Tactfully</span>
         <SignOutButton />
-      </div>
+      </header>
+
+      {/* 2. CENTERED DASHBOARD WORKSPACE */}
+      <main className="flex-1 flex items-center justify-center p-4 md:p-8 overflow-y-auto">
+        <DraftForm />
+      </main>
     </div>
   )
 }
