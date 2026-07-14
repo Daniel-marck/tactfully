@@ -12,16 +12,15 @@ export default async function DashboardPage() {
   }
 
   return (
-    // Locks the dashboard to the screen size on Windows/Mac and removes vertical scroll
     <div className="h-screen w-screen bg-slate-950 text-slate-100 flex flex-col overflow-hidden select-none">
       
-      {/* 1. MINIMALIST HEADER (No emails or greetings, just clean layout) */}
+      {/* Clean Minimal Header (No user emails or greetings here!) */}
       <header className="h-14 border-b border-slate-800/80 bg-slate-900/50 backdrop-blur-md px-6 flex items-center justify-between shrink-0">
         <span className="font-semibold text-base tracking-tight text-indigo-400">Tactfully</span>
         <SignOutButton />
       </header>
 
-      {/* 2. CENTERED DASHBOARD WORKSPACE */}
+      {/* Center-locked application canvas */}
       <main className="flex-1 flex items-center justify-center p-4 md:p-8 overflow-y-auto">
         <DraftForm />
       </main>
