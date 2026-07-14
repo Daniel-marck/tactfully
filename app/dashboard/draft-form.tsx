@@ -1,112 +1,180 @@
-"use client"
+'use client';
 
-import { useState } from "react"
+import { useState } from 'react';
 
-const FREE_LIMIT = 3
-const GUMROAD_URL = "https://smartoolkit.gumroad.com/l/dzlkij"
+const SITUATIONS = [
+  { label: 'Late payment', val: 'Chasing a late payment' },
+  { label: 'Scope creep', val: 'Pushing back on scope creep' },
+  { label: 'Lowball offer', val: 'Responding to a lowball offer' },
+  { label: 'No response', val: 'Following up on no response' },
+  { label: 'Saying no', val: 'Saying no / declining the ask' },
+  { label: 'Something else', val: 'A general difficult message' },
+];
 
-export function DraftForm({
-  initialPlan,
-  initialDraftCount,
-  userEmail,
-}: {
-  initialPlan: string
-  initialDraftCount: number
-  userEmail: string
-}) {
-  const [clientMessage, setClientMessage] = useState("")
-  const [draft, setDraft] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [plan, setPlan] = useState(initialPlan)
-  const [draftCount, setDraftCount] = useState(initialDraftCount)
+const TONES = [
+  { label: 'Diplomatic', val: 'Diplomatic and warm, but clear' },
+  { label: 'Firm', val: 'Firm and direct, no fluff' },
+  { label: 'Formal', val: 'Formal and businesslike' },
+];
 
-  const atLimit = plan === "free" && draftCount >= FREE_LIMIT
+interface Reply {
+  label: string;
+  reply: string;
+  why: string;
+}
 
-  async function handleSubmit() {
-    if (!clientMessage.trim() || atLimit) return
-    setLoading(true)
-    setError("")
-    setDraft("")
+export default function DraftForm() {
+  const [message, setMessage] = useState('');
+  const [situation, setSituation] = useState('Chasing a late payment');
+  const [tone, setTone] = useState('Diplomatic and warm, but clear');
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState('');
+  const [replies, setReplies] = useState<Reply[]>([]);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+
+  const sealSVG = () => (
+    <svg viewBox="0 0 24 24" fill="none">
+      <path d="M12 2L14.5 8.5L21 9.5L16 14L17.5 21L12 17.5L6.5 21L8 14L3 9.5L9.5 8.5L12 2Z" fill="#F5EFE1" opacity="0.9"/>
+    </svg>
+  );
+
+  const handleGenerate = async () => {
+    if (!message.trim()) {
+      setStatus('Paste the client message first.');
+      return;
+    }
+
+    setLoading(true);
+    setStatus('');
+    setReplies([]);
 
     try {
-      const res = await fetch("/api/draft", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clientMessage }),
-      })
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, situation, tone }),
+      });
 
-      const data = await res.json()
-
-      if (res.status === 402) {
-        setPlan("free")
-        setDraftCount(FREE_LIMIT)
-        setError(data.message ?? "Upgrade to Pro for unlimited drafts")
-        return
+      if (!response.ok) {
+        throw new Error('Server returned an error');
       }
 
-      if (!res.ok) {
-        setError(data.message ?? "Something went wrong. Try again.")
-        return
+      const data = await response.json();
+      if (data.replies) {
+        setReplies(data.replies);
+      } else {
+        throw new Error('Invalid JSON shape returned');
       }
-
-      setDraft(data.draft)
-      setDraftCount(data.draftCount)
-      setPlan(data.plan)
-    } catch {
-      setError("Network error. Check your connection and try again.")
+    } catch (err) {
+      console.error(err);
+      setStatus('Something went wrong drafting that. Try again.');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const upgradeUrl = `${GUMROAD_URL}?email=${encodeURIComponent(userEmail)}`
+  const handleCopy = (text: string, index: number) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex(null), 1500);
+    });
+  };
 
   return (
-    <div className="flex flex-col gap-4">
-      {plan === "free" && (
-        <p className="text-sm text-muted-foreground">
-          {draftCount}/{FREE_LIMIT} free drafts used
-        </p>
-      )}
+    <div className="tactfully-theme">
+      <div className="wrap">
+        <header>
+          <div className="eyebrow">For freelancers &amp; solo consultants</div>
+          <h1>Tactfully</h1>
+          <p className="sub">Paste the message that's stressing you out. Get a reply worth sending — sealed and ready.</p>
+        </header>
 
-      <textarea
-        className="min-h-32 w-full rounded-lg border border-border bg-background p-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-        placeholder="Paste the awkward client message here..."
-        value={clientMessage}
-        onChange={(e) => setClientMessage(e.target.value)}
-        disabled={atLimit}
-      />
+        <div className="board">
+          {/* Left Side: Interactive Note Card */}
+          <div className="card note-card">
+            <span className="card-label">The message</span>
+            <textarea 
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder='Paste what the client actually said... e.g. "Hey, can you just knock the price down a bit? My budget is tighter than I thought."'
+            />
 
-      <button
-        onClick={handleSubmit}
-        disabled={loading || atLimit || !clientMessage.trim()}
-        className="h-10 w-full rounded-lg bg-primary text-sm font-medium text-primary-foreground disabled:pointer-events-none disabled:opacity-50"
-      >
-        {loading ? "Drafting..." : "Generate reply"}
-      </button>
+            {/* Situation Selection */}
+            <div className="fieldgroup">
+              <span className="card-label">Situation</span>
+              <div className="pillrow">
+                {SITUATIONS.map((sit) => (
+                  <button
+                    key={sit.val}
+                    type="button"
+                    className={`pill ${situation === sit.val ? 'active' : ''}`}
+                    onClick={() => setSituation(sit.val)}
+                  >
+                    {sit.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-      {error && (
-        <div className="rounded-lg border border-border bg-card p-4 text-sm">
-          <p>{error}</p>
-          {atLimit && (
-            <a
-              href={upgradeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            {/* Tone Selection */}
+            <div className="fieldgroup">
+              <span className="card-label">Tone</span>
+              <div className="pillrow">
+                {TONES.map((t) => (
+                  <button
+                    key={t.val}
+                    type="button"
+                    className={`pill ${tone === t.val ? 'active' : ''}`}
+                    onClick={() => setTone(t.val)}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button 
+              className="gen-btn" 
+              onClick={handleGenerate} 
+              disabled={loading}
             >
-              Upgrade to Pro — $12/mo
-            </a>
-          )}
-        </div>
-      )}
+              {loading ? 'Drafting...' : 'Draft my reply'}
+            </button>
+            {status && <div className="status">{status}</div>}
+          </div>
 
-      {draft && (
-        <div className="rounded-lg border border-border bg-card p-4 text-sm whitespace-pre-wrap">
-          {draft}
+          {/* Right Side: Generated Replies */}
+          <div className="output-col">
+            {replies.length === 0 && !loading && (
+              <div className="empty-state">
+                Your two reply options will appear here, each with a quick note on why it works.
+              </div>
+            )}
+
+            {loading && (
+              <div className="empty-state">
+                Claude is polishing up two smart, strategic replies for you...
+              </div>
+            )}
+
+            {replies.map((r, idx) => (
+              <div key={idx} className="reply-card">
+                <div className="seal">{sealSVG()}</div>
+                <div className="reply-label">{r.label}</div>
+                <div className="reply-text">{r.reply}</div>
+                <div className="why">{r.why}</div>
+                <button 
+                  className="copy-btn"
+                  onClick={() => handleCopy(r.reply, idx)}
+                >
+                  {copiedIndex === idx ? 'Copied' : 'Copy reply'}
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
-      )}
+      </div>
     </div>
-  )
+  );
 }
