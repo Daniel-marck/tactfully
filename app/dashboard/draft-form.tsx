@@ -90,7 +90,7 @@ export function DraftForm({
         <div className="rounded-lg border border-border bg-card p-4 text-sm">
           <p>{error}</p>
           {atLimit && (
-            
+            <a
               href={upgradeUrl}
               target="_blank"
               rel="noopener noreferrer"
