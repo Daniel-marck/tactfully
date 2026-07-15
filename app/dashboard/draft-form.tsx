@@ -1,23 +1,55 @@
 "use client"
 
 import React, { useState } from 'react'
-import { MessageSquare } from 'lucide-react'
+
+const SITUATIONS = [
+  'Chasing a late payment',
+  'Pushing back on scope creep',
+  'Responding to a lowball offer',
+  'Following up on no response',
+  'Saying no / declining the ask',
+  'A general difficult message',
+]
+
+const TONES = [
+  { label: 'Diplomatic', value: 'Diplomatic and warm, but clear' },
+  { label: 'Firm', value: 'Firm and direct, no fluff' },
+  { label: 'Formal', value: 'Formal and businesslike' },
+]
+
+function SealIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
+      <path
+        d="M12 2L14.5 8.5L21 9.5L16 14L17.5 21L12 17.5L6.5 21L8 14L3 9.5L9.5 8.5L12 2Z"
+        fill="#F5EFE1"
+        opacity="0.9"
+      />
+    </svg>
+  )
+}
 
 export function DraftForm() {
-  const [incomingMessage, setIncomingMessage] = useState('what is your name?')
-  const [selectedTone, setSelectedTone] = useState('Formal')
+  const [incomingMessage, setIncomingMessage] = useState('')
+  const [situation, setSituation] = useState(SITUATIONS[0])
+  const [tone, setTone] = useState(TONES[0].value)
   const [draftResult, setDraftResult] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
 
   const handleDraftReply = async () => {
+    if (!incomingMessage.trim()) {
+      setError('Paste the client message first.')
+      return
+    }
     setLoading(true)
     setError(null)
+    setDraftResult('')
     try {
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: incomingMessage, tone: selectedTone }),
+        body: JSON.stringify({ message: incomingMessage, tone, situation }),
       })
 
       if (!response.ok) throw new Error('Server returned an error')
@@ -31,88 +63,130 @@ export function DraftForm() {
   }
 
   return (
-    <div className="w-full max-w-xl bg-slate-900/80 border border-slate-800 rounded-xl p-6 shadow-2xl flex flex-col gap-5 backdrop-blur-sm">
-      
-      {/* Workspace Header */}
-      <div className="border-b border-slate-800/60 pb-3">
-        <h1 className="text-lg font-semibold text-slate-100">Reply Generator</h1>
-        <p className="text-xs text-slate-400 mt-0.5">Draft polished professional messages instantly.</p>
-      </div>
+    <div className="w-full max-w-xl">
+      <style jsx>{`
+        @keyframes stamp {
+          from { transform: scale(0) rotate(-25deg); }
+          to { transform: scale(1) rotate(0deg); }
+        }
+        @keyframes rise {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .seal-anim { animation: stamp 0.5s cubic-bezier(.2,1.4,.4,1) forwards; }
+        .rise-anim { animation: rise 0.5s ease forwards; }
+      `}</style>
 
-      {/* Incoming Message Input */}
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-          Incoming Message
-        </label>
+      <div
+        className="relative rounded-md p-6 shadow-2xl"
+        style={{ background: '#F5EFE1', color: '#24303B', transform: 'rotate(-0.6deg)' }}
+      >
+        <div
+          className="absolute -top-2.5 left-6 w-11 h-5 -rotate-3"
+          style={{ background: 'rgba(184,114,42,0.35)', border: '1px solid rgba(184,114,42,0.5)' }}
+        />
+
+        <span className="block mb-3.5 uppercase" style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
+          The message
+        </span>
         <textarea
           value={incomingMessage}
           onChange={(e) => setIncomingMessage(e.target.value)}
-          className="w-full h-24 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none font-normal leading-relaxed"
-          placeholder="Paste the message you received here..."
+          placeholder={`Paste what the client actually said... e.g. "Hey, can you just knock the price down a bit?"`}
+          className="w-full min-h-[150px] bg-transparent border-none outline-none resize-y"
+          style={{ fontFamily: "'Work Sans', sans-serif", fontSize: 15, lineHeight: 1.55, color: '#24303B' }}
         />
-      </div>
 
-      {/* Tone Selection Buttons */}
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-          Select Desired Tone
-        </label>
-        <div className="grid grid-cols-3 gap-2">
-          {['Formal', 'Casual', 'Diplomatic'].map((tone) => (
-            <button
-              key={tone}
-              onClick={() => setSelectedTone(tone)}
-              type="button"
-              className={`py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${
-                selectedTone === tone
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/10'
-                  : 'bg-slate-950 border border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
-              }`}
-            >
-              {tone}
-            </button>
-          ))}
+        <div className="mt-5">
+          <span className="block mb-3.5 uppercase" style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
+            Situation
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {SITUATIONS.map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setSituation(s)}
+                className="rounded-full px-3.5 py-1.5 text-[13px] transition-all"
+                style={situation === s
+                  ? { background: '#1B2A3A', color: '#F5EFE1', border: '1px solid #1B2A3A' }
+                  : { background: 'transparent', color: '#24303B', border: '1px solid rgba(36,48,59,0.18)' }}
+              >
+                {s === 'Chasing a late payment' ? 'Late payment'
+                  : s === 'Pushing back on scope creep' ? 'Scope creep'
+                  : s === 'Responding to a lowball offer' ? 'Lowball offer'
+                  : s === 'Following up on no response' ? 'No response'
+                  : s === 'Saying no / declining the ask' ? 'Saying no'
+                  : 'Something else'}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Draft Trigger Button */}
-      <div className="flex flex-col gap-3">
+        <div className="mt-5">
+          <span className="block mb-3.5 uppercase" style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
+            Tone
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {TONES.map((t) => (
+              <button
+                key={t.value}
+                type="button"
+                onClick={() => setTone(t.value)}
+                className="rounded-full px-3.5 py-1.5 text-[13px] transition-all"
+                style={tone === t.value
+                  ? { background: '#1B2A3A', color: '#F5EFE1', border: '1px solid #1B2A3A' }
+                  : { background: 'transparent', color: '#24303B', border: '1px solid rgba(36,48,59,0.18)' }}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <button
+          type="button"
           onClick={handleDraftReply}
           disabled={loading}
-          type="button"
-          className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/10 active:scale-[0.98]"
+          className="mt-6 w-full py-[15px] rounded-md font-semibold text-[15px] text-white transition-all active:scale-[0.99] disabled:cursor-not-allowed"
+          style={{ background: loading ? '#8a8a8a' : '#B8722A' }}
+          onMouseEnter={(e) => { if (!loading) (e.target as HTMLElement).style.background = '#D98A3B' }}
+          onMouseLeave={(e) => { if (!loading) (e.target as HTMLElement).style.background = '#B8722A' }}
         >
-          {loading ? (
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          ) : (
-            <>
-              <MessageSquare className="w-3.5 h-3.5" />
-              Draft my reply
-            </>
-          )}
+          {loading ? 'Drafting...' : 'Draft my reply'}
         </button>
 
-        {/* Error Feedback */}
         {error && (
-          <div className="text-xs text-rose-400 font-medium text-center bg-rose-500/5 border border-rose-500/10 py-2 rounded-lg">
-            ⚠️ {error}
+          <div className="text-center mt-4 text-[13px]" style={{ color: '#6B7A8C' }}>
+            {error}
           </div>
         )}
       </div>
 
-      {/* Draft Generation Output */}
       {draftResult && (
-        <div className="border-t border-slate-800 pt-4 flex flex-col gap-1.5">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">
-            Suggested Response
-          </label>
-          <div className="bg-slate-950 border border-indigo-500/10 rounded-lg p-3.5 text-sm text-slate-200 leading-relaxed font-normal">
-            <p className="whitespace-pre-wrap">{draftResult}</p>
+        <div className="rise-anim relative rounded-md p-6 mt-5" style={{ background: '#F5EFE1', color: '#24303B' }}>
+          <div
+            className="seal-anim absolute -top-4 right-5 w-11 h-11 rounded-full flex items-center justify-center"
+            style={{ background: 'radial-gradient(circle at 32% 30%, #D98A3B, #B8722A 60%, #8a541f 100%)', boxShadow: '0 6px 14px rgba(0,0,0,0.4)' }}
+          >
+            <SealIcon />
           </div>
+          <div className="mb-3" style={{ fontFamily: "'Newsreader', serif", fontStyle: 'italic', fontSize: 15, color: '#B8722A' }}>
+            Your reply
+          </div>
+          <p className="whitespace-pre-wrap" style={{ fontSize: 15, lineHeight: 1.6 }}>
+            {draftResult}
+          </p>
+          <button
+            type="button"
+            onClick={() => navigator.clipboard.writeText(draftResult)}
+            className="mt-4 uppercase text-[11px] px-3.5 py-2 rounded"
+            style={{ fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.08em', border: '1px solid rgba(36,48,59,0.25)', color: '#24303B' }}
+          >
+            Copy reply
+          </button>
         </div>
       )}
-
     </div>
   )
 }
