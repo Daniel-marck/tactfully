@@ -196,7 +196,7 @@ export function DraftForm() {
             Upgrade to Pro for unlimited replies, every tone, every situation.
           </p>
           
-            href={upgradeUrl}
+            <a href={upgradeUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block px-6 py-3 rounded-md font-semibold text-[15px]"
