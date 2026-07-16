@@ -1,5 +1,6 @@
 "use client"
 
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import React, { useState } from 'react'
 
 const SITUATIONS = [
@@ -188,24 +189,52 @@ export function DraftForm() {
       </div>
 
       {limitReached && (
-        <div className="rise-anim relative rounded-md p-6 mt-5 text-center" style={{ background: '#1B2A3A', color: '#F5EFE1' }}>
-          <div className="mb-2 font-semibold" style={{ fontFamily: "var(--font-newsreader), serif", fontSize: 18 }}>
-            You've used your 3 free drafts
-          </div>
-          <p className="mb-5 text-[14px]" style={{ fontFamily: "var(--font-work-sans), sans-serif", color: '#B8C2CE' }}>
-            Upgrade to Pro for unlimited replies, every tone, every situation.
-          </p>
-          
-            <a href={upgradeUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block px-6 py-3 rounded-md font-semibold text-[15px]"
-            style={{ background: '#B8722A', color: '#fff', fontFamily: "var(--font-work-sans), sans-serif" }}
-          >
-            Upgrade to Pro — $12/mo
-          </a>
-        </div>
-      )}
+  <div className="rise-anim relative rounded-md p-6 mt-5 text-center" style={{ background: '#1B2A3A', color: '#F5EFE1' }}>
+    <div className="mb-2 font-semibold" style={{ fontFamily: "var(--font-newsreader), serif", fontSize: 18 }}>
+      You've used your 3 free drafts
+    </div>
+    <p className="mb-5 text-[14px]" style={{ fontFamily: "var(--font-work-sans), sans-serif", color: '#B8C2CE' }}>
+      Upgrade to Pro for unlimited replies, every tone, every situation.
+    </p>
+    
+    {/* Live PayPal Button Container */}
+    <div className="w-full max-w-xs mx-auto mt-2">
+      <PayPalScriptProvider 
+        options={{ 
+          "client-id": process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "",
+          currency: "USD"
+        }}
+      >
+        <PayPalButtons 
+          style={{ layout: "vertical", color: "gold", shape: "rect", tagLine: false }}
+          createOrder={(data, actions) => {
+            return actions.order.create({
+              intent: "CAPTURE",
+              purchase_units: [
+                {
+                  amount: {
+                    currency_code: "USD",
+                    value: "12.00",
+                  },
+                },
+              ],
+            });
+          }}
+          onApprove={async (data, actions) => {
+            if (actions.order) {
+              const details = await actions.order.capture();
+              alert(`Thank you ${details.payer?.name?.given_name}! Your Pro upgrade was successful.`);
+            }
+          }}
+          onError={(err) => {
+            console.error("PayPal Error: ", err);
+            alert("Something went wrong with the payment window.");
+          }}
+        />
+      </PayPalScriptProvider>
+    </div>
+  </div>
+)}
 
       {draftResult && !limitReached && (
         <div className="rise-anim relative rounded-md p-6 mt-5" style={{ background: '#F5EFE1', color: '#24303B' }}>
