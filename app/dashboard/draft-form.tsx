@@ -36,6 +36,9 @@ export function DraftForm() {
   const [draftResult, setDraftResult] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [limitReached, setLimitReached] = useState(false)
+  const [upgradeUrl, setUpgradeUrl] = useState('https://smartoolkit.gumroad.com/l/dzlkij')
+  const [draftsRemaining, setDraftsRemaining] = useState<number | null>(null)
 
   const handleDraftReply = async () => {
     if (!incomingMessage.trim()) {
@@ -44,6 +47,7 @@ export function DraftForm() {
     }
     setLoading(true)
     setError(null)
+    setLimitReached(false)
     setDraftResult('')
     try {
       const response = await fetch('/api/generate', {
@@ -52,9 +56,23 @@ export function DraftForm() {
         body: JSON.stringify({ message: incomingMessage, tone, situation }),
       })
 
-      if (!response.ok) throw new Error('Server returned an error')
       const data = await response.json()
+
+      if (response.status === 401) {
+        setError('Please sign in to draft a reply.')
+        return
+      }
+
+      if (response.status === 403 && data.error === 'limit_reached') {
+        setLimitReached(true)
+        if (data.upgradeUrl) setUpgradeUrl(data.upgradeUrl)
+        return
+      }
+
+      if (!response.ok) throw new Error(data.error || 'Server returned an error')
+
       setDraftResult(data.reply)
+      setDraftsRemaining(typeof data.draftsRemaining === 'number' ? data.draftsRemaining : null)
     } catch (err) {
       setError('Something went wrong drafting that. Try again.')
     } finally {
@@ -86,7 +104,7 @@ export function DraftForm() {
           style={{ background: 'rgba(184,114,42,0.35)', border: '1px solid rgba(184,114,42,0.5)' }}
         />
 
-        <span className="block mb-3.5 uppercase" style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
+        <span className="block mb-3.5 uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
           The message
         </span>
         <textarea
@@ -94,11 +112,11 @@ export function DraftForm() {
           onChange={(e) => setIncomingMessage(e.target.value)}
           placeholder={`Paste what the client actually said... e.g. "Hey, can you just knock the price down a bit?"`}
           className="w-full min-h-[150px] bg-transparent border-none outline-none resize-y"
-          style={{ fontFamily: "'Work Sans', sans-serif", fontSize: 15, lineHeight: 1.55, color: '#24303B' }}
+          style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.55, color: '#24303B' }}
         />
 
         <div className="mt-5">
-          <span className="block mb-3.5 uppercase" style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
+          <span className="block mb-3.5 uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
             Situation
           </span>
           <div className="flex flex-wrap gap-2">
@@ -124,7 +142,7 @@ export function DraftForm() {
         </div>
 
         <div className="mt-5">
-          <span className="block mb-3.5 uppercase" style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
+          <span className="block mb-3.5 uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
             Tone
           </span>
           <div className="flex flex-wrap gap-2">
@@ -149,7 +167,7 @@ export function DraftForm() {
           onClick={handleDraftReply}
           disabled={loading}
           className="mt-6 w-full py-[15px] rounded-md font-semibold text-[15px] text-white transition-all active:scale-[0.99] disabled:cursor-not-allowed"
-          style={{ background: loading ? '#8a8a8a' : '#B8722A' }}
+          style={{ background: loading ? '#8a8a8a' : '#B8722A', fontFamily: "var(--font-work-sans), sans-serif" }}
           onMouseEnter={(e) => { if (!loading) (e.target as HTMLElement).style.background = '#D98A3B' }}
           onMouseLeave={(e) => { if (!loading) (e.target as HTMLElement).style.background = '#B8722A' }}
         >
@@ -157,13 +175,39 @@ export function DraftForm() {
         </button>
 
         {error && (
-          <div className="text-center mt-4 text-[13px]" style={{ color: '#6B7A8C' }}>
+          <div className="text-center mt-4 text-[13px]" style={{ color: '#6B7A8C', fontFamily: "var(--font-work-sans), sans-serif" }}>
             {error}
+          </div>
+        )}
+
+        {draftsRemaining !== null && !limitReached && (
+          <div className="text-center mt-3 text-[12px]" style={{ color: '#6B7A8C', fontFamily: "var(--font-work-sans), sans-serif" }}>
+            {draftsRemaining} free {draftsRemaining === 1 ? 'draft' : 'drafts'} remaining
           </div>
         )}
       </div>
 
-      {draftResult && (
+      {limitReached && (
+        <div className="rise-anim relative rounded-md p-6 mt-5 text-center" style={{ background: '#1B2A3A', color: '#F5EFE1' }}>
+          <div className="mb-2 font-semibold" style={{ fontFamily: "var(--font-newsreader), serif", fontSize: 18 }}>
+            You've used your 3 free drafts
+          </div>
+          <p className="mb-5 text-[14px]" style={{ fontFamily: "var(--font-work-sans), sans-serif", color: '#B8C2CE' }}>
+            Upgrade to Pro for unlimited replies, every tone, every situation.
+          </p>
+          <a
+            href={upgradeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block px-6 py-3 rounded-md font-semibold text-[15px]"
+            style={{ background: '#B8722A', color: '#fff', fontFamily: "var(--font-work-sans), sans-serif" }}
+          >
+            Upgrade to Pro — $12/mo
+          </a>
+        </div>
+      )}
+
+      {draftResult && !limitReached && (
         <div className="rise-anim relative rounded-md p-6 mt-5" style={{ background: '#F5EFE1', color: '#24303B' }}>
           <div
             className="seal-anim absolute -top-4 right-5 w-11 h-11 rounded-full flex items-center justify-center"
@@ -171,17 +215,17 @@ export function DraftForm() {
           >
             <SealIcon />
           </div>
-          <div className="mb-3" style={{ fontFamily: "'Newsreader', serif", fontStyle: 'italic', fontSize: 15, color: '#B8722A' }}>
+          <div className="mb-3" style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 15, color: '#B8722A' }}>
             Your reply
           </div>
-          <p className="whitespace-pre-wrap" style={{ fontSize: 15, lineHeight: 1.6 }}>
+          <p className="whitespace-pre-wrap" style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.6 }}>
             {draftResult}
           </p>
           <button
             type="button"
             onClick={() => navigator.clipboard.writeText(draftResult)}
             className="mt-4 uppercase text-[11px] px-3.5 py-2 rounded"
-            style={{ fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.08em', border: '1px solid rgba(36,48,59,0.25)', color: '#24303B' }}
+            style={{ fontFamily: "var(--font-plex-mono), monospace", letterSpacing: '0.08em', border: '1px solid rgba(36,48,59,0.25)', color: '#24303B' }}
           >
             Copy reply
           </button>
