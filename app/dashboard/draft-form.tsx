@@ -195,7 +195,7 @@ export function DraftForm() {
           <p className="mb-5 text-[14px]" style={{ fontFamily: "var(--font-work-sans), sans-serif", color: '#B8C2CE' }}>
             Upgrade to Pro for unlimited replies, every tone, every situation.
           </p>
-          <a
+          
             href={upgradeUrl}
             target="_blank"
             rel="noopener noreferrer"
