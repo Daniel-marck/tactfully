@@ -82,7 +82,13 @@ export function DraftForm() {
   }
 
   return (
-    <div className="w-full max-w-xl">
+    /* 
+      1. Main layout container: Changed to a flex layout.
+         - Stacked vertically on mobile (`flex-col`)
+         - Side-by-side on tablet/desktop screens (`lg:flex-row`)
+         - Clean spacing gap and top-alignment
+    */
+    <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row gap-6 items-start px-4">
       <style jsx>{`
         @keyframes stamp {
           from { transform: scale(0) rotate(-25deg); }
@@ -96,170 +102,176 @@ export function DraftForm() {
         .rise-anim { animation: rise 0.5s ease forwards; }
       `}</style>
 
-      <div
-        className="relative rounded-md p-6 shadow-2xl"
-        style={{ background: '#F5EFE1', color: '#24303B', transform: 'rotate(-0.6deg)' }}
-      >
+      {/* Left Column: Input Form (Now keeps a proportional width) */}
+      <div className="w-full lg:flex-1">
         <div
-          className="absolute -top-2.5 left-6 w-11 h-5 -rotate-3"
-          style={{ background: 'rgba(184,114,42,0.35)', border: '1px solid rgba(184,114,42,0.5)' }}
-        />
-
-        <span className="block mb-3.5 uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
-          The message
-        </span>
-        <textarea
-          value={incomingMessage}
-          onChange={(e) => setIncomingMessage(e.target.value)}
-          placeholder={`Paste what the client actually said... e.g. "Hey, can you just knock the price down a bit?"`}
-          className="w-full min-h-[150px] bg-transparent border-none outline-none resize-y"
-          style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.55, color: '#24303B' }}
-        />
-
-        <div className="mt-5">
-          <span className="block mb-3.5 uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
-            Situation
-          </span>
-          <div className="flex flex-wrap gap-2">
-            {SITUATIONS.map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setSituation(s)}
-                className="rounded-full px-3.5 py-1.5 text-[13px] transition-all"
-                style={situation === s
-                  ? { background: '#1B2A3A', color: '#F5EFE1', border: '1px solid #1B2A3A' }
-                  : { background: 'transparent', color: '#24303B', border: '1px solid rgba(36,48,59,0.18)' }}
-              >
-                {s === 'Chasing a late payment' ? 'Late payment'
-                  : s === 'Pushing back on scope creep' ? 'Scope creep'
-                  : s === 'Responding to a lowball offer' ? 'Lowball offer'
-                  : s === 'Following up on no response' ? 'No response'
-                  : s === 'Saying no / declining the ask' ? 'Saying no'
-                  : 'Something else'}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-5">
-          <span className="block mb-3.5 uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
-            Tone
-          </span>
-          <div className="flex flex-wrap gap-2">
-            {TONES.map((t) => (
-              <button
-                key={t.value}
-                type="button"
-                onClick={() => setTone(t.value)}
-                className="rounded-full px-3.5 py-1.5 text-[13px] transition-all"
-                style={tone === t.value
-                  ? { background: '#1B2A3A', color: '#F5EFE1', border: '1px solid #1B2A3A' }
-                  : { background: 'transparent', color: '#24303B', border: '1px solid rgba(36,48,59,0.18)' }}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleDraftReply}
-          disabled={loading}
-          className="mt-6 w-full py-[15px] rounded-md font-semibold text-[15px] text-white transition-all active:scale-[0.99] disabled:cursor-not-allowed"
-          style={{ background: loading ? '#8a8a8a' : '#B8722A', fontFamily: "var(--font-work-sans), sans-serif" }}
-          onMouseEnter={(e) => { if (!loading) (e.target as HTMLElement).style.background = '#D98A3B' }}
-          onMouseLeave={(e) => { if (!loading) (e.target as HTMLElement).style.background = '#B8722A' }}
+          className="relative rounded-md p-6 shadow-2xl"
+          style={{ background: '#F5EFE1', color: '#24303B', transform: 'rotate(-0.6deg)' }}
         >
-          {loading ? 'Drafting...' : 'Draft my reply'}
-        </button>
+          <div
+            className="absolute -top-2.5 left-6 w-11 h-5 -rotate-3"
+            style={{ background: 'rgba(184,114,42,0.35)', border: '1px solid rgba(184,114,42,0.5)' }}
+          />
 
-        {error && (
-          <div className="text-center mt-4 text-[13px]" style={{ color: '#6B7A8C', fontFamily: "var(--font-work-sans), sans-serif" }}>
-            {error}
+          <span className="block mb-3.5 uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
+            The message
+          </span>
+          <textarea
+            value={incomingMessage}
+            onChange={(e) => setIncomingMessage(e.target.value)}
+            placeholder={`Paste what the client actually said... e.g. "Hey, can you just knock the price down a bit?"`}
+            className="w-full min-h-[150px] bg-transparent border-none outline-none resize-y"
+            style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.55, color: '#24303B' }}
+          />
+
+          <div className="mt-5">
+            <span className="block mb-3.5 uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
+              Situation
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {SITUATIONS.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setSituation(s)}
+                  className="rounded-full px-3.5 py-1.5 text-[13px] transition-all"
+                  style={situation === s
+                    ? { background: '#1B2A3A', color: '#F5EFE1', border: '1px solid #1B2A3A' }
+                    : { background: 'transparent', color: '#24303B', border: '1px solid rgba(36,48,59,0.18)' }}
+                >
+                  {s === 'Chasing a late payment' ? 'Late payment'
+                    : s === 'Pushing back on scope creep' ? 'Scope creep'
+                    : s === 'Responding to a lowball offer' ? 'Lowball offer'
+                    : s === 'Following up on no response' ? 'No response'
+                    : s === 'Saying no / declining the ask' ? 'Saying no'
+                    : 'Something else'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-5">
+            <span className="block mb-3.5 uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
+              Tone
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {TONES.map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => setTone(t.value)}
+                  className="rounded-full px-3.5 py-1.5 text-[13px] transition-all"
+                  style={tone === t.value
+                    ? { background: '#1B2A3A', color: '#F5EFE1', border: '1px solid #1B2A3A' }
+                    : { background: 'transparent', color: '#24303B', border: '1px solid rgba(36,48,59,0.18)' }}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleDraftReply}
+            disabled={loading}
+            className="mt-6 w-full py-[15px] rounded-md font-semibold text-[15px] text-white transition-all active:scale-[0.99] disabled:cursor-not-allowed"
+            style={{ background: loading ? '#8a8a8a' : '#B8722A', fontFamily: "var(--font-work-sans), sans-serif" }}
+            onMouseEnter={(e) => { if (!loading) (e.target as HTMLElement).style.background = '#D98A3B' }}
+            onMouseLeave={(e) => { if (!loading) (e.target as HTMLElement).style.background = '#B8722A' }}
+          >
+            {loading ? 'Drafting...' : 'Draft my reply'}
+          </button>
+
+          {error && (
+            <div className="text-center mt-4 text-[13px]" style={{ color: '#6B7A8C', fontFamily: "var(--font-work-sans), sans-serif" }}>
+              {error}
+            </div>
+          )}
+
+          {draftsRemaining !== null && !limitReached && (
+            <div className="text-center mt-3 text-[12px]" style={{ color: '#6B7A8C', fontFamily: "var(--font-work-sans), sans-serif" }}>
+              {draftsRemaining} free {draftsRemaining === 1 ? 'draft' : 'drafts'} remaining
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Right Column: Generated Reply / Paywall (Aligns parallel with the form) */}
+      <div className="w-full lg:flex-1">
+        {limitReached && (
+          <div className="rise-anim relative rounded-md p-6 text-center" style={{ background: '#1B2A3A', color: '#F5EFE1' }}>
+            <div className="mb-2 font-semibold" style={{ fontFamily: "var(--font-newsreader), serif", fontSize: 18 }}>
+              You've used your 3 free drafts
+            </div>
+            <p className="mb-5 text-[14px]" style={{ fontFamily: "var(--font-work-sans), sans-serif", color: '#B8C2CE' }}>
+              Upgrade to Pro for unlimited replies, every tone, every situation.
+            </p>
+            
+            {/* Live PayPal Button Container */}
+            <div className="w-full max-w-xs mx-auto mt-2">
+              <PayPalScriptProvider 
+                options={{ 
+                  "client-id": process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "",
+                  currency: "USD"
+                }}
+              >
+                <PayPalButtons 
+                  style={{ layout: "vertical", color: "gold", shape: "rect", tagLine: false }}
+                  createOrder={(data, actions) => {
+                    return actions.order.create({
+                      intent: "CAPTURE",
+                      purchase_units: [
+                        {
+                          amount: {
+                            currency_code: "USD",
+                            value: "12.00",
+                          },
+                        },
+                      ],
+                    });
+                  }}
+                  onApprove={async (data, actions) => {
+                    if (actions.order) {
+                      const details = await actions.order.capture();
+                      alert(`Thank you ${details.payer?.name?.given_name}! Your Pro upgrade was successful.`);
+                    }
+                  }}
+                  onError={(err) => {
+                    console.error("PayPal Error: ", err);
+                    alert("Something went wrong with the payment window.");
+                  }}
+                />
+              </PayPalScriptProvider>
+            </div>
           </div>
         )}
 
-        {draftsRemaining !== null && !limitReached && (
-          <div className="text-center mt-3 text-[12px]" style={{ color: '#6B7A8C', fontFamily: "var(--font-work-sans), sans-serif" }}>
-            {draftsRemaining} free {draftsRemaining === 1 ? 'draft' : 'drafts'} remaining
+        {draftResult && !limitReached && (
+          <div className="rise-anim relative rounded-md p-6 shadow-2xl" style={{ background: '#F5EFE1', color: '#24303B' }}>
+            <div
+              className="seal-anim absolute -top-4 right-5 w-11 h-11 rounded-full flex items-center justify-center"
+              style={{ background: 'radial-gradient(circle at 32% 30%, #D98A3B, #B8722A 60%, #8a541f 100%)', boxShadow: '0 6px 14px rgba(0,0,0,0.4)' }}
+            >
+              <SealIcon />
+            </div>
+            <div className="mb-3" style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 15, color: '#B8722A' }}>
+              Your reply
+            </div>
+            <p className="whitespace-pre-wrap" style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.6 }}>
+              {draftResult}
+            </p>
+            <button
+              type="button"
+              onClick={() => navigator.clipboard.writeText(draftResult)}
+              className="mt-4 uppercase text-[11px] px-3.5 py-2 rounded"
+              style={{ fontFamily: "var(--font-plex-mono), monospace", letterSpacing: '0.08em', border: '1px solid rgba(36,48,59,0.25)', color: '#24303B' }}
+            >
+              Copy reply
+            </button>
           </div>
         )}
       </div>
-
-      {limitReached && (
-  <div className="rise-anim relative rounded-md p-6 mt-5 text-center" style={{ background: '#1B2A3A', color: '#F5EFE1' }}>
-    <div className="mb-2 font-semibold" style={{ fontFamily: "var(--font-newsreader), serif", fontSize: 18 }}>
-      You've used your 3 free drafts
-    </div>
-    <p className="mb-5 text-[14px]" style={{ fontFamily: "var(--font-work-sans), sans-serif", color: '#B8C2CE' }}>
-      Upgrade to Pro for unlimited replies, every tone, every situation.
-    </p>
-    
-    {/* Live PayPal Button Container */}
-    <div className="w-full max-w-xs mx-auto mt-2">
-      <PayPalScriptProvider 
-        options={{ 
-          "client-id": process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "",
-          currency: "USD"
-        }}
-      >
-        <PayPalButtons 
-          style={{ layout: "vertical", color: "gold", shape: "rect", tagLine: false }}
-          createOrder={(data, actions) => {
-            return actions.order.create({
-              intent: "CAPTURE",
-              purchase_units: [
-                {
-                  amount: {
-                    currency_code: "USD",
-                    value: "12.00",
-                  },
-                },
-              ],
-            });
-          }}
-          onApprove={async (data, actions) => {
-            if (actions.order) {
-              const details = await actions.order.capture();
-              alert(`Thank you ${details.payer?.name?.given_name}! Your Pro upgrade was successful.`);
-            }
-          }}
-          onError={(err) => {
-            console.error("PayPal Error: ", err);
-            alert("Something went wrong with the payment window.");
-          }}
-        />
-      </PayPalScriptProvider>
-    </div>
-  </div>
-)}
-
-      {draftResult && !limitReached && (
-        <div className="rise-anim relative rounded-md p-6 mt-5" style={{ background: '#F5EFE1', color: '#24303B' }}>
-          <div
-            className="seal-anim absolute -top-4 right-5 w-11 h-11 rounded-full flex items-center justify-center"
-            style={{ background: 'radial-gradient(circle at 32% 30%, #D98A3B, #B8722A 60%, #8a541f 100%)', boxShadow: '0 6px 14px rgba(0,0,0,0.4)' }}
-          >
-            <SealIcon />
-          </div>
-          <div className="mb-3" style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 15, color: '#B8722A' }}>
-            Your reply
-          </div>
-          <p className="whitespace-pre-wrap" style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.6 }}>
-            {draftResult}
-          </p>
-          <button
-            type="button"
-            onClick={() => navigator.clipboard.writeText(draftResult)}
-            className="mt-4 uppercase text-[11px] px-3.5 py-2 rounded"
-            style={{ fontFamily: "var(--font-plex-mono), monospace", letterSpacing: '0.08em', border: '1px solid rgba(36,48,59,0.25)', color: '#24303B' }}
-          >
-            Copy reply
-          </button>
-        </div>
-      )}
     </div>
   )
 }
