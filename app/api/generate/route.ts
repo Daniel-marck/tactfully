@@ -117,6 +117,7 @@ Keep each reply concise, polite, and ready to send. Write in the first person.`;
 
     const data = await response.json();
     const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    console.log('🔍 DEBUG rawText from Gemini:', rawText);
 
     let replies: string[] = [];
     try {
