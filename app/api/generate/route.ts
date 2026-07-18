@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
 const FREE_DRAFT_LIMIT = 3;
+const NUM_OPTIONS = 2; // Start with 2 -- can raise later without touching anything else.
 
 export async function POST(req: Request) {
   try {
@@ -64,10 +65,16 @@ export async function POST(req: Request) {
       );
     }
 
-    const prompt = `Draft a professional business reply to this client message: "${message}".
+    const prompt = `Draft ${NUM_OPTIONS} distinct professional business replies to this client message: "${message}".
 Desired tone: ${tone}.
 Additional context: ${context || 'None'}.
-Keep the reply concise, polite, and ready to send. Write it in the first person.`;
+
+Each reply should take a genuinely different approach (e.g. different opening, different level of detail, different phrasing) while staying in the requested tone -- don't just reword the same sentence.
+
+Keep each reply concise, polite, and ready to send. Write in the first person.
+
+Respond with ONLY valid JSON in exactly this shape, no markdown fences, no preamble:
+{"replies": ["first reply text", "second reply text"]}`;
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
@@ -79,9 +86,12 @@ Keep the reply concise, polite, and ready to send. Write it in the first person.
           systemInstruction: {
             parts: [
               {
-                text: 'You help freelancers and support teams write professional, concise email and message replies.',
+                text: 'You help freelancers and support teams write professional, concise email and message replies. You always respond with strictly valid JSON when asked to.',
               },
             ],
+          },
+          generationConfig: {
+            responseMimeType: 'application/json',
           },
         }),
       }
@@ -97,8 +107,31 @@ Keep the reply concise, polite, and ready to send. Write it in the first person.
     }
 
     const data = await response.json();
-    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
+    let replies: string[] = [];
+    try {
+      const parsed = JSON.parse(rawText);
+      if (Array.isArray(parsed.replies)) {
+        replies = parsed.replies.filter((r: unknown) => typeof r === 'string' && r.trim());
+      }
+    } catch (parseErr) {
+      console.error('⚠️ Could not parse Gemini JSON response, falling back to raw text:', rawText);
+    }
+
+    // Fallback: if parsing failed or the model returned fewer than expected,
+    // don't leave the user with nothing -- use whatever raw text we got.
+    if (replies.length === 0 && rawText.trim()) {
+      replies = [rawText.trim()];
+    }
+
+    if (replies.length === 0) {
+      return NextResponse.json({ error: 'Failed to generate a reply. Try again.' }, { status: 502 });
+    }
+
+    // Only increment on a SUCCESSFUL generation -- don't charge failed attempts
+    // against the free quota. One generation event = one credit, regardless
+    // of how many options came back.
     const { data: incrementResult, error: incrementError } = await supabase.rpc(
       'increment_draft_count',
       { user_id: user.id }
@@ -111,9 +144,11 @@ Keep the reply concise, polite, and ready to send. Write it in the first person.
     const newCount = incrementResult?.[0]?.new_count ?? profile.draft_count + 1;
 
     return NextResponse.json({
-      reply: replyText,
-      draft: replyText,
-      text: replyText,
+      replies,
+      // Keep these for backward compatibility with anything still reading a single reply.
+      reply: replies[0],
+      draft: replies[0],
+      text: replies[0],
       draftsUsed: newCount,
       draftsRemaining:
         profile.plan === 'pro' ? null : Math.max(0, FREE_DRAFT_LIMIT - newCount),
