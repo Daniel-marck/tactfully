@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
 const FREE_DRAFT_LIMIT = 3;
-const NUM_OPTIONS = 2; // Start with 2 -- can raise later without touching anything else.
+const NUM_OPTIONS = 2;
 
 export async function POST(req: Request) {
   try {
@@ -69,12 +69,9 @@ export async function POST(req: Request) {
 Desired tone: ${tone}.
 Additional context: ${context || 'None'}.
 
-Each reply should take a genuinely different approach (e.g. different opening, different level of detail, different phrasing) while staying in the requested tone -- don't just reword the same sentence.
+Each reply must take a genuinely different approach -- a different opening, a different level of detail, or a different way of framing the same point -- while staying in the requested tone. Do not just reword the same sentence twice.
 
-Keep each reply concise, polite, and ready to send. Write in the first person.
-
-Respond with ONLY valid JSON in exactly this shape, no markdown fences, no preamble:
-{"replies": ["first reply text", "second reply text"]}`;
+Keep each reply concise, polite, and ready to send. Write in the first person.`;
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
@@ -86,12 +83,24 @@ Respond with ONLY valid JSON in exactly this shape, no markdown fences, no pream
           systemInstruction: {
             parts: [
               {
-                text: 'You help freelancers and support teams write professional, concise email and message replies. You always respond with strictly valid JSON when asked to.',
+                text: 'You help freelancers and support teams write professional, concise email and message replies.',
               },
             ],
           },
           generationConfig: {
             responseMimeType: 'application/json',
+            responseSchema: {
+              type: 'OBJECT',
+              properties: {
+                replies: {
+                  type: 'ARRAY',
+                  minItems: NUM_OPTIONS,
+                  maxItems: NUM_OPTIONS,
+                  items: { type: 'STRING' },
+                },
+              },
+              required: ['replies'],
+            },
           },
         }),
       }
@@ -116,11 +125,9 @@ Respond with ONLY valid JSON in exactly this shape, no markdown fences, no pream
         replies = parsed.replies.filter((r: unknown) => typeof r === 'string' && r.trim());
       }
     } catch (parseErr) {
-      console.error('⚠️ Could not parse Gemini JSON response, falling back to raw text:', rawText);
+      console.error('⚠️ Could not parse Gemini JSON response:', rawText);
     }
 
-    // Fallback: if parsing failed or the model returned fewer than expected,
-    // don't leave the user with nothing -- use whatever raw text we got.
     if (replies.length === 0 && rawText.trim()) {
       replies = [rawText.trim()];
     }
@@ -129,9 +136,6 @@ Respond with ONLY valid JSON in exactly this shape, no markdown fences, no pream
       return NextResponse.json({ error: 'Failed to generate a reply. Try again.' }, { status: 502 });
     }
 
-    // Only increment on a SUCCESSFUL generation -- don't charge failed attempts
-    // against the free quota. One generation event = one credit, regardless
-    // of how many options came back.
     const { data: incrementResult, error: incrementError } = await supabase.rpc(
       'increment_draft_count',
       { user_id: user.id }
@@ -145,7 +149,6 @@ Respond with ONLY valid JSON in exactly this shape, no markdown fences, no pream
 
     return NextResponse.json({
       replies,
-      // Keep these for backward compatibility with anything still reading a single reply.
       reply: replies[0],
       draft: replies[0],
       text: replies[0],
