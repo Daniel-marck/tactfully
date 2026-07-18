@@ -30,6 +30,8 @@ const TONES = [
   { label: 'Formal', value: 'Formal and businesslike' },
 ]
 
+const OPTIONS_SEPARATOR = '\n\n---\n\n'
+
 function SealIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
@@ -72,12 +74,13 @@ export function DraftForm() {
   const [incomingMessage, setIncomingMessage] = useState('')
   const [situation, setSituation] = useState(SITUATIONS[0])
   const [tone, setTone] = useState(TONES[0].value)
-  const [draftResult, setDraftResult] = useState('')
+  const [draftOptions, setDraftOptions] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [limitReached, setLimitReached] = useState(false)
   const [draftsRemaining, setDraftsRemaining] = useState<number | null>(null)
   const [paypalError, setPaypalError] = useState<string | null>(null)
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
 
   const [user, setUser] = useState<any | null>(null)
   const [plan, setPlan] = useState<'free' | 'pro'>('free')
@@ -132,7 +135,11 @@ export function DraftForm() {
     setIncomingMessage(draft.original_message)
     setSituation(draft.situation)
     setTone(draft.tone)
-    setDraftResult(draft.generated_reply)
+    setDraftOptions(
+      draft.generated_reply.includes(OPTIONS_SEPARATOR)
+        ? draft.generated_reply.split(OPTIONS_SEPARATOR)
+        : [draft.generated_reply]
+    )
     setLimitReached(false)
     setError(null)
   }
@@ -141,7 +148,7 @@ export function DraftForm() {
     setIncomingMessage('')
     setSituation(SITUATIONS[0])
     setTone(TONES[0].value)
-    setDraftResult('')
+    setDraftOptions([])
     setLimitReached(false)
     setError(null)
   }
@@ -187,7 +194,7 @@ export function DraftForm() {
     setLoading(true)
     setError(null)
     setLimitReached(false)
-    setDraftResult('')
+    setDraftOptions([])
 
     try {
       const response = await fetch('/api/generate', {
@@ -203,7 +210,11 @@ export function DraftForm() {
       }
       if (!response.ok) throw new Error(data.error || 'Server returned an error')
 
-      setDraftResult(data.reply)
+      const replies: string[] = Array.isArray(data.replies) && data.replies.length > 0
+        ? data.replies
+        : [data.reply]
+
+      setDraftOptions(replies)
       setDraftsRemaining(typeof data.draftsRemaining === 'number' ? data.draftsRemaining : null)
 
       await supabase.from('drafts').insert({
@@ -211,7 +222,7 @@ export function DraftForm() {
         original_message: incomingMessage,
         situation,
         tone,
-        generated_reply: data.reply,
+        generated_reply: replies.join(OPTIONS_SEPARATOR),
       })
 
       const { data: updatedDrafts } = await supabase
@@ -225,6 +236,12 @@ export function DraftForm() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleCopy = (text: string, index: number) => {
+    navigator.clipboard.writeText(text)
+    setCopiedIndex(index)
+    setTimeout(() => setCopiedIndex((current) => (current === index ? null : current)), 1800)
   }
 
   const todayStamp = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit' })
@@ -439,8 +456,8 @@ export function DraftForm() {
             )}
           </div>
 
-          {(draftResult || limitReached) && (
-            <div className="mt-5 lg:mt-0">
+          {(draftOptions.length > 0 || limitReached) && (
+            <div className="mt-5 lg:mt-0 flex flex-col gap-4">
               {limitReached && plan !== 'pro' && (
                 <div className="rise-anim relative rounded-md p-6 text-center lg:sticky lg:top-6" style={{ background: '#24303B', color: '#F5EFE1' }}>
                   <div className="mb-2 font-semibold" style={{ fontFamily: "var(--font-newsreader), serif", fontSize: 18 }}>
@@ -492,32 +509,42 @@ export function DraftForm() {
                 </div>
               )}
 
-              {draftResult && (!limitReached || plan === 'pro') && (
-                <div
-                  className="rise-anim relative rounded-md p-5 sm:p-6 max-h-[70vh] lg:max-h-[80vh] overflow-y-auto paper-scroll lg:sticky lg:top-6"
-                  style={{ background: '#F5EFE1', color: '#24303B' }}
-                >
-                  <div
-                    className="seal-anim absolute -top-4 right-5 w-11 h-11 rounded-full flex items-center justify-center"
-                    style={{ background: 'radial-gradient(circle at 32% 30%, #D98A3B, #B8722A 60%, #8a541f 100%)', boxShadow: '0 6px 14px rgba(0,0,0,0.4)' }}
-                  >
-                    <SealIcon />
-                  </div>
-                  <Postmark label={todayStamp} />
-                  <div className="mb-3" style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 15, color: '#B8722A' }}>
-                    Your reply
-                  </div>
-                  <p className="whitespace-pre-wrap" style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.6 }}>
-                    {draftResult}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => navigator.clipboard.writeText(draftResult)}
-                    className="sticky bottom-0 mt-4 uppercase text-[11px] px-3.5 py-2 rounded"
-                    style={{ fontFamily: "var(--font-plex-mono), monospace", letterSpacing: '0.08em', border: '1px solid rgba(36,48,59,0.25)', color: '#24303B', background: '#F5EFE1' }}
-                  >
-                    Copy reply
-                  </button>
+              {draftOptions.length > 0 && (!limitReached || plan === 'pro') && (
+                <div className="flex flex-col gap-4 lg:sticky lg:top-6 lg:max-h-[80vh] lg:overflow-y-auto paper-scroll pr-0.5">
+                  {draftOptions.map((option, index) => (
+                    <div
+                      key={index}
+                      className="rise-anim relative rounded-md p-5 sm:p-6"
+                      style={{ background: '#F5EFE1', color: '#24303B' }}
+                    >
+                      {index === 0 && (
+                        <div
+                          className="seal-anim absolute -top-4 right-5 w-11 h-11 rounded-full flex items-center justify-center"
+                          style={{ background: 'radial-gradient(circle at 32% 30%, #D98A3B, #B8722A 60%, #8a541f 100%)', boxShadow: '0 6px 14px rgba(0,0,0,0.4)' }}
+                        >
+                          <SealIcon />
+                        </div>
+                      )}
+                      {index === 0 && <Postmark label={todayStamp} />}
+
+                      <div className="flex items-center justify-between mb-3">
+                        <span style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 15, color: '#B8722A' }}>
+                          {draftOptions.length > 1 ? `Option ${index + 1}` : 'Your reply'}
+                        </span>
+                      </div>
+                      <p className="whitespace-pre-wrap" style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.6 }}>
+                        {option}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(option, index)}
+                        className="mt-4 uppercase text-[11px] px-3.5 py-2 rounded"
+                        style={{ fontFamily: "var(--font-plex-mono), monospace", letterSpacing: '0.08em', border: '1px solid rgba(36,48,59,0.25)', color: '#24303B', background: '#F5EFE1' }}
+                      >
+                        {copiedIndex === index ? 'Copied!' : 'Copy reply'}
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
