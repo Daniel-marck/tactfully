@@ -8,6 +8,44 @@ const bullets = [
   "Advanced negotiation support in Pro",
 ]
 
+function SealIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4">
+      <path
+        d="M12 2L14.5 8.5L21 9.5L16 14L17.5 21L12 17.5L6.5 21L8 14L3 9.5L9.5 8.5L12 2Z"
+        fill="#F5EFE1"
+        opacity="0.9"
+      />
+    </svg>
+  )
+}
+
+function Postmark() {
+  return (
+    <div
+      className="absolute -top-3 -right-2 w-12 h-12 rounded-full flex flex-col items-center justify-center rotate-[8deg] select-none"
+      style={{
+        border: '1.5px solid rgba(184,114,42,0.55)',
+        background: 'rgba(245,239,225,0.9)',
+        boxShadow: '0 4px 10px rgba(27,42,58,0.15)',
+      }}
+    >
+      <span
+        className="uppercase leading-none"
+        style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 5.5, letterSpacing: '0.1em', color: '#B8722A' }}
+      >
+        Tactfully
+      </span>
+      <span
+        className="leading-none mt-0.5"
+        style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 7, color: '#1B2A3A' }}
+      >
+        Jul 19
+      </span>
+    </div>
+  )
+}
+
 function ProductPreview() {
   return (
     <div className="p-6" style={{ background: '#1B2A3A' }}>
@@ -47,23 +85,43 @@ function ProductPreview() {
         </div>
       </div>
 
-      <div
-        className="relative rounded-md p-5 shadow-xl mt-4"
-        style={{ background: '#F5EFE1', color: '#24303B' }}
-      >
+      <div className="flex flex-col gap-3 mt-4">
         <div
-          className="absolute -top-3 right-4 w-9 h-9 rounded-full flex items-center justify-center"
-          style={{ background: 'radial-gradient(circle at 32% 30%, #D98A3B, #B8722A 60%, #8a541f 100%)' }}
-        />
-        <span
-          className="block mb-2"
-          style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 13, color: '#B8722A' }}
+          className="relative rounded-md p-5 shadow-xl"
+          style={{ background: '#F5EFE1', color: '#24303B' }}
         >
-          Option 1
-        </span>
-        <p className="text-[12.5px] leading-relaxed" style={{ fontFamily: "var(--font-work-sans), sans-serif" }}>
-          Thanks for reaching out! Our current rate reflects the scope we discussed -- happy to revisit if the project shrinks in scope...
-        </p>
+          <div
+            className="absolute -top-3 right-4 w-9 h-9 rounded-full flex items-center justify-center"
+            style={{ background: 'radial-gradient(circle at 32% 30%, #D98A3B, #B8722A 60%, #8a541f 100%)', boxShadow: '0 4px 10px rgba(0,0,0,0.35)' }}
+          >
+            <SealIcon />
+          </div>
+          <Postmark />
+          <span
+            className="block mb-2"
+            style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 13, color: '#B8722A' }}
+          >
+            Option 1
+          </span>
+          <p className="text-[12.5px] leading-relaxed" style={{ fontFamily: "var(--font-work-sans), sans-serif" }}>
+            Thanks for reaching out! Our current rate reflects the scope we discussed -- happy to revisit if the project shrinks in scope...
+          </p>
+        </div>
+
+        <div
+          className="relative rounded-md p-5 shadow-xl"
+          style={{ background: '#F5EFE1', color: '#24303B' }}
+        >
+          <span
+            className="block mb-2"
+            style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 13, color: '#B8722A' }}
+          >
+            Option 2
+          </span>
+          <p className="text-[12.5px] leading-relaxed" style={{ fontFamily: "var(--font-work-sans), sans-serif" }}>
+            I appreciate you flagging that -- happy to walk through what's driving the price so it's clear where the value is...
+          </p>
+        </div>
       </div>
     </div>
   )
