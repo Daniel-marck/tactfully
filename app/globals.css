@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
@@ -5,8 +6,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-sans: 'Work Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,110 +50,73 @@
 
 :root {
   color-scheme: light;
-  --background: oklch(0.985 0.005 248);
-  --foreground: oklch(0.19 0.028 264);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.19 0.028 264);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.19 0.028 264);
-  --primary: oklch(0.48 0.18 264);
-  --primary-foreground: oklch(0.99 0.005 250);
-  --secondary: oklch(0.955 0.012 255);
-  --secondary-foreground: oklch(0.26 0.04 264);
-  --muted: oklch(0.96 0.008 255);
-  --muted-foreground: oklch(0.5 0.022 262);
-  --accent: oklch(0.8 0.13 78);
-  --accent-foreground: oklch(0.28 0.06 62);
+  --background: #F5EFE1;
+  --foreground: #24303B;
+  --card: #FBF8F0;
+  --card-foreground: #24303B;
+  --popover: #FBF8F0;
+  --popover-foreground: #24303B;
+  --primary: #B8722A;
+  --primary-foreground: #F5EFE1;
+  --secondary: #EDE4D0;
+  --secondary-foreground: #1B2A3A;
+  --muted: #EDE4D0;
+  --muted-foreground: #6B7A8C;
+  --accent: #1B2A3A;
+  --accent-foreground: #F5EFE1;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.9 0.012 258);
-  --input: oklch(0.9 0.012 258);
-  --ring: oklch(0.48 0.18 264);
-  --chart-1: oklch(0.48 0.18 264);
-  --chart-2: oklch(0.62 0.14 210);
-  --chart-3: oklch(0.8 0.13 78);
-  --chart-4: oklch(0.6 0.11 162);
-  --chart-5: oklch(0.55 0.15 300);
-  --radius: 0.75rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.19 0.028 264);
-  --sidebar-primary: oklch(0.48 0.18 264);
-  --sidebar-primary-foreground: oklch(0.99 0.005 250);
-  --sidebar-accent: oklch(0.955 0.012 255);
-  --sidebar-accent-foreground: oklch(0.26 0.04 264);
-  --sidebar-border: oklch(0.9 0.012 258);
-  --sidebar-ring: oklch(0.48 0.18 264);
+  --border: #DED2B4;
+  --input: #DED2B4;
+  --ring: #B8722A;
+  --chart-1: #B8722A;
+  --chart-2: #1B2A3A;
+  --chart-3: #6B7A8C;
+  --chart-4: #D98A3B;
+  --chart-5: #24303B;
+  --radius: 0.5rem;
+  --sidebar: #1B2A3A;
+  --sidebar-foreground: #F5EFE1;
+  --sidebar-primary: #B8722A;
+  --sidebar-primary-foreground: #F5EFE1;
+  --sidebar-accent: #24303B;
+  --sidebar-accent-foreground: #F5EFE1;
+  --sidebar-border: rgba(245,239,225,0.1);
+  --sidebar-ring: #B8722A;
 }
 
 .dark {
   color-scheme: dark;
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: #1B2A3A;
+  --foreground: #F5EFE1;
+  --card: #24303B;
+  --card-foreground: #F5EFE1;
+  --popover: #24303B;
+  --popover-foreground: #F5EFE1;
+  --primary: #B8722A;
+  --primary-foreground: #F5EFE1;
+  --secondary: #24303B;
+  --secondary-foreground: #F5EFE1;
+  --muted: #24303B;
+  --muted-foreground: #B8C2CE;
+  --accent: #B8722A;
+  --accent-foreground: #F5EFE1;
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not(.light) {
-    color-scheme: dark;
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
-  }
+  --border: rgba(245,239,225,0.1);
+  --input: rgba(245,239,225,0.15);
+  --ring: #B8722A;
+  --chart-1: #B8722A;
+  --chart-2: #D98A3B;
+  --chart-3: #6B7A8C;
+  --chart-4: #F5EFE1;
+  --chart-5: #24303B;
+  --sidebar: #1B2A3A;
+  --sidebar-foreground: #F5EFE1;
+  --sidebar-primary: #B8722A;
+  --sidebar-primary-foreground: #F5EFE1;
+  --sidebar-accent: #24303B;
+  --sidebar-accent-foreground: #F5EFE1;
+  --sidebar-border: rgba(245,239,225,0.1);
+  --sidebar-ring: #B8722A;
 }
 
 @layer base {
@@ -162,214 +126,25 @@
   body {
     @apply bg-background text-foreground;
   }
+  h1, h2, h3 {
+    font-family: 'Newsreader', serif;
+    letter-spacing: -0.01em;
+  }
 }
+
 /* ==========================================
-   Tactfully Custom Vintage Theme
+   Tactfully dashboard-specific styles
+   (used directly by the dashboard, which
+   applies its own inline colors independent
+   of the theme tokens above)
    ========================================== */
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
-
-:root {
-  --ink: #1B2A3A;
-  --ink-deep: #0F1B26;
-  --paper: #F5EFE1;
-  --paper-dim: #EDE4D0;
-  --copper: #B8722A;
-  --copper-bright: #D98A3B;
-  --charcoal: #24303B;
-  --slate: #6B7A8C;
-  --line: rgba(245,239,225,0.14);
-}
-
 .tactfully-theme {
-  background: var(--ink);
+  background: #1B2A3A;
   background-image:
     radial-gradient(circle at 15% 10%, rgba(216,138,59,0.06), transparent 40%),
     radial-gradient(circle at 85% 90%, rgba(216,138,59,0.05), transparent 45%);
-  color: var(--paper);
+  color: #F5EFE1;
   font-family: 'Work Sans', sans-serif;
   min-height: 100vh;
   padding: 32px 16px 60px;
-}
-
-.tactfully-theme .wrap { max-width: 920px; margin: 0 auto; }
-.tactfully-theme header { text-align: center; margin-bottom: 36px; }
-.tactfully-theme .eyebrow {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--copper-bright);
-  margin-bottom: 10px;
-}
-.tactfully-theme h1 {
-  font-family: 'Newsreader', serif;
-  font-weight: 500;
-  font-size: clamp(30px, 5vw, 44px);
-  margin: 0 0 10px;
-  letter-spacing: -0.01em;
-}
-.tactfully-theme .sub {
-  color: var(--slate);
-  font-size: 15px;
-  max-width: 460px;
-  margin: 0 auto;
-  line-height: 1.5;
-}
-.tactfully-theme .board {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 22px;
-}
-@media(min-width:860px){
-  .tactfully-theme .board { grid-template-columns: 1fr 1fr; }
-}
-.tactfully-theme .card {
-  background: var(--paper);
-  color: var(--charcoal);
-  border-radius: 6px;
-  padding: 26px;
-  position: relative;
-}
-.tactfully-theme .note-card {
-  transform: rotate(-0.6deg);
-  box-shadow: 0 18px 40px rgba(0,0,0,0.35);
-}
-.tactfully-theme .note-card::before {
-  content: '';
-  position: absolute;
-  top: -10px; left: 26px;
-  width: 46px; height: 20px;
-  background: rgba(184,114,42,0.35);
-  border: 1px solid rgba(184,114,42,0.5);
-  transform: rotate(-4deg);
-}
-.tactfully-theme .card-label {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--copper);
-  margin-bottom: 14px;
-  display: block;
-}
-.tactfully-theme textarea {
-  width: 100%;
-  min-height: 150px;
-  border: none;
-  background: transparent;
-  resize: vertical;
-  font-family: 'Work Sans', sans-serif;
-  font-size: 15px;
-  line-height: 1.55;
-  color: var(--charcoal);
-  outline: none;
-}
-.tactfully-theme .pillrow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 18px;
-}
-.tactfully-theme .pill {
-  font-family: 'Work Sans', sans-serif;
-  font-size: 13px;
-  padding: 7px 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(36,48,59,0.18);
-  background: transparent;
-  color: var(--charcoal);
-  cursor: pointer;
-  transition: all .15s ease;
-}
-.tactfully-theme .pill.active {
-  background: var(--ink);
-  color: var(--paper);
-  border-color: var(--ink);
-}
-.tactfully-theme .fieldgroup { margin-top: 22px; }
-.tactfully-theme .gen-btn {
-  margin-top: 24px;
-  width: 100%;
-  padding: 15px;
-  border-radius: 6px;
-  border: none;
-  background: var(--copper);
-  color: #fff;
-  font-family: 'Work Sans', sans-serif;
-  font-weight: 600;
-  font-size: 15px;
-  cursor: pointer;
-  letter-spacing: 0.01em;
-  transition: background .15s ease, transform .1s ease;
-}
-.tactfully-theme .gen-btn:hover { background: var(--copper-bright); }
-.tactfully-theme .gen-btn:active { transform: scale(0.99); }
-.tactfully-theme .gen-btn:disabled { background: #8a8a8a; cursor: not-allowed; }
-.tactfully-theme .output-col { display: flex; flex-direction: column; gap: 18px; }
-.tactfully-theme .empty-state {
-  border: 1px dashed rgba(245,239,225,0.25);
-  border-radius: 6px;
-  padding: 40px 24px;
-  text-align: center;
-  color: var(--slate);
-  font-size: 14px;
-  line-height: 1.6;
-}
-.tactfully-theme .reply-card {
-  background: var(--paper);
-  color: var(--charcoal);
-  border-radius: 6px;
-  padding: 26px 26px 22px;
-  position: relative;
-}
-.tactfully-theme .seal {
-  position: absolute;
-  top: -16px; right: 20px;
-  width: 44px; height: 44px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 32% 30%, var(--copper-bright), var(--copper) 60%, #8a541f 100%);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.4);
-  display: flex; align-items: center; justify-content: center;
-}
-.tactfully-theme .seal svg { width: 20px; height: 20px; }
-.tactfully-theme .reply-label {
-  font-family: 'Newsreader', serif;
-  font-style: italic;
-  font-size: 15px;
-  color: var(--copper);
-  margin-bottom: 12px;
-}
-.tactfully-theme .reply-text {
-  font-size: 15px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  margin-bottom: 16px;
-}
-.tactfully-theme .why {
-  font-size: 12.5px;
-  color: var(--slate);
-  border-top: 1px solid rgba(36,48,59,0.12);
-  padding-top: 12px;
-  line-height: 1.5;
-}
-.tactfully-theme .copy-btn {
-  margin-top: 14px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  background: none;
-  border: 1px solid rgba(36,48,59,0.25);
-  color: var(--charcoal);
-  padding: 8px 14px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.tactfully-theme .copy-btn:hover { background: rgba(36,48,59,0.06); }
-.tactfully-theme .status {
-  text-align: center;
-  color: var(--slate);
-  font-size: 13px;
-  margin-top: 16px;
-  min-height: 18px;
 }
