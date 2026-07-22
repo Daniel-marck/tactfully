@@ -1,7 +1,7 @@
 "use client"
 
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { createClient } from "@/lib/supabase/client"
 
 const supabase = createClient()
@@ -70,6 +70,75 @@ function Postmark({ label }: { label: string }) {
   )
 }
 
+function InfoIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className="w-3.5 h-3.5">
+      <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M10 9v5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <circle cx="10" cy="6.3" r="1" fill="currentColor" />
+    </svg>
+  )
+}
+
+function InfoPopover({ text }: { text: string }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLSpanElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  return (
+    <span className="relative inline-flex items-center" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-label="More information"
+        className="inline-flex items-center justify-center rounded-full"
+        style={{ color: '#B8722A', opacity: 0.75 }}
+      >
+        <InfoIcon />
+      </button>
+      {open && (
+        <div
+          className="absolute z-20 top-full left-0 mt-2 w-56 rounded-md p-3 text-[12px] leading-relaxed shadow-lg"
+          style={{ background: '#1B2A3A', color: '#F5EFE1', fontFamily: "var(--font-work-sans), sans-serif" }}
+        >
+          {text}
+        </div>
+      )}
+    </span>
+  )
+}
+
+function EyeIcon({ open }: { open: boolean }) {
+  return open ? (
+    <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
+      <path
+        d="M1 10s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6Z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+      />
+      <circle cx="10" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  ) : (
+    <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
+      <path
+        d="M2.5 2.5l15 15M8.3 8.4a2.5 2.5 0 0 0 3.4 3.4M5.6 5.7C3.3 7 1 10 1 10s3 6 9 6c1.6 0 3-.4 4.2-1M15 14c1.9-1.3 3-3 3-3s-3-6-9-6c-.7 0-1.4.1-2 .3"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
 export function DraftForm() {
   const [incomingMessage, setIncomingMessage] = useState('')
   const [situation, setSituation] = useState(SITUATIONS[0])
@@ -89,6 +158,7 @@ export function DraftForm() {
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authEmail, setAuthEmail] = useState('')
   const [authPassword, setAuthPassword] = useState('')
+  const [showAuthPassword, setShowAuthPassword] = useState(false)
   const [isSignUpMode, setIsSignUpMode] = useState(false)
   const [authError, setAuthError] = useState<string | null>(null)
   const [authLoading, setAuthLoading] = useState(false)
@@ -169,6 +239,7 @@ export function DraftForm() {
       setShowAuthModal(false)
       setAuthEmail('')
       setAuthPassword('')
+      setShowAuthPassword(false)
     } catch (err: any) {
       setAuthError(err.message || 'Authentication failed.')
     } finally {
@@ -392,9 +463,12 @@ export function DraftForm() {
             />
 
             <div className="mt-5">
-              <span className="block mb-3.5 uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
-                Situation
-              </span>
+              <div className="flex items-center gap-1.5 mb-3.5">
+                <span className="uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
+                  Situation
+                </span>
+                <InfoPopover text="Situation tells the AI what kind of conversation this is -- a late payment, a lowball offer, and so on -- so it can shape the reply around the right context." />
+              </div>
               <div className="flex flex-wrap gap-2">
                 {SITUATIONS.map((s) => (
                   <button
@@ -413,9 +487,12 @@ export function DraftForm() {
             </div>
 
             <div className="mt-5">
-              <span className="block mb-3.5 uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
-                Tone
-              </span>
+              <div className="flex items-center gap-1.5 mb-3.5">
+                <span className="uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
+                  Tone
+                </span>
+                <InfoPopover text="Tone sets how the reply should sound -- Diplomatic keeps it warm, Firm is direct with no fluff, Formal keeps it strictly businesslike." />
+              </div>
               <div className="flex flex-wrap gap-2">
                 {TONES.map((t) => (
                   <button
@@ -590,15 +667,26 @@ export function DraftForm() {
               </div>
               <div>
                 <label className="block text-[11px] font-bold uppercase mb-1" style={{ color: '#6B7A8C', fontFamily: "var(--font-plex-mono), monospace" }}>Password</label>
-                <input
-                  type="password"
-                  required
-                  value={authPassword}
-                  onChange={(e) => setAuthPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full rounded-md p-2.5 outline-none text-sm"
-                  style={{ border: '1px solid rgba(36,48,59,0.18)', background: '#fff' }}
-                />
+                <div className="relative">
+                  <input
+                    type={showAuthPassword ? 'text' : 'password'}
+                    required
+                    value={authPassword}
+                    onChange={(e) => setAuthPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full rounded-md p-2.5 pr-10 outline-none text-sm"
+                    style={{ border: '1px solid rgba(36,48,59,0.18)', background: '#fff' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowAuthPassword((v) => !v)}
+                    aria-label={showAuthPassword ? 'Hide password' : 'Show password'}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2"
+                    style={{ color: '#6B7A8C' }}
+                  >
+                    <EyeIcon open={showAuthPassword} />
+                  </button>
+                </div>
               </div>
 
               {authError && (
