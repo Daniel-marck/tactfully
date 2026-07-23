@@ -1,10 +1,6 @@
 import { Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-// Drop your Gumroad product checkout link in here once it's live.
-// e.g. "https://gumroad.com/l/tactfully-pro"
-const GUMROAD_PRO_CHECKOUT_URL = "https://smartoolkit.gumroad.com/l/dzlkij"
-
 const plans = [
   {
     name: "Free",
@@ -34,7 +30,7 @@ const plans = [
       "Personal AI communication coach",
     ],
     cta: "Upgrade to Pro",
-    href: GUMROAD_PRO_CHECKOUT_URL,
+    href: "/sign-up",
     featured: true,
   },
 ]
@@ -49,7 +45,6 @@ export function PricingSection() {
             Start free, upgrade when you need scale.
           </h2>
         </div>
-
         <div className="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-2">
           {plans.map((plan) => (
             <div
@@ -69,13 +64,11 @@ export function PricingSection() {
                   </span>
                 )}
               </div>
-
               <div className="mt-4 flex items-baseline gap-1">
                 <span className="text-4xl font-semibold tracking-tight">{plan.price}</span>
                 <span className="text-sm text-muted-foreground">{plan.period}</span>
               </div>
               <p className="mt-2 text-sm text-muted-foreground">{plan.description}</p>
-
               <ul className="mt-6 flex flex-1 flex-col gap-3">
                 {plan.features.map((f) => (
                   <li key={f} className="flex items-center gap-2.5 text-sm">
@@ -86,11 +79,8 @@ export function PricingSection() {
                   </li>
                 ))}
               </ul>
-
-              <a
+              
                 href={plan.href}
-                target={plan.featured ? "_blank" : undefined}
-                rel={plan.featured ? "noopener noreferrer" : undefined}
                 className={`mt-8 h-11 w-full inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors ${
                   plan.featured
                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
