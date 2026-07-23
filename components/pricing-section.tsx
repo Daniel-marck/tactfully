@@ -46,51 +46,48 @@ export function PricingSection() {
           </h2>
         </div>
         <div className="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-2">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className={
-                "flex flex-col rounded-2xl border p-8 " +
-                (plan.featured
-                  ? "border-primary bg-card shadow-lg shadow-primary/10 ring-1 ring-primary"
-                  : "border-border bg-card")
-              }
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">{plan.name}</h3>
-                {plan.featured && (
-                  <span className="rounded-full bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground">
-                    Most popular
-                  </span>
-                )}
-              </div>
-              <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-semibold tracking-tight">{plan.price}</span>
-                <span className="text-sm text-muted-foreground">{plan.period}</span>
-              </div>
-              <p className="mt-2 text-sm text-muted-foreground">{plan.description}</p>
-              <ul className="mt-6 flex flex-1 flex-col gap-3">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2.5 text-sm">
-                    <span className="flex size-4 items-center justify-center rounded-full bg-primary/10 text-primary">
-                      <Check className="size-3" />
-                    </span>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              
-                href={plan.href}
-                className={`mt-8 h-11 w-full inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors ${
-                  plan.featured
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                    : "border border-input bg-background hover:bg-accent hover:text-accent-foreground"
-                }`}
+          {plans.map((plan) => {
+            const linkClassName = plan.featured
+              ? "mt-8 h-11 w-full inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90"
+              : "mt-8 h-11 w-full inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+
+            return (
+              <div
+                key={plan.name}
+                className={
+                  "flex flex-col rounded-2xl border p-8 " +
+                  (plan.featured
+                    ? "border-primary bg-card shadow-lg shadow-primary/10 ring-1 ring-primary"
+                    : "border-border bg-card")
+                }
               >
-                {plan.cta}
-              </a>
-            </div>
-          ))}
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">{plan.name}</h3>
+                  {plan.featured && (
+                    <span className="rounded-full bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground">
+                      Most popular
+                    </span>
+                  )}
+                </div>
+                <div className="mt-4 flex items-baseline gap-1">
+                  <span className="text-4xl font-semibold tracking-tight">{plan.price}</span>
+                  <span className="text-sm text-muted-foreground">{plan.period}</span>
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground">{plan.description}</p>
+                <ul className="mt-6 flex flex-1 flex-col gap-3">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-center gap-2.5 text-sm">
+                      <span className="flex size-4 items-center justify-center rounded-full bg-primary/10 text-primary">
+                        <Check className="size-3" />
+                      </span>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <a href={plan.href} className={linkClassName}>{plan.cta}</a>
+              </div>
+            )
+          })}
         </div>
       </div>
     </section>
