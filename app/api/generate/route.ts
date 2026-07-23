@@ -21,7 +21,7 @@ export async function POST(req: Request) {
 
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('plan, draft_count')
+      .select('plan, draft_count, last_draft_date')
       .eq('id', user.id)
       .single();
 
@@ -33,11 +33,19 @@ export async function POST(req: Request) {
       );
     }
 
-    if (profile.plan === 'free' && profile.draft_count >= FREE_DRAFT_LIMIT) {
+    // A new day resets the count -- but only the increment RPC actually
+    // writes that reset to the database. For this pre-check (before we've
+    // even called Gemini), compute what the count WOULD be today so we
+    // don't wrongly block someone whose reset hasn't been persisted yet.
+    const today = new Date().toISOString().slice(0, 10);
+    const effectiveDraftCount =
+      profile.last_draft_date === today ? profile.draft_count : 0;
+
+    if (profile.plan === 'free' && effectiveDraftCount >= FREE_DRAFT_LIMIT) {
       return NextResponse.json(
         {
           error: 'limit_reached',
-          message: `You've used all ${FREE_DRAFT_LIMIT} free drafts. Upgrade to Pro for unlimited replies.`,
+          message: `You've used all ${FREE_DRAFT_LIMIT} free drafts for today. They reset tomorrow, or upgrade to Pro for unlimited replies.`,
           upgradeUrl: 'https://smartoolkit.gumroad.com/l/dzlkij',
         },
         { status: 403 }
@@ -117,7 +125,6 @@ Keep each reply concise, polite, and ready to send. Write in the first person.`;
 
     const data = await response.json();
     const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    console.log('🔍 DEBUG rawText from Gemini:', rawText);
 
     let replies: string[] = [];
     try {
@@ -137,6 +144,8 @@ Keep each reply concise, polite, and ready to send. Write in the first person.`;
       return NextResponse.json({ error: 'Failed to generate a reply. Try again.' }, { status: 502 });
     }
 
+    // This RPC now handles the daily reset atomically: if last_draft_date
+    // wasn't today, it resets draft_count to 1 instead of incrementing.
     const { data: incrementResult, error: incrementError } = await supabase.rpc(
       'increment_draft_count',
       { user_id: user.id }
@@ -146,7 +155,7 @@ Keep each reply concise, polite, and ready to send. Write in the first person.`;
       console.error('⚠️ Failed to increment draft count:', incrementError);
     }
 
-    const newCount = incrementResult?.[0]?.new_count ?? profile.draft_count + 1;
+    const newCount = incrementResult?.[0]?.new_count ?? effectiveDraftCount + 1;
 
     return NextResponse.json({
       replies,
