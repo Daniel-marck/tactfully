@@ -32,6 +32,13 @@ const TONES = [
 
 const OPTIONS_SEPARATOR = '\n\n---\n\n'
 
+const QUICK_START_STEPS = [
+  'Paste the client message',
+  'Pick the situation and tone',
+  'Generate your draft',
+  'Copy and send',
+]
+
 function SealIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
@@ -442,6 +449,37 @@ export function DraftForm() {
         </aside>
 
         <div className="flex-1 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
+          <div className="lg:col-span-2 mb-4">
+            <div
+              className="rounded-md border px-4 py-3 text-sm"
+              style={{
+                background: 'rgba(184,114,42,0.08)',
+                borderColor: 'rgba(184,114,42,0.35)',
+                color: '#F5EFE1',
+                fontFamily: "var(--font-work-sans), sans-serif",
+              }}
+            >
+              <div className="mb-2 font-semibold" style={{ color: '#F5EFE1' }}>
+                Quick start
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {QUICK_START_STEPS.map((step, index) => (
+                  <span
+                    key={step}
+                    className="rounded-full border px-2.5 py-1 text-[11px]"
+                    style={{
+                      borderColor: 'rgba(255,255,255,0.12)',
+                      background: 'rgba(255,255,255,0.02)',
+                      color: '#E8E0D4',
+                    }}
+                  >
+                    {index + 1}. {step}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
           <div
             className="relative rounded-md p-5 sm:p-6 shadow-2xl w-full max-h-[70vh] lg:max-h-[80vh] overflow-y-auto paper-scroll lg:sticky lg:top-6"
             style={{ background: '#F5EFE1', color: '#24303B', transform: 'rotate(-0.4deg)' }}
