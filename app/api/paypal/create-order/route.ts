@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { assertServerEnv } from '@/lib/config'
 
 const PAYPAL_API =
   process.env.PAYPAL_MODE === 'live'
     ? 'https://api-m.paypal.com'
     : 'https://api-m.sandbox.paypal.com'
 
-const PRO_PRICE_USD = '12.00' // Fixed server-side. Never read this from the client request.
+const PRO_PRICE_USD = '12.00'
 
 async function getPayPalAccessToken() {
   const auth = Buffer.from(
@@ -29,6 +30,8 @@ async function getPayPalAccessToken() {
 
 export async function POST() {
   try {
+    assertServerEnv(['PAYPAL_CLIENT_ID', 'PAYPAL_CLIENT_SECRET', 'NEXT_PUBLIC_PAYPAL_CLIENT_ID'], 'PayPal checkout')
+
     const supabase = await createClient()
     const {
       data: { user },
@@ -51,9 +54,6 @@ export async function POST() {
         intent: 'CAPTURE',
         purchase_units: [
           {
-            // custom_id lets us tie the PayPal order back to a specific
-            // Supabase user during capture, without trusting anything
-            // the browser sends us at capture time.
             custom_id: user.id,
             amount: {
               currency_code: 'USD',

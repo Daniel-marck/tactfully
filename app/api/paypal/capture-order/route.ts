@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { assertServerEnv } from '@/lib/config'
 
 const PAYPAL_API =
   process.env.PAYPAL_MODE === 'live'
@@ -30,6 +31,8 @@ async function getPayPalAccessToken() {
 
 export async function POST(req: Request) {
   try {
+    assertServerEnv(['PAYPAL_CLIENT_ID', 'PAYPAL_CLIENT_SECRET'], 'PayPal capture')
+
     const supabase = await createClient()
     const {
       data: { user },
@@ -46,9 +49,6 @@ export async function POST(req: Request) {
     }
 
     const accessToken = await getPayPalAccessToken()
-
-    // Ask PayPal directly whether this order actually completed -- never
-    // trust the browser's word that "payment succeeded".
     const captureRes = await fetch(
       `${PAYPAL_API}/v2/checkout/orders/${orderID}/capture`,
       {
@@ -67,12 +67,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Payment was not completed.' }, { status: 402 })
     }
 
-    // Verify: the order belongs to THIS logged-in user (custom_id set at
-    // create-order time), and the amount matches what we expect to charge.
     const purchaseUnit = captureData.purchase_units?.[0]
     const paidCustomId = purchaseUnit?.custom_id
-    const capturedAmount =
-      purchaseUnit?.payments?.captures?.[0]?.amount?.value
+    const capturedAmount = purchaseUnit?.payments?.captures?.[0]?.amount?.value
 
     if (paidCustomId !== user.id) {
       console.error('❌ PayPal order user mismatch', { paidCustomId, userId: user.id })
@@ -84,8 +81,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Payment amount mismatch.' }, { status: 402 })
     }
 
-    // Only now, after independently verifying with PayPal, upgrade the
-    // account -- using the service_role key so RLS doesn't block it.
     const admin = createAdminClient()
     const { error: updateError } = await admin
       .from('profiles')
@@ -93,8 +88,6 @@ export async function POST(req: Request) {
       .eq('id', user.id)
 
     if (updateError) {
-      // Likely the unique index on paypal_order_id -- this order was
-      // already used to upgrade an account once before.
       console.error('❌ Failed to upgrade profile:', updateError)
       return NextResponse.json(
         { error: 'Could not apply upgrade. Contact support if you were charged.' },

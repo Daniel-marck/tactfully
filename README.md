@@ -48,6 +48,16 @@ supabase/
   migrations/         database schema files
 ```
 
+## Quick start checklist
+
+Before the app works, make sure you have all of these configured:
+
+1. Supabase project created and URL/anon key added to `.env.local`
+2. Supabase migration applied: `supabase/migrations/20260920_create_profiles_and_drafts.sql`
+3. Gemini key added: `GEMINI_API_KEY`
+4. PayPal sandbox credentials added for Pro checkout
+5. App started locally with `npm run dev`
+
 ## Local development
 
 1. Install dependencies:

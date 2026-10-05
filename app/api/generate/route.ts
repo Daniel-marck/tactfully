@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { assertServerEnv } from '@/lib/config';
 
 const FREE_DRAFT_LIMIT = 3;
 const NUM_OPTIONS = 2;
 
 export async function POST(req: Request) {
   try {
+    assertServerEnv(['GEMINI_API_KEY'], 'AI generation');
+
     const supabase = await createClient();
     const {
       data: { user },
@@ -33,10 +36,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // A new day resets the count -- but only the increment RPC actually
-    // writes that reset to the database. For this pre-check (before we've
-    // even called Gemini), compute what the count WOULD be today so we
-    // don't wrongly block someone whose reset hasn't been persisted yet.
     const today = new Date().toISOString().slice(0, 10);
     const effectiveDraftCount =
       profile.last_draft_date === today ? profile.draft_count : 0;
@@ -77,9 +76,7 @@ export async function POST(req: Request) {
 Desired tone: ${tone}.
 Additional context: ${context || 'None'}.
 
-Each reply must take a genuinely different approach -- a different opening, a different level of detail, or a different way of framing the same point -- while staying in the requested tone. Do not just reword the same sentence twice.
-
-Keep each reply concise, polite, and ready to send. Write in the first person.`;
+Each reply must take a genuinely different approach -- a different opening, a different level of detail, or a different way of framing the same point -- while staying in the requested tone. Do not simply rewrite the user message. Keep each reply concise, polite, and ready to send. Write in the first person.`;
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
@@ -144,8 +141,6 @@ Keep each reply concise, polite, and ready to send. Write in the first person.`;
       return NextResponse.json({ error: 'Failed to generate a reply. Try again.' }, { status: 502 });
     }
 
-    // This RPC now handles the daily reset atomically: if last_draft_date
-    // wasn't today, it resets draft_count to 1 instead of incrementing.
     const { data: incrementResult, error: incrementError } = await supabase.rpc(
       'increment_draft_count',
       { user_id: user.id }
