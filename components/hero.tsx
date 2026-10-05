@@ -145,10 +145,10 @@ export function Hero() {
             respond faster and close more effectively.
           </p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <Button className="h-11 px-6 text-sm" nativeButton={false} render={<a href="#pricing" />}>
+            <Button className="h-11 px-6 text-sm" nativeButton={false} render={<a href="/sign-up" />}>
               Start Free
             </Button>
-            <Button variant="outline" className="h-11 px-6 text-sm" nativeButton={false} render={<a href="#pricing" />}>
+            <Button variant="outline" className="h-11 px-6 text-sm" nativeButton={false} render={<a href="/sign-up" />}>
               Upgrade to Pro
             </Button>
           </div>

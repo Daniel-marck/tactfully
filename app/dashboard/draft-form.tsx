@@ -405,14 +405,14 @@ export function DraftForm() {
               className="rounded-md p-4 text-[12px]"
               style={{ background: 'rgba(245,239,225,0.06)', color: '#B8C2CE', fontFamily: "var(--font-work-sans), sans-serif" }}
             >
-              Sign in to keep a record of every reply you draft.
+              Sign in to start drafting. Paste a client message, choose the situation, and Tactfully will suggest replies in seconds.
             </div>
           ) : draftsList.length === 0 ? (
             <div
-              className="rounded-md p-4 text-[12px] italic"
-              style={{ background: 'rgba(245,239,225,0.06)', color: '#8291A3', fontFamily: "var(--font-work-sans), sans-serif" }}
+              className="rounded-md p-4 text-[12px]"
+              style={{ background: 'rgba(245,239,225,0.06)', color: '#B8C2CE', fontFamily: "var(--font-work-sans), sans-serif" }}
             >
-              Nothing filed yet -- your first draft will land here.
+              Your first draft will appear here. Paste the message, select the scenario, and click “Draft my reply.”
             </div>
           ) : (
             <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible lg:max-h-[70vh] lg:overflow-y-auto paper-scroll pb-1">

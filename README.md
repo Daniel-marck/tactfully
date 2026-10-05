@@ -1,6 +1,6 @@
 # Tactfully
 
-Tactfully is an AI-powered client communication assistant for freelancers and support teams. It helps users draft better replies, choose a tone for the situation, and maintain a cleaner communication workflow with saved drafts and paid plan upgrades.
+Tactfully is an AI-powered client communication assistant for freelancers and support teams. It helps users draft better replies, choose a tone for the situation, and maintain a cleaner communication workflow.
 
 ## What it does
 
@@ -19,6 +19,7 @@ Tactfully is an AI-powered client communication assistant for freelancers and su
 - Supabase Auth + Postgres
 - PayPal Checkout
 - Vercel Analytics
+- Gemini API for reply generation
 
 ## Repository structure
 
@@ -81,17 +82,20 @@ PAYPAL_CLIENT_ID=
 PAYPAL_CLIENT_SECRET=
 NEXT_PUBLIC_PAYPAL_CLIENT_ID=
 PAYPAL_MODE=sandbox
+GEMINI_API_KEY=
 ```
+
+Important: the AI reply generation route requires `GEMINI_API_KEY` in order to work. Without it, the app cannot generate drafts.
 
 ## Database setup
 
 This project expects a Supabase project with at least the following schema. The migration file is stored in:
 
 ```text
-supabase/migrations/20260724_create_profiles_and_drafts.sql
+supabase/migrations/20260920_create_profiles_and_drafts.sql
 ```
 
-Apply it in Supabase SQL editor or with your migration tool.
+Apply it in the Supabase SQL editor or with your migration tool before signing in for the first time.
 
 ## Useful commands
 
@@ -111,3 +115,4 @@ This app is designed for deployment on Vercel with a connected Supabase project 
 - The repository currently expects a configured Supabase project for authentication and draft persistence.
 - The PayPal checkout flow is server-side and verifies the capture before enabling Pro access.
 - If you are moving to production, set `PAYPAL_MODE=live` and use your live PayPal credentials.
+- If you are testing locally, generate the `.env.local` file first so the app can create drafts immediately.
