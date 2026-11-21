@@ -147,6 +147,10 @@ function EyeIcon({ open }: { open: boolean }) {
 
 export function DraftForm() {
   const [incomingMessage, setIncomingMessage] = useState('')
+  const [userContext, setUserContext] = useState('')
+  const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null)
+  const [savingDraft, setSavingDraft] = useState(false)
+  const [deletingDraftId, setDeletingDraftId] = useState<string | null>(null)
   const [situation, setSituation] = useState(SITUATIONS[0])
   const [tone, setTone] = useState(TONES[0].value)
   const [draftOptions, setDraftOptions] = useState<string[]>([])
@@ -208,7 +212,9 @@ export function DraftForm() {
   }
 
   const handleSelectDraft = (draft: any) => {
+    setSelectedDraftId(draft.id)
     setIncomingMessage(draft.original_message)
+    setUserContext(draft.user_context || '')
     setSituation(draft.situation)
     setTone(draft.tone)
     setAnalysis(draft.analysis || null)
@@ -222,7 +228,9 @@ export function DraftForm() {
   }
 
   const handleNewDraft = () => {
+    setSelectedDraftId(null)
     setIncomingMessage('')
+    setUserContext('')
     setSituation(SITUATIONS[0])
     setTone(TONES[0].value)
     setDraftOptions([])
@@ -280,7 +288,7 @@ export function DraftForm() {
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: incomingMessage, tone, situation }),
+        body: JSON.stringify({ message: incomingMessage, tone, situation, userContext }),
       })
       const data = await response.json()
 
@@ -307,20 +315,22 @@ export function DraftForm() {
       setAnalysis(conversationAnalysis)
       setDraftsRemaining(typeof data.draftsRemaining === 'number' ? data.draftsRemaining : null)
 
-      const { error: saveError } = await supabase.from('drafts').insert({
+      const { data: savedDraft, error: saveError } = await supabase.from('drafts').insert({
         user_id: user.id,
         original_message: incomingMessage,
+        user_context: userContext,
         situation,
         tone,
         generated_reply: replies.join(OPTIONS_SEPARATOR),
         analysis: conversationAnalysis,
-      })
+      }).select('id').single()
       if (saveError) {
         console.error('Could not save Tactfully conversation:', saveError)
         setError('Your replies are ready, but this conversation could not be saved. Copy the reply before leaving this page.')
         return
       }
 
+      setSelectedDraftId(savedDraft.id)
       const { data: updatedDrafts } = await supabase
         .from('drafts')
         .select('*')
@@ -332,6 +342,39 @@ export function DraftForm() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleSaveEdits = async () => {
+    if (!user || !selectedDraftId) return
+    setSavingDraft(true)
+    setError(null)
+    const { error: updateError } = await supabase
+      .from('drafts')
+      .update({ generated_reply: draftOptions.join(OPTIONS_SEPARATOR) })
+      .eq('id', selectedDraftId)
+      .eq('user_id', user.id)
+    if (updateError) {
+      setError('Could not save your edits. Please try again.')
+    } else {
+      setError('Your edited replies have been saved.')
+      const { data } = await supabase.from('drafts').select('*').order('created_at', { ascending: false }).limit(20)
+      setDraftsList(data || [])
+    }
+    setSavingDraft(false)
+  }
+
+  const handleDeleteDraft = async (draftId: string) => {
+    if (!user || deletingDraftId) return
+    setDeletingDraftId(draftId)
+    const { error: deleteError } = await supabase
+      .from('drafts').delete().eq('id', draftId).eq('user_id', user.id)
+    if (deleteError) {
+      setError('Could not delete that conversation. Please try again.')
+    } else {
+      setDraftsList((items) => items.filter((item) => item.id !== draftId))
+      if (selectedDraftId === draftId) handleNewDraft()
+    }
+    setDeletingDraftId(null)
   }
 
   const handleCopy = (text: string, index: number) => {
@@ -442,12 +485,11 @@ export function DraftForm() {
           ) : (
             <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible lg:max-h-[70vh] lg:overflow-y-auto paper-scroll pb-1">
               {draftsList.map((draft) => (
-                <button
-                  key={draft.id}
-                  onClick={() => handleSelectDraft(draft)}
-                  className="text-left rounded-md px-3 py-2.5 shrink-0 w-48 lg:w-full transition-colors"
-                  style={{ background: 'rgba(245,239,225,0.06)' }}
-                >
+                <div key={draft.id} className="flex shrink-0 w-52 lg:w-full items-stretch gap-1 rounded-md" style={{ background: 'rgba(245,239,225,0.06)' }}>
+                  <button
+                    onClick={() => handleSelectDraft(draft)}
+                    className="min-w-0 flex-1 text-left px-3 py-2.5 transition-colors"
+                  >
                   <span
                     className="block uppercase mb-0.5"
                     style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 9, letterSpacing: '0.08em', color: '#B8722A' }}
@@ -460,7 +502,19 @@ export function DraftForm() {
                   <span className="block text-[10px] mt-1" style={{ color: '#6B7A8C', fontFamily: "var(--font-plex-mono), monospace" }}>
                     {new Date(draft.created_at).toLocaleDateString()}
                   </span>
-                </button>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteDraft(draft.id)}
+                    disabled={deletingDraftId === draft.id}
+                    aria-label="Delete saved conversation"
+                    title="Delete saved conversation"
+                    className="px-2 text-[11px] self-stretch"
+                    style={{ color: '#D99A79' }}
+                  >
+                    {deletingDraftId === draft.id ? '…' : 'Delete'}
+                  </button>
+                </div>
               ))}
             </div>
           )}
@@ -517,6 +571,22 @@ export function DraftForm() {
               className="w-full min-h-[120px] sm:min-h-[150px] bg-transparent border-none outline-none resize-y"
               style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.55, color: '#24303B' }}
             />
+
+            <div className="mt-5">
+              <label htmlFor="project-context" className="mb-2 block uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
+                Project context (optional)
+              </label>
+              <textarea
+                id="project-context"
+                value={userContext}
+                maxLength={2000}
+                onChange={(e) => setUserContext(e.target.value)}
+                placeholder="Add relevant details such as agreed scope, deadlines, payment terms, or what has already been discussed. Avoid sensitive information."
+                className="w-full min-h-[76px] rounded-md p-3 outline-none resize-y"
+                style={{ background: 'rgba(255,255,255,0.55)', border: '1px solid rgba(36,48,59,0.15)', color: '#24303B', fontFamily: "var(--font-work-sans), sans-serif", fontSize: 13, lineHeight: 1.5 }}
+              />
+              <p className="mt-1 text-[10px] text-right" style={{ color: '#6B7A8C' }}>{userContext.length}/2,000</p>
+            </div>
 
             <div className="mt-5">
               <div className="flex items-center gap-1.5 mb-3.5">
@@ -658,9 +728,25 @@ export function DraftForm() {
                         </span>
                       </div>
                       {analysis?.replyOptions?.[index]?.bestWhen && <p className="mb-3 text-xs italic" style={{ color: '#6B7A8C' }}>{analysis.replyOptions[index].bestWhen}</p>}
-                      <p className="whitespace-pre-wrap" style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.6 }}>
-                        {option}
-                      </p>
+                      <textarea
+                        aria-label={`Edit ${analysis?.replyOptions?.[index]?.approach || `reply option ${index + 1}`}`}
+                        value={option}
+                        onChange={(e) => setDraftOptions((items) => items.map((item, itemIndex) => itemIndex === index ? e.target.value : item))}
+                        rows={Math.max(4, Math.min(12, option.split('\n').length + 2))}
+                        className="w-full resize-y rounded-md p-3 outline-none"
+                        style={{ background: 'rgba(255,255,255,0.55)', border: '1px solid rgba(36,48,59,0.15)', color: '#24303B', fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.6 }}
+                      />
+                      {selectedDraftId && index === draftOptions.length - 1 && (
+                        <button
+                          type="button"
+                          onClick={handleSaveEdits}
+                          disabled={savingDraft}
+                          className="mt-4 mr-2 uppercase text-[11px] px-3.5 py-2 rounded"
+                          style={{ fontFamily: "var(--font-plex-mono), monospace", letterSpacing: '0.08em', border: '1px solid rgba(36,48,59,0.25)', color: '#24303B' }}
+                        >
+                          {savingDraft ? 'Saving...' : 'Save edits'}
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => handleCopy(option, index)}
