@@ -151,6 +151,7 @@ export function DraftForm() {
   const [situation, setSituation] = useState(SITUATIONS[0])
   const [tone, setTone] = useState(TONES[0].value)
   const [draftOptions, setDraftOptions] = useState<string[]>([])
+  const [analysis, setAnalysis] = useState<any | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [limitReached, setLimitReached] = useState(false)
@@ -212,6 +213,7 @@ export function DraftForm() {
     setIncomingMessage(draft.original_message)
     setSituation(draft.situation)
     setTone(draft.tone)
+    setAnalysis(draft.analysis || null)
     setDraftOptions(
       draft.generated_reply.includes(OPTIONS_SEPARATOR)
         ? draft.generated_reply.split(OPTIONS_SEPARATOR)
@@ -226,6 +228,7 @@ export function DraftForm() {
     setSituation(SITUATIONS[0])
     setTone(TONES[0].value)
     setDraftOptions([])
+    setAnalysis(null)
     setLimitReached(false)
     setError(null)
   }
@@ -273,6 +276,7 @@ export function DraftForm() {
     setError(null)
     setLimitReached(false)
     setDraftOptions([])
+    setAnalysis(null)
 
     try {
       const response = await fetch('/api/generate', {
@@ -293,6 +297,7 @@ export function DraftForm() {
         : [data.reply]
 
       setDraftOptions(replies)
+      setAnalysis(data.analysis || null)
       setDraftsRemaining(typeof data.draftsRemaining === 'number' ? data.draftsRemaining : null)
 
       await supabase.from('drafts').insert({
@@ -301,6 +306,7 @@ export function DraftForm() {
         situation,
         tone,
         generated_reply: replies.join(OPTIONS_SEPARATOR),
+        analysis: data.analysis || null,
       })
 
       const { data: updatedDrafts } = await supabase
@@ -624,6 +630,34 @@ export function DraftForm() {
                 </div>
               )}
 
+              {analysis && (
+                <section className="mb-4 rounded-md p-5 sm:p-6" style={{ background: '#E9E3D5', color: '#24303B' }}>
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <span className="text-xs font-bold uppercase tracking-[0.12em]" style={{ color: '#B8722A' }}>Conversation intelligence</span>
+                    <span className="rounded-full px-2.5 py-1 text-[10px] uppercase tracking-wide" style={{ background: '#1B2A3A', color: '#F5EFE1' }}>{analysis.situation}</span>
+                  </div>
+                  <p className="text-sm leading-relaxed">{analysis.summary}</p>
+                  {Array.isArray(analysis.riskFlags) && analysis.riskFlags.length > 0 && (
+                    <div className="mt-4">
+                      <h3 className="text-xs font-bold uppercase tracking-wide">Watch for</h3>
+                      <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
+                        {analysis.riskFlags.map((flag: string, index: number) => <li key={index}>{flag}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-md p-3" style={{ background: 'rgba(255,255,255,0.65)' }}>
+                      <h3 className="text-xs font-bold uppercase tracking-wide">Recommended approach</h3>
+                      <p className="mt-1 text-sm leading-relaxed">{analysis.recommendedStrategy}</p>
+                    </div>
+                    <div className="rounded-md p-3" style={{ background: 'rgba(255,255,255,0.65)' }}>
+                      <h3 className="text-xs font-bold uppercase tracking-wide">Protect this boundary</h3>
+                      <p className="mt-1 text-sm leading-relaxed">{analysis.boundaryToProtect}</p>
+                    </div>
+                  </div>
+                </section>
+              )}
+
               {draftOptions.length > 0 && (!limitReached || plan === 'pro') && (
                 <div className="flex flex-col gap-4 lg:sticky lg:top-6 lg:max-h-[80vh] lg:overflow-y-auto paper-scroll pr-0.5">
                   {draftOptions.map((option, index) => (
@@ -644,9 +678,10 @@ export function DraftForm() {
 
                       <div className="flex items-center justify-between mb-3">
                         <span style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 15, color: '#B8722A' }}>
-                          {draftOptions.length > 1 ? `Option ${index + 1}` : 'Your reply'}
+                          {analysis?.replyOptions?.[index]?.approach || (draftOptions.length > 1 ? `Option ${index + 1}` : 'Your reply')}
                         </span>
                       </div>
+                      {analysis?.replyOptions?.[index]?.bestWhen && <p className="mb-3 text-xs italic" style={{ color: '#6B7A8C' }}>{analysis.replyOptions[index].bestWhen}</p>}
                       <p className="whitespace-pre-wrap" style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.6 }}>
                         {option}
                       </p>
