@@ -81,7 +81,7 @@ function ProductPreview() {
           className="w-full py-2 rounded-md text-center text-[12px] font-semibold"
           style={{ background: '#B8722A', color: '#fff', fontFamily: "var(--font-work-sans), sans-serif" }}
         >
-          Draft my reply
+          Analyze & draft replies
         </div>
       </div>
 
