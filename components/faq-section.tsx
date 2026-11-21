@@ -5,20 +5,20 @@ import { ChevronDown } from "lucide-react"
 
 const faqs = [
   {
-    q: "Is Tactfully only for support teams?",
-    a: "No. It is designed for any team that needs faster, better client communication, including support, sales, and client success.",
+    q: "Who is Tactfully built for?",
+    a: "Tactfully is built first for freelancers and independent consultants who manage client relationships, project scope, deadlines, and payments themselves.",
   },
   {
-    q: "What's included in Free?",
-    a: "Free includes 3 AI replies per day, 3 reply tones, 2 reply options, copy response, and basic sentiment detection.",
+    q: "What can I do with Tactfully?",
+    a: "You can analyze up to three client messages per day, see practical risk flags and a recommended strategy, generate two different reply approaches, and save your conversation history.",
   },
   {
-    q: "What does Pro unlock?",
-    a: "Pro unlocks unlimited replies, no daily limits, advanced negotiation, and a personal AI communication coach.",
+    q: "Are paid plans available?",
+    a: "Not yet. Tactfully is in early access. Paid plans will launch after recurring billing, renewals, cancellations, and account controls have been implemented and tested.",
   },
   {
-    q: "Does Tactfully replace my team?",
-    a: "No. It helps teams draft, refine, and manage communication more efficiently.",
+    q: "Does Tactfully send messages for me?",
+    a: "No. Tactfully analyzes and drafts suggestions. You decide what to edit, copy, and send.",
   },
 ]
 
