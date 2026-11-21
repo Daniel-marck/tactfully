@@ -98,11 +98,10 @@ Before adding more features:
 6. Run typecheck, lint, production build, and end-to-end tests.
 7. Deploy a preview; do not promote to production until secrets, Supabase migration, billing, and acceptance tests are verified.
 
-## Current known blockers
+## Implementation status on the MVP branch
 
-- The only checked-in Supabase migration does not define `draft_count`, `last_draft_date`, or `increment_draft_count`, although the generation route uses them.
-- The same migration does not define `paypal_order_id`, although the PayPal capture route writes it.
-- The profile self-update RLS policy allows a signed-in user to update their own `plan` column. This is a privilege-escalation risk and must be removed.
-- PayPal code creates and captures a one-time order while the UI labels the plan as monthly. Recurring subscription lifecycle is not implemented.
-- Landing-page customer logos and several feature claims are not backed by verified product evidence.
-- Production deployment and live third-party credentials have not been verified from this repository review.
+- **Implemented in code:** structured message analysis and two strategic reply options; dashboard rendering; saved analysis and reply guidance; request validation; safer API error handling.
+- **Implemented in migration, not yet applied to Supabase:** JSONB analysis storage, daily usage fields, atomic UTC usage metering, and removal of the profile self-update policy that exposed plan escalation.
+- **Marketing updated:** freelancer-focused positioning, accurate early-access pricing, removal of unverified customer logos and unsupported feature claims.
+- **Billing intentionally disabled:** the former PayPal flow was a one-time capture presented as monthly recurring billing. Reintroduce paid plans only after recurring subscriptions, renewals, cancellations, webhooks, and entitlement reconciliation are implemented and tested.
+- **Still unverified:** typecheck, lint, production build, database migration execution, end-to-end acceptance tests, and a Vercel preview deployment.
