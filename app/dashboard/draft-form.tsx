@@ -154,7 +154,14 @@ export function DraftForm() {
   const [situation, setSituation] = useState(SITUATIONS[0])
   const [tone, setTone] = useState(TONES[0].value)
   const [draftOptions, setDraftOptions] = useState<string[]>([])
-  const [analysis, setAnalysis] = useState<any | null>(null)
+  const [analysis, setAnalysis] = useState<{
+    summary: string
+    situation: string
+    riskFlags: string[]
+    recommendedStrategy: string
+    boundaryToProtect: string
+    replyOptions?: { approach: string; bestWhen: string }[]
+  } | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saveNotice, setSaveNotice] = useState<string | null>(null)
@@ -226,6 +233,7 @@ export function DraftForm() {
     )
     setLimitReached(false)
     setError(null)
+    setSaveNotice(null)
   }
 
   const handleNewDraft = () => {
@@ -238,6 +246,7 @@ export function DraftForm() {
     setAnalysis(null)
     setLimitReached(false)
     setError(null)
+    setSaveNotice(null)
   }
 
   const handleAuthAction = async (e: React.FormEvent) => {
@@ -281,6 +290,7 @@ export function DraftForm() {
 
     setLoading(true)
     setError(null)
+    setSaveNotice(null)
     setLimitReached(false)
     setDraftOptions([])
     setAnalysis(null)
@@ -475,14 +485,14 @@ export function DraftForm() {
               className="rounded-md p-4 text-[12px]"
               style={{ background: 'rgba(245,239,225,0.06)', color: '#B8C2CE', fontFamily: "var(--font-work-sans), sans-serif" }}
             >
-              Sign in to start drafting. Paste a client message, choose the situation, and Tactfully will suggest replies in seconds.
+              Sign in to analyze a client message, understand the situation, and prepare a considered response.
             </div>
           ) : draftsList.length === 0 ? (
             <div
               className="rounded-md p-4 text-[12px]"
               style={{ background: 'rgba(245,239,225,0.06)', color: '#B8C2CE', fontFamily: "var(--font-work-sans), sans-serif" }}
             >
-              Your first draft will appear here. Paste the message, select the scenario, and click “Draft my reply.”
+              Your saved conversations will appear here. Analyze a message to create your first one.
             </div>
           ) : (
             <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible lg:max-h-[70vh] lg:overflow-y-auto paper-scroll pb-1">
