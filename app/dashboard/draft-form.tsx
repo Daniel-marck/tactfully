@@ -31,6 +31,7 @@ const TONES = [
 ]
 
 const OPTIONS_SEPARATOR = '\n\n---\n\n'
+const FREE_DAILY_LIMIT = 3
 
 type SavedDraft = {
   id: string
@@ -210,10 +211,21 @@ export function DraftForm() {
       if (currentUser) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('plan')
+           .select('plan, draft_count, last_draft_date')
           .eq('id', currentUser.id)
           .single()
-        setPlan(profile?.plan === 'pro' ? 'pro' : 'free')
+        const currentPlan = profile?.plan === 'pro' ? 'pro' : 'free'
+        setPlan(currentPlan)
+        if (currentPlan === 'pro') {
+          setDraftsRemaining(null)
+          setLimitReached(false)
+        } else {
+          const todayUtc = new Date().toISOString().slice(0, 10)
+          const usedToday = profile?.last_draft_date === todayUtc ? (profile?.draft_count ?? 0) : 0
+          const remaining = Math.max(0, FREE_DAILY_LIMIT - usedToday)
+          setDraftsRemaining(remaining)
+          setLimitReached(remaining === 0)
+        }
 
         const { data: drafts } = await supabase
           .from('drafts')
