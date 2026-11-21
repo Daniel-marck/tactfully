@@ -654,6 +654,11 @@ export function DraftForm() {
                 {error}
               </div>
             )}
+            {saveNotice && (
+              <div role="status" className="text-center mt-3 text-[12px]" style={{ color: '#9FC6A5', fontFamily: "var(--font-work-sans), sans-serif" }}>
+                {saveNotice}
+              </div>
+            )}
 
             {draftsRemaining !== null && !limitReached && plan !== 'pro' && (
               <div className="text-center mt-3 text-[12px]" style={{ color: '#6B7A8C', fontFamily: "var(--font-work-sans), sans-serif" }}>
