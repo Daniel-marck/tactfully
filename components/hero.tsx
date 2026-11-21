@@ -135,10 +135,10 @@ export function Hero() {
         <div>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
             <Sparkles className="size-3.5 text-primary" />
-            AI communication platform for client-facing teams
+            The client-conversation copilot for independent professionals
           </span>
           <h1 className="mt-5 text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-[3.4rem] lg:leading-[1.05]">
-            Client communication intelligence for support and revenue teams.
+            Handle difficult client conversations without losing your boundaries.
           </h1>
           <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground text-pretty">
             Generate better replies, detect sentiment, and optimize negotiation workflows with AI that helps your team
@@ -148,8 +148,8 @@ export function Hero() {
             <Button className="h-11 px-6 text-sm" nativeButton={false} render={<a href="/sign-up" />}>
               Start Free
             </Button>
-            <Button variant="outline" className="h-11 px-6 text-sm" nativeButton={false} render={<a href="/sign-up" />}>
-              Upgrade to Pro
+            <Button variant="outline" className="h-11 px-6 text-sm" nativeButton={false} render={<a href="#use-cases" />}>
+              See common situations
             </Button>
           </div>
           <ul className="mt-8 grid gap-x-6 gap-y-2.5 sm:grid-cols-2">
