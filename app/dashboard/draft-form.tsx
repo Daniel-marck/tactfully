@@ -32,6 +32,26 @@ const TONES = [
 
 const OPTIONS_SEPARATOR = '\n\n---\n\n'
 
+type SavedDraft = {
+  id: string
+  user_id: string
+  original_message: string
+  user_context: string | null
+  situation: string
+  tone: string
+  generated_reply: string
+  analysis: {
+    summary: string
+    situation: string
+    riskFlags: string[]
+    recommendedStrategy: string
+    boundaryToProtect: string
+    replyOptions?: { approach: string; bestWhen: string }[]
+  } | null
+  created_at: string
+}
+
+
 const QUICK_START_STEPS = [
   'Paste the client message',
   'Pick the situation and tone',
