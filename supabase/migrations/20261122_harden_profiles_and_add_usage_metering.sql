@@ -39,15 +39,15 @@ begin
   update public.profiles as p
   set
     draft_count = case
-      when p.last_draft_date = current_date then p.draft_count + 1
+      when p.last_draft_date = (now() at time zone 'utc')::date then p.draft_count + 1
       else 1
     end,
-    last_draft_date = current_date,
+    last_draft_date = (now() at time zone 'utc')::date,
     updated_at = now()
   where p.id = p_user_id
     and (
       p.plan = 'pro'
-      or p.last_draft_date is distinct from current_date
+      or p.last_draft_date is distinct from (now() at time zone 'utc')::date
       or p.draft_count < 3
     )
   returning p.draft_count into v_count;
