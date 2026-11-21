@@ -186,28 +186,28 @@ export function DraftForm() {
 
   useEffect(() => {
     const handleUserChange = async (currentUser: User | null) => {
-    setUser(currentUser)
-    if (currentUser) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('plan')
-        .eq('id', currentUser.id)
-        .single()
-      setPlan(profile?.plan === 'pro' ? 'pro' : 'free')
+      setUser(currentUser)
+      if (currentUser) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('plan')
+          .eq('id', currentUser.id)
+          .single()
+        setPlan(profile?.plan === 'pro' ? 'pro' : 'free')
 
-      const { data: drafts } = await supabase
-        .from('drafts')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20)
-      setDraftsList(drafts || [])
-    } else {
-      setPlan('free')
-      setDraftsList([])
-      setDraftsRemaining(null)
-      setLimitReached(false)
+        const { data: drafts } = await supabase
+          .from('drafts')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(20)
+        setDraftsList(drafts || [])
+      } else {
+        setPlan('free')
+        setDraftsList([])
+        setDraftsRemaining(null)
+        setLimitReached(false)
+      }
     }
-  }
 
     async function initUser() {
       const { data: { session } } = await supabase.auth.getSession()
