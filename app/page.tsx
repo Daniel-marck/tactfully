@@ -1,6 +1,5 @@
 import { SiteHeader } from "@/components/site-header"
 import { Hero } from "@/components/hero"
-import { LogoCloud } from "@/components/logo-cloud"
 import { ProblemSection } from "@/components/problem-section"
 import { SolutionSection } from "@/components/solution-section"
 import { FeaturesSection } from "@/components/features-section"
@@ -17,7 +16,6 @@ export default function Page() {
       <SiteHeader />
       <main>
         <Hero />
-        <LogoCloud />
         <ProblemSection />
         <SolutionSection />
         <FeaturesSection />
