@@ -8,7 +8,7 @@ Tactfully is a client-conversation copilot for freelancers and independent consu
 - Flag practical risks such as scope creep, delayed payment, discount pressure, and unclear expectations.
 - Recommend a response strategy and identify a boundary or fact worth protecting.
 - Generate two meaningfully different reply approaches with guidance on when each is useful.
-- Save the original message, structured analysis, and reply options in the user's private conversation history.
+- Add optional project context (scope, deadlines, payment terms, or prior agreements) to improve the analysis.\n- Save the original message, project context, structured analysis, and reply options in the user's private conversation history.\n- Edit saved reply drafts and delete conversations.
 - Enforce a daily free usage limit on the server with an atomic database function.
 
 ## Product scope
