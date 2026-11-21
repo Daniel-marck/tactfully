@@ -84,4 +84,4 @@ npm run build
 
 ## Delivery notes
 
-See [docs/PRODUCT-MVP-PLAN.md](docs/PRODUCT-MVP-PLAN.md) for product positioning, scope, acceptance criteria, validation targets, and delivery sequence.
+See [docs/PRODUCT-MVP-PLAN.md](docs/PRODUCT-MVP-PLAN.md) for product positioning, scope, validation targets, and delivery sequence. Use [docs/QA-ACCEPTANCE-CHECKLIST.md](docs/QA-ACCEPTANCE-CHECKLIST.md) before accepting a preview or release.
