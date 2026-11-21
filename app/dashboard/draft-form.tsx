@@ -307,7 +307,7 @@ export function DraftForm() {
       setAnalysis(conversationAnalysis)
       setDraftsRemaining(typeof data.draftsRemaining === 'number' ? data.draftsRemaining : null)
 
-      await supabase.from('drafts').insert({
+      const { error: saveError } = await supabase.from('drafts').insert({
         user_id: user.id,
         original_message: incomingMessage,
         situation,
@@ -315,6 +315,11 @@ export function DraftForm() {
         generated_reply: replies.join(OPTIONS_SEPARATOR),
         analysis: conversationAnalysis,
       })
+      if (saveError) {
+        console.error('Could not save Tactfully conversation:', saveError)
+        setError('Your replies are ready, but this conversation could not be saved. Copy the reply before leaving this page.')
+        return
+      }
 
       const { data: updatedDrafts } = await supabase
         .from('drafts')
@@ -568,7 +573,7 @@ export function DraftForm() {
               className="mt-6 w-full py-[15px] rounded-md font-semibold text-[15px] text-white transition-all active:scale-[0.99] disabled:cursor-not-allowed"
               style={{ background: loading ? '#8a8a8a' : '#B8722A', fontFamily: "var(--font-work-sans), sans-serif" }}
             >
-              {loading ? 'Drafting...' : user ? 'Draft my reply' : 'Sign in to draft a reply'}
+              {loading ? 'Analyzing message...' : user ? 'Analyze & draft replies' : 'Sign in to analyze a message'}
             </button>
 
             {error && (
@@ -579,7 +584,7 @@ export function DraftForm() {
 
             {draftsRemaining !== null && !limitReached && plan !== 'pro' && (
               <div className="text-center mt-3 text-[12px]" style={{ color: '#6B7A8C', fontFamily: "var(--font-work-sans), sans-serif" }}>
-                {draftsRemaining} free {draftsRemaining === 1 ? 'draft' : 'drafts'} remaining
+                {draftsRemaining} free {draftsRemaining === 1 ? 'analysis' : 'analyses'} remaining
               </div>
             )}
           </div>
@@ -592,7 +597,7 @@ export function DraftForm() {
                     You've used today's free analyses
                   </div>
                   <p className="mb-5 text-[14px]" style={{ fontFamily: "var(--font-work-sans), sans-serif", color: '#B8C2CE' }}>
-                    Your free allowance resets tomorrow. Paid plans are not available yet.
+                    Your free allowance resets daily at 00:00 UTC. Paid plans are not available yet.
                   </p>
 
                   <p className="text-[13px] leading-relaxed" style={{ color: '#B8C2CE', fontFamily: "var(--font-work-sans), sans-serif" }}>
