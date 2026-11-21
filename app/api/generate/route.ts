@@ -48,10 +48,25 @@ export async function POST(req: Request) {
     }
 
     const { data: profile, error: profileError } = await supabase
-      .from('profiles').select('plan').eq('id', user.id).single();
+      .from('profiles').select('plan, draft_count, last_draft_date').eq('id', user.id).single();
     if (profileError || !profile) {
       console.error('Could not load Tactfully profile:', profileError);
       return NextResponse.json({ error: 'Could not load your account. Please try again.' }, { status: 500 });
+    }
+
+    // Fast preflight avoids spending on a provider request when the user is
+    // already over the free limit. The atomic RPC below remains authoritative
+    // for concurrent requests racing through this check.
+    const todayUtc = new Date().toISOString().slice(0, 10);
+    if (
+      profile.plan !== 'pro' &&
+      profile.last_draft_date === todayUtc &&
+      profile.draft_count >= FREE_DRAFT_LIMIT
+    ) {
+      return NextResponse.json({
+        error: 'limit_reached',
+        message: `You've used all ${FREE_DRAFT_LIMIT} free analyses for today. Your allowance resets at 00:00 UTC.`,
+      }, { status: 403 });
     }
 
     const prompt = `You are Tactfully, a communication strategist for freelancers and independent consultants.
