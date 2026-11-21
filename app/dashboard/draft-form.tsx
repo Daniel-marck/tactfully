@@ -294,8 +294,17 @@ export function DraftForm() {
         ? data.replies
         : [data.reply]
 
+      const conversationAnalysis = {
+        ...data.analysis,
+        replyOptions: Array.isArray(data.replyOptions)
+          ? data.replyOptions.map((option: { approach: string; bestWhen: string }) => ({
+              approach: option.approach,
+              bestWhen: option.bestWhen,
+            }))
+          : [],
+      }
       setDraftOptions(replies)
-      setAnalysis(data.analysis || null)
+      setAnalysis(conversationAnalysis)
       setDraftsRemaining(typeof data.draftsRemaining === 'number' ? data.draftsRemaining : null)
 
       await supabase.from('drafts').insert({
@@ -304,7 +313,7 @@ export function DraftForm() {
         situation,
         tone,
         generated_reply: replies.join(OPTIONS_SEPARATOR),
-        analysis: data.analysis || null,
+        analysis: conversationAnalysis,
       })
 
       const { data: updatedDrafts } = await supabase
@@ -314,7 +323,7 @@ export function DraftForm() {
         .limit(20)
       setDraftsList(updatedDrafts || [])
     } catch (err) {
-      setError('Something went wrong drafting that. Try again.')
+      setError(err instanceof Error ? err.message : 'Something went wrong drafting that. Try again.')
     } finally {
       setLoading(false)
     }
