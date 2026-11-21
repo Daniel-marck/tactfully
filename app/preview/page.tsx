@@ -2,8 +2,8 @@ import type { Metadata } from "next"
 import { ProductPreview } from "./product-preview"
 
 export const metadata: Metadata = {
-  title: "Tactfully product preview",
-  description: "Preview the new Tactfully client communication workspace.",
+  title: "Tactfully — Product Preview",
+  description: "A complete visual preview of the new Tactfully workspace.",
   robots: { index: false, follow: false },
 }
 

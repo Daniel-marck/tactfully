@@ -1,209 +1,207 @@
 "use client"
 
-import { useState } from "react"
-import Link from "next/link"
+import { useMemo, useState } from "react"
 import {
-  ArrowDownLeft,
+  Archive,
+  ArrowLeft,
   ArrowRight,
-  ArrowUpRight,
   Check,
   ChevronDown,
+  ChevronRight,
   CircleHelp,
   Clock3,
-  Command,
   Copy,
-  FileText,
-  Inbox,
-  LayoutDashboard,
-  MessageSquareText,
+  LayoutGrid,
   MoreHorizontal,
   Plus,
   Search,
-  Send,
-  Settings2,
+  Settings,
   Sparkles,
   WandSparkles,
 } from "lucide-react"
 import styles from "./product-preview.module.css"
 
-const scenarios = ["Late payment", "Scope change", "Following up", "Saying no"]
-const tones = ["Warm", "Direct", "Polished"]
-
-const replies: Record<string, string> = {
-  Warm: "Hi Alex,\n\nThanks for the update — I completely understand that priorities can shift. I’m happy to make room for the additional landing page. Since it’s outside the original scope, I’ll send over a quick estimate and an updated timeline for your approval before I get started.\n\nWould that work for you?\n\nBest,\nJordan",
-  Direct: "Hi Alex,\n\nI can add the landing page. It falls outside our agreed scope, so I’ll need to confirm the additional cost and delivery date before starting. I’ll send both over today.\n\nPlease confirm once you’re happy to proceed.\n\nBest,\nJordan",
-  Polished: "Hi Alex,\n\nThank you for sharing the additional request. I’d be glad to include the new landing page. As this extends beyond the project scope we agreed, I’ll prepare a concise change order with the associated fee and revised delivery date for your review.\n\nI’ll send that through shortly.\n\nKind regards,\nJordan",
-}
-
-const recent = [
-  { initials: "AM", name: "Alex Morgan", subject: "One more thing for the launch…", label: "Scope change", time: "12 min ago", color: "peach" },
-  { initials: "SK", name: "Sam Kim", subject: "Re: Invoice 1048 — payment date", label: "Late payment", time: "Yesterday", color: "lavender" },
-  { initials: "JR", name: "Jamie Rivera", subject: "Checking in on the proposal", label: "Following up", time: "Yesterday", color: "mint" },
+const drafts = [
+  { name: "Alex Morgan", subject: "Scope expansion", preview: "Could we also add the landing page?", time: "12m", tone: "Warm", status: "New" },
+  { name: "Sofia Kim", subject: "Invoice follow-up", preview: "Just checking whether the invoice has been…", time: "1h", tone: "Direct", status: "Replied" },
+  { name: "Marcos Ruiz", subject: "Delivery timing", preview: "Is there any chance we can move the launch?", time: "Tue", tone: "Clear", status: "Draft" },
 ]
 
-export function ProductPreview() {
-  const [tone, setTone] = useState("Warm")
-  const [scenario, setScenario] = useState("Scope change")
-  const [reply, setReply] = useState("")
-  const [copied, setCopied] = useState(false)
-  const [activeNav, setActiveNav] = useState("Workspace")
+const scenarios = ["Scope change", "Late payment", "No response", "Unclear brief", "Say no"]
+const tones = ["Warm", "Direct", "Candid", "Formal"]
 
-  function generateReply() {
-    setReply(replies[tone])
-    setCopied(false)
-  }
+export function ProductPreview() {
+  const [selectedDraft, setSelectedDraft] = useState(0)
+  const [scenario, setScenario] = useState("Scope change")
+  const [tone, setTone] = useState("Warm")
+  const [generated, setGenerated] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [mobileDraft, setMobileDraft] = useState(false)
+
+  const draft = drafts[selectedDraft]
+  const reply = useMemo(() => {
+    const openings: Record<string, string> = {
+      Warm: "Hi Alex,\n\nThanks for sharing this. I’d be happy to include the landing page, and I want to make sure we have the space to do it properly.",
+      Direct: "Hi Alex,\n\nI can add the landing page. It sits outside our agreed scope, so I’ll need to confirm the added cost and adjusted timeline before starting.",
+      Candid: "Hi Alex,\n\nThe landing page is possible, but I don’t think we can keep the existing launch date and quality level unchanged.",
+      Formal: "Hi Alex,\n\nThank you for the additional request. I would be pleased to include the landing page, subject to confirming the associated scope and schedule adjustments.",
+    }
+    return `${openings[tone]}\n\nI’ll send over a short change order with the additional cost and revised delivery date for your review. If that works for you, I can begin right away.\n\nBest,\nJordan`
+  }, [tone])
 
   async function copyReply() {
-    const text = reply || replies[tone]
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopied(true)
-      window.setTimeout(() => setCopied(false), 1800)
-    } catch {
-      setCopied(false)
-    }
+    await navigator.clipboard?.writeText(reply).catch(() => undefined)
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 1800)
   }
 
   return (
-    <div className={styles.preview}>
+    <div className={styles.appShell}>
       <aside className={styles.sidebar}>
-        <Link href="/" className={styles.brand} aria-label="Tactfully home">
-          <span className={styles.brandMark}><MessageSquareText size={18} strokeWidth={2.2} /></span>
-          <span>tactfully<span className={styles.brandDot}>.</span></span>
-        </Link>
+        <button className={styles.brand} aria-label="Tactfully home">
+          <span className={styles.brandGlyph}>T</span>
+          <span className={styles.brandWord}>Tactfully</span>
+        </button>
 
-        <div className={styles.workspacePicker}>
-          <div className={styles.workspaceAvatar}>J</div>
-          <div className={styles.workspaceText}><strong>Jordan’s workspace</strong><span>Personal plan</span></div>
-          <ChevronDown size={15} />
-        </div>
+        <button className={styles.accountSwitch}>
+          <span className={styles.accountMark}>J</span>
+          <span><strong>Jordan Davis</strong><small>Studio workspace</small></span>
+          <ChevronDown size={14} />
+        </button>
 
-        <div className={styles.navLabel}>WORKSPACE</div>
-        <nav className={styles.nav} aria-label="Preview navigation">
-          <button className={`${styles.navItem} ${activeNav === "Workspace" ? styles.navActive : ""}`} onClick={() => setActiveNav("Workspace")}><LayoutDashboard size={17} />Workspace</button>
-          <button className={`${styles.navItem} ${activeNav === "Inbox" ? styles.navActive : ""}`} onClick={() => setActiveNav("Inbox")}><Inbox size={17} />Inbox<span className={styles.navCount}>4</span></button>
-          <button className={`${styles.navItem} ${activeNav === "Saved replies" ? styles.navActive : ""}`} onClick={() => setActiveNav("Saved replies")}><FileText size={17} />Saved replies</button>
+        <nav className={styles.primaryNav} aria-label="Main navigation">
+          <button className={styles.navItemActive}><LayoutGrid size={17} /><span>Overview</span></button>
+          <button className={styles.navItem}><Sparkles size={17} /><span>New response</span><kbd>⌘N</kbd></button>
+          <button className={styles.navItem}><Archive size={17} /><span>All drafts</span><em>24</em></button>
         </nav>
 
-        <div className={styles.navLabel}>YOUR SPACE</div>
-        <nav className={styles.nav}>
-          <button className={styles.navItem} onClick={() => setActiveNav("Preferences")}><Settings2 size={17} />Preferences</button>
-          <button className={styles.navItem} onClick={() => setActiveNav("Help center")}><CircleHelp size={17} />Help center</button>
+        <div className={styles.navGroupLabel}>COLLECTIONS</div>
+        <nav className={styles.collectionNav}>
+          <button><span className={styles.collectionDot} style={{ background: "#d7a87b" }} />Scope & pricing</button>
+          <button><span className={styles.collectionDot} style={{ background: "#83a99d" }} />Following up</button>
+          <button><span className={styles.collectionDot} style={{ background: "#9b91b5" }} />Client changes</button>
+          <button><Plus size={13} />New collection</button>
         </nav>
 
         <div className={styles.sidebarBottom}>
-          <div className={styles.planCard}>
-            <div className={styles.planIcon}><Sparkles size={15} /></div>
-            <strong>A little more room?</strong>
-            <p>Get more thoughtful replies with Tactfully Pro.</p>
-            <Link href="/sign-up">Explore plans <ArrowRight size={13} /></Link>
+          <button className={styles.navItem}><Settings size={16} /><span>Settings</span></button>
+          <button className={styles.navItem}><CircleHelp size={16} /><span>Help & feedback</span></button>
+          <div className={styles.usageCard}>
+            <div className={styles.usageTop}><span>Starter</span><strong>68%</strong></div>
+            <div className={styles.usageTrack}><span /></div>
+            <p>34 of 50 replies used</p>
           </div>
-          <button className={styles.profileButton} onClick={() => setActiveNav("Your profile")}>
-            <span className={styles.profileAvatar}>JD</span>
-            <span className={styles.profileText}><strong>Jordan Davis</strong><small>jordan@example.com</small></span>
-            <MoreHorizontal size={17} />
-          </button>
         </div>
       </aside>
 
-      <main className={styles.main}>
+      <main className={styles.workspace}>
         <header className={styles.topbar}>
-          <div className={styles.breadcrumb}><span>Workspace</span><span className={styles.slash}>/</span><strong>{activeNav}</strong></div>
-          <div className={styles.topbarRight}>
-            <button className={styles.searchButton}><Search size={15} /><span>Search anything</span><kbd><Command size={11} /> K</kbd></button>
-            <button className={styles.helpButton} aria-label="Help"><CircleHelp size={17} /></button>
-            <span className={styles.topAvatar}>JD</span>
+          <div className={styles.mobileBrand}><span>T</span><strong>Tactfully</strong></div>
+          <div className={styles.pageTitle}><span>Workspace</span><ChevronRight size={13} /><strong>Overview</strong></div>
+          <div className={styles.topActions}>
+            <button className={styles.searchBox}><Search size={15} /><span>Search</span><kbd>⌘ K</kbd></button>
+            <button className={styles.iconButton} aria-label="Help"><CircleHelp size={17} /></button>
+            <button className={styles.profileButton}>JD</button>
           </div>
         </header>
 
         <div className={styles.content}>
-          <section className={styles.welcome}>
+          <section className={styles.heroRow}>
             <div>
-              <div className={styles.eyebrow}><span className={styles.liveDot} /> YOUR COMMUNICATION DESK</div>
-              <h1>A better reply<br className={styles.mobileBreak} /> starts here<span className={styles.headingPeriod}>.</span></h1>
-              <p>Find the right words for the conversations that matter.</p>
+              <p className={styles.kicker}>MONDAY, 21 NOVEMBER</p>
+              <h1>Good morning, Jordan.</h1>
+              <p className={styles.heroSubtitle}>Here’s what’s happening across your client conversations.</p>
             </div>
-            <button className={styles.newButton} onClick={() => { setReply(""); setCopied(false) }}><Plus size={16} /> New draft</button>
+            <button className={styles.primaryButton} onClick={() => setMobileDraft(true)}><Plus size={16} />Write a response</button>
           </section>
 
-          <section className={styles.stats} aria-label="Workspace overview">
-            <div className={styles.statCard}>
-              <span className={styles.statIcon}><MessageSquareText size={17} /></span>
-              <div className={styles.statMeta}><span>Replies drafted</span><strong>28</strong></div>
-              <span className={styles.statTrend}><ArrowUpRight size={13} /> 18%</span>
-              <small className={styles.statFoot}>this month</small>
-            </div>
-            <div className={styles.statCard}>
-              <span className={`${styles.statIcon} ${styles.statIconMint}`}><Clock3 size={17} /></span>
-              <div className={styles.statMeta}><span>Time saved</span><strong>2.4 <small>hrs</small></strong></div>
-              <span className={styles.statTrend}><ArrowUpRight size={13} /> 12%</span>
-              <small className={styles.statFoot}>this month</small>
-            </div>
-            <div className={`${styles.statCard} ${styles.statCardNote}`}>
-              <div className={styles.noteIcon}><Sparkles size={15} /></div>
-              <div className={styles.noteCopy}><strong>Thoughtful beats rushed.</strong><span>You’ve kept your tone consistent across every reply this week.</span></div>
-              <ArrowRight size={16} className={styles.noteArrow} />
-            </div>
+          <section className={styles.metrics}>
+            <article className={styles.metricCard}>
+              <div className={styles.metricIcon} style={{ background: "#edf4ef", color: "#587969" }}><Sparkles size={17} /></div>
+              <div><span>Responses written</span><strong>128</strong></div>
+              <small><b>+14%</b> this month</small>
+            </article>
+            <article className={styles.metricCard}>
+              <div className={styles.metricIcon} style={{ background: "#f4ede5", color: "#9a744e" }}><Clock3 size={17} /></div>
+              <div><span>Time saved</span><strong>6.4h</strong></div>
+              <small><b>+22%</b> this month</small>
+            </article>
+            <article className={styles.metricCard}>
+              <div className={styles.metricIcon} style={{ background: "#eceaf2", color: "#77708e" }}><Check size={17} /></div>
+              <div><span>Replies sent</span><strong>92%</strong></div>
+              <small>of completed drafts</small>
+            </article>
           </section>
 
-          <section className={styles.draftSection}>
-            <div className={styles.sectionHeading}>
-              <div><h2>Let’s find the words.</h2><p>A little context goes a long way.</p></div>
-              <button className={styles.moreButton} aria-label="More options"><MoreHorizontal size={19} /></button>
+          <section className={styles.draftingArea}>
+            <div className={styles.sectionHeader}>
+              <div>
+                <p className={styles.sectionOverline}>YOUR RESPONSE DESK</p>
+                <h2>Turn a difficult message into the right words.</h2>
+              </div>
+              <button className={styles.textButton} onClick={() => setGenerated(false)}>Clear <ArrowRight size={14} /></button>
             </div>
 
-            <div className={styles.composerGrid}>
-              <div className={styles.composerCard}>
-                <div className={styles.fieldLabel}><span className={styles.fieldNumber}>01</span><label htmlFor="incoming-message">THE MESSAGE</label><span className={styles.optional}>Paste or type</span></div>
-                <textarea id="incoming-message" className={styles.messageInput} defaultValue={'Hey Jordan, quick one — could you also add a landing page to the project? We’re hoping to keep the launch date the same. Thanks!'} />
-                <div className={styles.charCount}>ALEX MORGAN <span>·</span> 136 characters</div>
+            <div className={styles.draftingGrid}>
+              <article className={styles.messagePanel}>
+                <div className={styles.panelHeader}><span>INCOMING MESSAGE</span><button><MoreHorizontal size={16} /></button></div>
+                <div className={styles.senderRow}><span className={styles.senderAvatar}>AM</span><div><strong>Alex Morgan</strong><small>alex@northstar.studio</small></div><time>Just now</time></div>
+                <div className={styles.messageText}>Hey Jordan — quick question. Could we also add the landing page to the project? We’d really like to keep the original launch date if possible.</div>
 
-                <div className={styles.formDivider} />
-                <div className={styles.fieldLabel}><span className={styles.fieldNumber}>02</span><span>WHAT’S THE SITUATION?</span></div>
-                <div className={styles.chipRow}>{scenarios.map((item) => <button key={item} className={`${styles.chip} ${scenario === item ? styles.chipSelected : ""}`} onClick={() => setScenario(item)}>{item}</button>)}</div>
+                <div className={styles.divider} />
 
-                <div className={styles.fieldLabel}><span className={styles.fieldNumber}>03</span><span>SET THE TONE</span><button className={styles.toneHint}><CircleHelp size={13} /> pick what feels right</button></div>
-                <div className={styles.toneRow}>{tones.map((item) => <button key={item} className={`${styles.toneButton} ${tone === item ? styles.toneSelected : ""}`} onClick={() => setTone(item)}>{tone === item && <Check size={13} />}{item}</button>)}</div>
+                <div className={styles.controlGroup}>
+                  <label>WHAT ARE YOU RESPONDING TO?</label>
+                  <div className={styles.scenarioGrid}>{scenarios.map((item) => <button key={item} className={scenario === item ? styles.optionActive : ""} onClick={() => setScenario(item)}>{item}</button>)}</div>
+                </div>
 
-                <button className={styles.generateButton} onClick={generateReply}><WandSparkles size={16} /> Draft my reply <ArrowRight size={15} /></button>
-                <div className={styles.privacyNote}><span className={styles.lockDot} /> Your message stays yours. We never send anything for you.</div>
-              </div>
+                <div className={styles.controlGroup}>
+                  <label>HOW SHOULD IT SOUND?</label>
+                  <div className={styles.toneGrid}>{tones.map((item) => <button key={item} className={tone === item ? styles.toneActive : ""} onClick={() => setTone(item)}>{tone === item && <Check size={13} />}{item}</button>)}</div>
+                </div>
 
-              <div className={styles.replyColumn}>
-                <div className={styles.replyTopline}><span>YOUR THOUGHTFUL REPLY</span><span className={styles.aiTag}><Sparkles size={12} /> A little help from AI</span></div>
-                <article className={styles.replyCard}>
-                  {reply ? (
-                    <>
-                      <div className={styles.replySuccess}><span><Check size={12} /></span> A draft that sounds like you</div>
-                      <div className={styles.replyBody}>{reply}</div>
-                      <div className={styles.replyActions}><button onClick={copyReply}>{copied ? <Check size={14} /> : <Copy size={14} />}{copied ? "Copied" : "Copy reply"}</button><button onClick={generateReply}><WandSparkles size={14} /> Try another</button></div>
-                    </>
-                  ) : (
-                    <>
-                      <div className={styles.replyEmptyIcon}><ArrowDownLeft size={20} /></div>
-                      <h3>Your next reply, made easier.</h3>
-                      <p>Add a message and choose a tone. We’ll help you say what you mean, with a little more confidence.</p>
-                      <div className={styles.replyPreview}>
-                        <div className={styles.previewLineShort} /><div className={styles.previewLine} /><div className={styles.previewLine} /><div className={styles.previewLineMedium} />
-                      </div>
-                    </>
-                  )}
-                </article>
-                <div className={styles.replyDisclaimer}><Sparkles size={13} /> A starting point, not the final word. Make it yours.</div>
-                <div className={styles.shortcut}><kbd>⌘</kbd><kbd>↵</kbd><span>to draft a reply</span><Send size={14} /></div>
-              </div>
+                <button className={styles.generateButton} onClick={() => setGenerated(true)}><WandSparkles size={17} />Create my response<ArrowRight size={16} /></button>
+              </article>
+
+              <article className={`${styles.responsePanel} ${generated ? styles.responseGenerated : ""}`}>
+                <div className={styles.responseHeader}><span>SUGGESTED RESPONSE</span>{generated && <button onClick={copyReply}>{copied ? <Check size={14} /> : <Copy size={14} />}{copied ? "Copied" : "Copy"}</button>}</div>
+                {generated ? (
+                  <div className={styles.generatedContent}>
+                    <div className={styles.confidenceLabel}><span />Ready to review</div>
+                    <div className={styles.replyText}>{reply}</div>
+                    <div className={styles.responseFooter}><button onClick={() => setGenerated(false)}><ArrowLeft size={14} />Start over</button><button onClick={() => setGenerated(true)}>Try another tone<ArrowRight size={14} /></button></div>
+                  </div>
+                ) : (
+                  <div className={styles.emptyState}>
+                    <div className={styles.emptyIllustration}><span /><span /><span /></div>
+                    <h3>A clearer response will appear here.</h3>
+                    <p>Choose the situation and tone, then Tactfully will prepare a thoughtful starting point.</p>
+                  </div>
+                )}
+              </article>
             </div>
           </section>
 
           <section className={styles.recentSection}>
-            <div className={styles.recentHeader}><div><h2>Recent conversations</h2><p>Pick up right where you left off.</p></div><button className={styles.viewAll} onClick={() => setActiveNav("Inbox")}>View all <ArrowRight size={14} /></button></div>
-            <div className={styles.recentList}>{recent.map((item) => <button className={styles.recentItem} key={item.name} onClick={() => { setScenario(item.label); setReply("") }}><span className={`${styles.contactAvatar} ${styles[item.color]}`}>{item.initials}</span><span className={styles.conversationText}><strong>{item.name}</strong><small>{item.subject}</small></span><span className={styles.conversationLabel}>{item.label}</span><span className={styles.conversationTime}>{item.time}</span><ArrowRight size={15} className={styles.conversationArrow} /></button>)}</div>
+            <div className={styles.recentHeader}><div><p className={styles.sectionOverline}>RECENTLY USED</p><h2>Continue a conversation</h2></div><button>View all <ArrowRight size={14} /></button></div>
+            <div className={styles.draftTable}>
+              <div className={styles.tableHeader}><span>CONVERSATION</span><span>TONE</span><span>STATUS</span><span>UPDATED</span><span /></div>
+              {drafts.map((item, index) => (
+                <button className={`${styles.draftRow} ${selectedDraft === index ? styles.draftRowActive : ""}`} key={item.name} onClick={() => setSelectedDraft(index)}>
+                  <span className={styles.contactCell}><span className={styles.contactAvatar}>{item.name.split(" ").map((part) => part[0]).join("")}</span><span><strong>{item.name}</strong><small>{item.preview}</small></span></span>
+                  <span className={styles.toneCell}>{item.tone}</span>
+                  <span className={styles.statusCell}><i />{item.status}</span>
+                  <span className={styles.timeCell}>{item.time}</span>
+                  <ChevronRight size={15} />
+                </button>
+              ))}
+            </div>
           </section>
-
-          <footer className={styles.footer}><span>Made for the moments when the right words matter.</span><span>TACTFULLY <i>© 2025</i></span></footer>
         </div>
       </main>
-      <div className={styles.previewBadge}><span /> INTERACTIVE PRODUCT PREVIEW</div>
+
+      {mobileDraft && <div className={styles.mobileToast}><Check size={14} /> New response started<button onClick={() => setMobileDraft(false)}>×</button></div>}
+      <div className={styles.previewLabel}><span />NEW PRODUCT EXPERIENCE</div>
     </div>
   )
 }
