@@ -6,8 +6,7 @@ alter table public.drafts
 
 alter table public.profiles
   add column if not exists draft_count integer not null default 0,
-  add column if not exists last_draft_date date,
-  add column if not exists paypal_order_id text;
+  add column if not exists last_draft_date date;
 
 alter table public.profiles
   drop constraint if exists profiles_draft_count_nonnegative;
