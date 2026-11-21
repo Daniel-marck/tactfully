@@ -1,62 +1,27 @@
 # Tactfully
 
-Tactfully is an AI-powered client communication assistant for freelancers and support teams. It helps users draft better replies, choose a tone for the situation, and maintain a cleaner communication workflow.
+Tactfully is a client-conversation copilot for freelancers and independent consultants. It helps independent professionals understand difficult client messages, spot commercial and relationship risks, choose a response strategy, and draft a reply they remain in control of.
 
-## What it does
+## MVP capabilities
 
-- Generate polished client replies from raw incoming messages
-- Suggest tone and response strategies based on situation context
-- Save drafts in Supabase for later editing
-- Gate advanced usage behind a simple Pro plan flow
-- Support authentication and protected dashboard access
+- Analyze a client message and summarize the likely request without pretending to know hidden intent.
+- Flag practical risks such as scope creep, delayed payment, discount pressure, and unclear expectations.
+- Recommend a response strategy and identify a boundary or fact worth protecting.
+- Generate two meaningfully different reply approaches with guidance on when each is useful.
+- Save the original message, structured analysis, and reply options in the user's private conversation history.
+- Enforce a daily free usage limit on the server with an atomic database function.
+
+## Product scope
+
+The first market is freelancers and independent consultants. Team inboxes, email/WhatsApp integrations, autonomous sending, full CRM features, and enterprise analytics are deliberately out of scope for the first release.
 
 ## Stack
 
-- Next.js 16
-- React 19
-- TypeScript
+- Next.js 16, React 19, TypeScript
 - Tailwind CSS
-- Supabase Auth + Postgres
-- PayPal Checkout
+- Supabase Auth and Postgres
+- Gemini API
 - Vercel Analytics
-- Gemini API for reply generation
-
-## Repository structure
-
-```text
-app/
-  api/                API routes for auth, generation, and PayPal flows
-  dashboard/          authenticated workspace and draft management UI
-  sign-in/            sign-in pages
-  sign-up/            sign-up pages
-  privacy/            privacy policy pages
-  terms/              terms pages
-  globals.css         global styling
-  layout.tsx          root layout
-  page.tsx            landing page
-components/
-  ui/                 shadcn-style primitives
-  *.tsx               landing-page sections and shared UI
-lib/
-  supabase/           auth and database client helpers
-  utils.ts            utility helpers
-public/               static assets and placeholders
-middleware.ts         route protection middleware
-next.config.mjs       Next.js config
-package.json          app metadata and scripts
-supabase/
-  migrations/         database schema files
-```
-
-## Quick start checklist
-
-Before the app works, make sure you have all of these configured:
-
-1. Supabase project created and URL/anon key added to `.env.local`
-2. Supabase migration applied: `supabase/migrations/20260920_create_profiles_and_drafts.sql`
-3. Gemini key added: `GEMINI_API_KEY`
-4. PayPal sandbox credentials added for Pro checkout
-5. App started locally with `npm run dev`
 
 ## Local development
 
@@ -66,63 +31,61 @@ Before the app works, make sure you have all of these configured:
 npm install
 ```
 
-2. Copy the example environment file and add real values:
+2. Copy the environment template and fill in the Supabase and Gemini values:
 
 ```bash
 cp .env.example .env.local
 ```
 
-3. Start the app:
+3. Apply both SQL migrations in order (or use your Supabase migration workflow):
+
+```text
+supabase/migrations/20260920_create_profiles_and_drafts.sql
+supabase/migrations/20261122_harden_profiles_and_add_usage_metering.sql
+```
+
+4. Start the app:
 
 ```bash
 npm run dev
 ```
 
-4. Open the app in your browser at `http://localhost:3000`.
+Open http://localhost:3000.
 
-## Required environment variables
+## Environment variables
 
-Create a `.env.local` file using the values from `.env.example`.
+Required for the MVP:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-PAYPAL_CLIENT_ID=
-PAYPAL_CLIENT_SECRET=
-NEXT_PUBLIC_PAYPAL_CLIENT_ID=
-PAYPAL_MODE=sandbox
 GEMINI_API_KEY=
 ```
 
-Important: the AI reply generation route requires `GEMINI_API_KEY` in order to work. Without it, the app cannot generate drafts.
+Optional server-side key for administrative tasks only (never expose it to browser code):
 
-## Database setup
-
-This project expects a Supabase project with at least the following schema. The migration file is stored in:
-
-```text
-supabase/migrations/20260920_create_profiles_and_drafts.sql
+```bash
+SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-Apply it in the Supabase SQL editor or with your migration tool before signing in for the first time.
+The PayPal order endpoints are disabled while the product uses free early access. Do not enable paid checkout until recurring billing, renewals, cancellations, webhooks, and entitlement reconciliation are implemented and tested.
 
-## Useful commands
+## Commands
 
 ```bash
 npm run dev
-npm run build
-npm run lint
 npm run typecheck
+npm run lint
+npm run build
 ```
 
-## Deployment
+## Security notes
 
-This app is designed for deployment on Vercel with a connected Supabase project and PayPal credentials. Configure the environment variables in the Vercel project settings before deploying.
+- Profile plan changes are not available to authenticated browser clients.
+- The usage counter is incremented by a security-definer Postgres function that checks the caller's authenticated user ID and applies the free limit atomically.
+- Saved drafts and analysis are scoped to their owner by Supabase Row Level Security.
+- AI output is a suggestion only. Tactfully does not send messages or provide legal advice.
 
-## Notes
+## Delivery notes
 
-- The repository currently expects a configured Supabase project for authentication and draft persistence.
-- The PayPal checkout flow is server-side and verifies the capture before enabling Pro access.
-- If you are moving to production, set `PAYPAL_MODE=live` and use your live PayPal credentials.
-- If you are testing locally, generate the `.env.local` file first so the app can create drafts immediately.
+See [docs/PRODUCT-MVP-PLAN.md](docs/PRODUCT-MVP-PLAN.md) for product positioning, scope, acceptance criteria, validation targets, and delivery sequence.
