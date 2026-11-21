@@ -104,4 +104,6 @@ Before adding more features:
 - **Implemented in migration, not yet applied to Supabase:** JSONB analysis storage, daily usage fields, atomic UTC usage metering, and removal of the profile self-update policy that exposed plan escalation.
 - **Marketing updated:** freelancer-focused positioning, accurate early-access pricing, removal of unverified customer logos and unsupported feature claims.
 - **Billing intentionally disabled:** the former PayPal flow was a one-time capture presented as monthly recurring billing. Reintroduce paid plans only after recurring subscriptions, renewals, cancellations, webhooks, and entitlement reconciliation are implemented and tested.
-- **Verification:** TypeScript check passed in the first GitHub Actions run. ESLint failed because the repository had no ESLint 9 flat config; a config is now being added. Production build, database migration execution, end-to-end acceptance tests, and a current Vercel preview remain unverified.
+- **Trust and policy:** privacy and terms pages now describe early access, the actual data sent to Gemini, user responsibilities, and the absence of paid checkout.
+- **CI:** GitHub Actions now runs TypeScript, ESLint, and a production build on pull requests. The latest run has passed TypeScript and ESLint; production build is still running.
+- **Still unverified:** applying the SQL migration to the connected Supabase project, end-to-end tests against real Supabase/Gemini credentials, and a current Vercel preview deployment.
