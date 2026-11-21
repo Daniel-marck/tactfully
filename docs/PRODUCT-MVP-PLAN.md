@@ -30,8 +30,8 @@ Avoid positioning Tactfully as a generic AI writer, a customer-support platform,
    - Draft editable, ready-to-send language.
    - Never invent dates, prices, contract terms, or promises.
 3. **Conversation library**
-   - Save the incoming message, selected situation, analysis, and reply options.
-   - Reopen, edit, copy, and delete saved items.
+   - Save the incoming message, optional project context, selected situation, analysis, and reply options.
+   - Reopen, edit reply text, copy, and delete saved items.
    - Keep all records private to their owner.
 4. **Account and usage controls**
    - Supabase authentication.
@@ -100,8 +100,8 @@ Before adding more features:
 
 ## Implementation status on the MVP branch
 
-- **Implemented in code:** structured message analysis and two strategic reply options; dashboard rendering; saved analysis and reply guidance; request validation; safer API error handling.
+- **Implemented in code:** structured message analysis and two strategic reply options; dashboard rendering; saved analysis and reply guidance; optional project context; editable saved replies; conversation deletion; request validation; safer API error handling.
 - **Implemented in migration, not yet applied to Supabase:** JSONB analysis storage, daily usage fields, atomic UTC usage metering, and removal of the profile self-update policy that exposed plan escalation.
 - **Marketing updated:** freelancer-focused positioning, accurate early-access pricing, removal of unverified customer logos and unsupported feature claims.
 - **Billing intentionally disabled:** the former PayPal flow was a one-time capture presented as monthly recurring billing. Reintroduce paid plans only after recurring subscriptions, renewals, cancellations, webhooks, and entitlement reconciliation are implemented and tested.
-- **Still unverified:** typecheck, lint, production build, database migration execution, end-to-end acceptance tests, and a Vercel preview deployment.
+- **Verification:** TypeScript check passed in the first GitHub Actions run. ESLint failed because the repository had no ESLint 9 flat config; a config is now being added. Production build, database migration execution, end-to-end acceptance tests, and a current Vercel preview remain unverified.
