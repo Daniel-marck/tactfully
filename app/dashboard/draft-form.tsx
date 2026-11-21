@@ -248,7 +248,10 @@ export function DraftForm() {
     initUser()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      handleUserChange(session?.user || null)
+      const currentUser = session?.user || null
+      window.setTimeout(() => {
+        void handleUserChange(currentUser)
+      }, 0)
     })
 
     return () => subscription.unsubscribe()
