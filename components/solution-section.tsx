@@ -99,7 +99,7 @@ export function SolutionSection() {
         <div>
           <span className="text-sm font-semibold text-primary">The solution</span>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-            Tactfully gives your team a better communication workflow.
+            Tactfully helps you decide what to say before you send it.
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-pretty">
             Paste in the client message, pick a situation and a tone, and Tactfully drafts two distinct reply options --
@@ -142,7 +142,7 @@ export function SolutionSection() {
             Every letter, filed and ready to reuse.
           </h3>
           <p className="mt-3 text-base leading-relaxed text-muted-foreground text-pretty">
-            Your past drafts are saved automatically -- pull one up, reuse it, or start fresh.
+            Your past conversations are saved privately -- reopen a reply, edit it, copy it, or delete it when you no longer need it.
           </p>
         </div>
         <div className="relative mt-10">
