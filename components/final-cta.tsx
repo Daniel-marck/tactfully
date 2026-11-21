@@ -12,7 +12,7 @@ export function FinalCta() {
           <div className="pointer-events-none absolute -bottom-20 -left-16 size-64 rounded-full bg-primary-foreground/10 blur-3xl" />
           <div className="relative mx-auto max-w-2xl">
             <h2 className="text-3xl font-semibold tracking-tight text-balance text-primary-foreground sm:text-4xl">
-              Standardize client communication at scale.
+              Make your next difficult client reply a considered one.
             </h2>
             <p className="mt-4 text-lg leading-relaxed text-pretty text-primary-foreground/80">
               Give your team a smarter way to respond, negotiate, and improve every client conversation.
