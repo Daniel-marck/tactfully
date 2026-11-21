@@ -157,6 +157,7 @@ export function DraftForm() {
   const [analysis, setAnalysis] = useState<any | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [saveNotice, setSaveNotice] = useState<string | null>(null)
   const [limitReached, setLimitReached] = useState(false)
   const [draftsRemaining, setDraftsRemaining] = useState<number | null>(null)
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
@@ -348,6 +349,7 @@ export function DraftForm() {
     if (!user || !selectedDraftId) return
     setSavingDraft(true)
     setError(null)
+    setSaveNotice(null)
     const { error: updateError } = await supabase
       .from('drafts')
       .update({ generated_reply: draftOptions.join(OPTIONS_SEPARATOR) })
@@ -356,7 +358,7 @@ export function DraftForm() {
     if (updateError) {
       setError('Could not save your edits. Please try again.')
     } else {
-      setError('Your edited replies have been saved.')
+      setSaveNotice('Your edited replies have been saved.')
       const { data } = await supabase.from('drafts').select('*').order('created_at', { ascending: false }).limit(20)
       setDraftsList(data || [])
     }
@@ -364,7 +366,7 @@ export function DraftForm() {
   }
 
   const handleDeleteDraft = async (draftId: string) => {
-    if (!user || deletingDraftId) return
+    if (!user || deletingDraftId || !window.confirm('Delete this saved conversation? This cannot be undone.')) return
     setDeletingDraftId(draftId)
     const { error: deleteError } = await supabase
       .from('drafts').delete().eq('id', draftId).eq('user_id', user.id)
@@ -566,6 +568,7 @@ export function DraftForm() {
             </span>
             <textarea
               value={incomingMessage}
+              maxLength={8000}
               onChange={(e) => setIncomingMessage(e.target.value)}
               placeholder={`Paste what the client actually said... e.g. "Hey, can you just knock the price down a bit?"`}
               className="w-full min-h-[120px] sm:min-h-[150px] bg-transparent border-none outline-none resize-y"
