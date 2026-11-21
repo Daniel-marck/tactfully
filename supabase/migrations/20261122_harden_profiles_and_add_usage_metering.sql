@@ -2,7 +2,8 @@
 -- Safe to apply after 20260920_create_profiles_and_drafts.sql.
 
 alter table public.drafts
-  add column if not exists analysis jsonb;
+  add column if not exists analysis jsonb,
+  add column if not exists user_context text;
 
 alter table public.profiles
   add column if not exists draft_count integer not null default 0,
