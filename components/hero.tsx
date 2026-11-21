@@ -141,8 +141,7 @@ export function Hero() {
             Handle difficult client conversations without losing your boundaries.
           </h1>
           <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground text-pretty">
-            Generate better replies, detect sentiment, and optimize negotiation workflows with AI that helps your team
-            respond faster and close more effectively.
+            Understand the situation, spot risks like scope creep or late payments, and choose a clear response strategy before you reply.
           </p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
             <Button className="h-11 px-6 text-sm" nativeButton={false} render={<a href="/sign-up" />}>
