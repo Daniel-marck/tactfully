@@ -2,10 +2,10 @@ import { Check, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 const bullets = [
-  "3 AI replies/day on Free",
-  "Unlimited replies on Pro",
-  "Basic sentiment detection included",
-  "Advanced negotiation support in Pro",
+  "3 message analyses per day on Free",
+  "Two distinct reply approaches",
+  "Spot scope and payment risks",
+  "Your conversations stay yours",
 ]
 
 function SealIcon() {
