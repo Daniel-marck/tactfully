@@ -183,7 +183,9 @@ export function DraftForm() {
   const [authError, setAuthError] = useState<string | null>(null)
   const [authLoading, setAuthLoading] = useState(false)
 
-  const handleUserChange = async (currentUser: User | null) => {
+
+  useEffect(() => {
+    const handleUserChange = async (currentUser: User | null) => {
     setUser(currentUser)
     if (currentUser) {
       const { data: profile } = await supabase
@@ -207,7 +209,6 @@ export function DraftForm() {
     }
   }
 
-  useEffect(() => {
     async function initUser() {
       const { data: { session } } = await supabase.auth.getSession()
       handleUserChange(session?.user || null)
