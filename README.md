@@ -8,7 +8,9 @@ Tactfully is a client-conversation copilot for freelancers and independent consu
 - Flag practical risks such as scope creep, delayed payment, discount pressure, and unclear expectations.
 - Recommend a response strategy and identify a boundary or fact worth protecting.
 - Generate two meaningfully different reply approaches with guidance on when each is useful.
-- Add optional project context (scope, deadlines, payment terms, or prior agreements) to improve the analysis.\n- Save the original message, project context, structured analysis, and reply options in the user's private conversation history.\n- Edit saved reply drafts and delete conversations.
+- Add optional project context (scope, deadlines, payment terms, or prior agreements) to improve the analysis.
+- Save the original message, project context, structured analysis, and reply options in the user's private conversation history.
+- Edit saved reply drafts and delete conversations.
 - Enforce a daily free usage limit on the server with an atomic database function.
 
 ## Product scope
@@ -60,12 +62,6 @@ Required for the MVP:
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 GEMINI_API_KEY=
-```
-
-Optional server-side key for administrative tasks only (never expose it to browser code):
-
-```bash
-SUPABASE_SERVICE_ROLE_KEY=
 ```
 
 The PayPal order endpoints are disabled while the product uses free early access. Do not enable paid checkout until recurring billing, renewals, cancellations, webhooks, and entitlement reconciliation are implemented and tested.
