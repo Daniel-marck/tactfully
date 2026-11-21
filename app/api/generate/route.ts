@@ -148,7 +148,7 @@ Return a concise, evidence-based summary of what the client appears to want (do 
     if (!usage?.allowed) {
       return NextResponse.json({
         error: 'limit_reached',
-        message: `You've used all ${FREE_DRAFT_LIMIT} free analyses for today. Your allowance resets tomorrow.`,
+        message: `You've used all ${FREE_DRAFT_LIMIT} free analyses for today. Your allowance resets at 00:00 UTC.`,
       }, { status: 403 });
     }
 
