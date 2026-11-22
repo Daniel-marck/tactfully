@@ -49,7 +49,7 @@ test('AI generation retries transient provider overload across fallback models',
   assert.match(route, /export const maxDuration = 50/);
   assert.match(route, /gemini-3\.5-flash-lite/);
   assert.match(route, /gemini-3\.6-flash/);
-  assert.match(route, /gemini-3\.8-flash/);
+  assert.match(route, /gemini-3\.5-flash/);
   assert.match(route, /new Set\(\[429, 500, 502, 503, 504\]\)/);
   assert.match(route, /AbortSignal\.timeout\(10000\)/);
   assert.match(route, /Your draft allowance was not used/);
@@ -73,7 +73,7 @@ test('launch page only advertises implemented product capabilities', () => {
 
 test('legal pages disclose AI provider data handling and daily free limits', () => {
   assert.match(privacy, /free-tier content may be used to improve its products/);
-  assert.match(privacy, /paid-tier\\s+content is not/);
+  assert.match(privacy, /paid-tier\s+content is not/);
   assert.match(terms, /3 AI replies per day/);
 });
 
