@@ -12,13 +12,13 @@ function findUnsupportedCommitments(replies: string[], sourceContext: string) {
   const normalizedContext = sourceContext.toLowerCase();
   const violations: string[] = [];
   const deadlinePatterns = [
-    /\\bby\\s+(?:tomorrow|today|tonight|this\\s+(?:morning|afternoon|evening|week)|next\\s+(?:week|month|monday|tuesday|wednesday|thursday|friday|saturday|sunday))\\b/gi,
-    /\\bwithin\\s+\\d+\\s+(?:minutes?|hours?|days?|weeks?)\\b/gi,
-    /\\bno\\s+later\\s+than\\b/gi,
-    /\\b(?:respond|reply|confirm|decide|let\\s+me\\s+know)\\s+by\\s+(?:\\w+\\s+)?(?:today|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\\b/gi,
-    /\\bby\\s+\\d{1,2}(?::\\d{2})?\\s*(?:am|pm)?\\b/gi,
+    /\bby\s+(?:tomorrow|today|tonight|this\s+(?:morning|afternoon|evening|week)|next\s+(?:week|month|monday|tuesday|wednesday|thursday|friday|saturday|sunday))\b/gi,
+    /\bwithin\s+\d+\s+(?:minutes?|hours?|days?|weeks?)\b/gi,
+    /\bno\s+later\s+than\b/gi,
+    /\b(?:respond|reply|confirm|decide|let\s+me\s+know)\s+by\s+(?:\w+\s+)?(?:today|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/gi,
+    /\bby\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?\b/gi,
   ];
-  const moneyPattern = /(?:[$£€]\\s?\\d[\\d,]*(?:\\.\\d{1,2})?\\b|\\b\\d+(?:\\.\\d+)?\\s?(?:usd|eur|gbp|dollars?|pounds?|euros?)\\b|\\b\\d+(?:\\.\\d+)?%)/gi;
+  const moneyPattern = /(?:[$£€]\s?\d[\d,]*(?:\.\d{1,2})?\b|\b\d+(?:\.\d+)?\s?(?:usd|eur|gbp|dollars?|pounds?|euros?)\b|\b\d+(?:\.\d+)?%)/gi;
 
   for (const reply of replies) {
     for (const pattern of deadlinePatterns) {
@@ -264,7 +264,7 @@ Return exactly three reply strings in the required JSON structure, in the order 
 
     const unsupportedCommitments = findUnsupportedCommitments(
       replies,
-      [message, situation, desiredOutcome, avoid].join("\\n")
+      [message, situation, desiredOutcome, avoid].join("\n")
     );
     if (unsupportedCommitments.length > 0) {
       console.error("Generation rejected for unsupported specifics:", unsupportedCommitments);
