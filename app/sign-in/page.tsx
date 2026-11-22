@@ -35,6 +35,9 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const hasSupabaseConfig = Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  )
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -69,6 +72,11 @@ export default function SignInPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           Welcome back. Enter your details to continue.
         </p>
+        {!hasSupabaseConfig && (
+          <p role="alert" className="mt-4 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+            Account services are not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to the Vercel environment, then redeploy.
+          </p>
+        )}
         <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="email" className="text-sm font-medium">
