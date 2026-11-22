@@ -147,15 +147,27 @@ All three must respect the user's desired outcome and preferred writing tone. Do
 
     for (const model of models) {
       selectedModel = model;
-      response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody),
-          signal: AbortSignal.timeout(20000),
+      try {
+        response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody),
+            signal: AbortSignal.timeout(20000),
+          }
+        );
+      } catch (error: any) {
+        const timedOut = error?.name === 'TimeoutError' || error?.name === 'AbortError';
+        const hasFallback = model !== models[models.length - 1];
+
+        if (timedOut && hasFallback) {
+          console.warn(`Gemini model ${model} timed out after 20000ms; trying fallback model.`);
+          continue;
         }
-      );
+
+        throw error;
+      }
 
       if (response.ok) break;
 
