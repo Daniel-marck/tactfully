@@ -4,6 +4,8 @@ import { readFile } from 'node:fs/promises';
 
 const route = await readFile(new URL('../app/api/generate/route.ts', import.meta.url), 'utf8');
 const landing = await readFile(new URL('../app/page.tsx', import.meta.url), 'utf8');
+const privacy = await readFile(new URL('../app/privacy/page.tsx', import.meta.url), 'utf8');
+const terms = await readFile(new URL('../app/terms/page.tsx', import.meta.url), 'utf8');
 
 test('generation prompt assigns three distinct tactical jobs', () => {
   assert.match(route, /DIPLOMATIC — RELATIONSHIP \+ COLLABORATION/);
@@ -66,4 +68,11 @@ test('launch page only advertises implemented product capabilities', () => {
   assert.match(landing, /3 response strategies/);
   assert.match(landing, /Review and approve every reply before sending/);
   assert.doesNotMatch(landing, /sentiment detection|personal communication coach|advanced negotiation support/i);
+});
+
+
+test('legal pages disclose AI provider data handling and daily free limits', () => {
+  assert.match(privacy, /free-tier content may be used to improve its products/);
+  assert.match(privacy, /paid-tier content is not/);
+  assert.match(terms, /3 AI replies per day/);
 });
