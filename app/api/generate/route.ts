@@ -5,6 +5,16 @@ import { assertServerEnv } from '@/lib/config';
 const FREE_DRAFT_LIMIT = 3;
 const NUM_OPTIONS = 2;
 
+// Server-side allowlist for isolated preview testing. Never expose this via NEXT_PUBLIC_*.
+function isTactfullyTester(email: string | undefined) {
+  const testerEmails = (process.env.TACTFULLY_TESTER_EMAILS ?? '')
+    .split(',')
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean);
+
+  return Boolean(email && testerEmails.includes(email.trim().toLowerCase()));
+}
+
 export async function POST(req: Request) {
   try {
     assertServerEnv(['GEMINI_API_KEY'], 'AI generation');
@@ -36,11 +46,12 @@ export async function POST(req: Request) {
       );
     }
 
+    const isTester = isTactfullyTester(user.email);
     const today = new Date().toISOString().slice(0, 10);
     const effectiveDraftCount =
       profile.last_draft_date === today ? profile.draft_count : 0;
 
-    if (profile.plan === 'free' && effectiveDraftCount >= FREE_DRAFT_LIMIT) {
+    if (!isTester && profile.plan === 'free' && effectiveDraftCount >= FREE_DRAFT_LIMIT) {
       return NextResponse.json(
         {
           error: 'limit_reached',
@@ -141,16 +152,20 @@ Each reply must take a genuinely different approach -- a different opening, a di
       return NextResponse.json({ error: 'Failed to generate a reply. Try again.' }, { status: 502 });
     }
 
-    const { data: incrementResult, error: incrementError } = await supabase.rpc(
-      'increment_draft_count',
-      { user_id: user.id }
-    );
+    // Tester requests do not consume the account's daily free allowance.
+    let newCount = effectiveDraftCount;
+    if (!isTester) {
+      const { data: incrementResult, error: incrementError } = await supabase.rpc(
+        'increment_draft_count',
+        { user_id: user.id }
+      );
 
-    if (incrementError) {
-      console.error('⚠️ Failed to increment draft count:', incrementError);
+      if (incrementError) {
+        console.error('⚠️ Failed to increment draft count:', incrementError);
+      }
+
+      newCount = incrementResult?.[0]?.new_count ?? effectiveDraftCount + 1;
     }
-
-    const newCount = incrementResult?.[0]?.new_count ?? effectiveDraftCount + 1;
 
     return NextResponse.json({
       replies,
@@ -159,7 +174,9 @@ Each reply must take a genuinely different approach -- a different opening, a di
       text: replies[0],
       draftsUsed: newCount,
       draftsRemaining:
-        profile.plan === 'pro' ? null : Math.max(0, FREE_DRAFT_LIMIT - newCount),
+        isTester || profile.plan === 'pro'
+          ? null
+          : Math.max(0, FREE_DRAFT_LIMIT - newCount),
     });
   } catch (error: any) {
     console.error('❌ Server route crashed:', error);
