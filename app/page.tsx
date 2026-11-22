@@ -15,7 +15,7 @@ const faqs = [
   ["What is Tactfully?", "Tactfully helps freelancers and client-facing professionals turn difficult client messages into clear, professional replies. Paste the message, choose the situation and tone, then review and copy a draft."],
   ["Do I need to connect my email or messaging account?", "No. You can paste the message directly into Tactfully. Nothing is sent to your client automatically; you review and copy the reply yourself."],
   ["What can I do on the free plan?", "The free plan includes up to 3 AI replies per day, three writing tones, three response strategies and a place to save your drafts."],
-  ["What does Pro cost?", "Pro is listed at $12 per month and removes the daily limit on AI replies."],
+  ["What does Pro cost?", "Pro is planned at $12 USD per month, billed monthly when subscriptions open. It will remove the daily limit on AI replies."],
   ["Will Tactfully send messages for me?", "No. Tactfully drafts suggestions. You stay in control of the wording and decide what to send."],
 ]
 
