@@ -14,6 +14,32 @@ type MessageAnalysis = {
   recommendedStrategy: string;
   boundaryToProtect: string;
 };
+const RETRYABLE_PROVIDER_STATUSES = new Set([429, 500, 502, 503, 504]);
+
+async function fetchGeminiWithRetry(url: string, init: RequestInit, maxAttempts = 3): Promise<Response> {
+  let response: Response | undefined;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      response = await fetch(url, init);
+    } catch (error) {
+      if (attempt === maxAttempts - 1) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 500 * 2 ** attempt));
+      continue;
+    }
+
+    if (response.ok || !RETRYABLE_PROVIDER_STATUSES.has(response.status) || attempt === maxAttempts - 1) {
+      return response;
+    }
+
+    // Retry transient provider overload/rate-limit errors with short exponential backoff.
+    await new Promise((resolve) => setTimeout(resolve, 500 * 2 ** attempt));
+  }
+
+  if (!response) throw new Error('Gemini request failed before a response was received.');
+  return response;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -84,7 +110,7 @@ ${message}
 Return a concise, evidence-based summary of what the client appears to want (do not claim certainty about hidden intent), the most relevant situation label, 0-3 concrete risk flags, one recommended response strategy, and one boundary/fact the freelancer should protect. Return exactly two genuinely different reply approaches (not synonym swaps), with an explanation of when each is useful. Replies must be concise, professional, editable, and ready to send. Never invent contract terms, prices, dates, facts, commitments, or prior agreements. Use placeholders or ask a clarifying question when essential information is missing. Do not provide legal advice or send anything on the user's behalf.`;
 
     const apiKey = process.env.GEMINI_API_KEY!;
-    const response = await fetch(
+    const response = await fetchGeminiWithRetry(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
       {
         method: 'POST',
@@ -126,8 +152,14 @@ Return a concise, evidence-based summary of what the client appears to want (do 
 
     if (!response.ok) {
       const providerError = await response.json().catch(() => null);
-      console.error('Gemini generation failed:', providerError);
-      return NextResponse.json({ error: 'Tactfully could not analyze that message. Please try again.' }, { status: 502 });
+      console.error('Gemini generation failed after retries:', providerError);
+      if ([429, 500, 502, 503, 504].includes(response.status)) {
+        return NextResponse.json({
+          error: 'AI service temporarily unavailable',
+          message: 'The AI service is experiencing high demand. Your analysis was not used. Please wait a moment and try again.',
+        }, { status: 503 });
+      }
+      return NextResponse.json({ error: 'The AI provider rejected the request. Please try again later.' }, { status: 502 });
     }
 
     const data = await response.json();
