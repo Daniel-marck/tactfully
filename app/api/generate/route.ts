@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { assertServerEnv } from '@/lib/config';
 
+export const maxDuration = 50;
+
 const FREE_DRAFT_LIMIT = 3;
 
 const NUM_OPTIONS = 3;
@@ -207,16 +209,24 @@ Return exactly three reply strings in the required JSON structure, in the order 
       },
     };
 
-    // Start with the lightweight model for lower latency. Fall back to the general Flash
-    // model only when Google reports temporary capacity exhaustion (503).
-    const models = ['gemini-3.5-flash-lite', 'gemini-flash-latest'];
+    // Try independent Gemini model capacity pools. Retry the first model once on
+    // transient overload, then move to broader Flash models instead of surfacing
+    // Google's raw capacity message to the customer.
+    const modelAttempts = [
+      'gemini-3.5-flash-lite',
+      'gemini-3.5-flash-lite',
+      'gemini-3.6-flash',
+      'gemini-3.8-flash',
+    ];
+    const transientStatuses = new Set([429, 500, 502, 503, 504]);
     let response: Response | null = null;
-    let lastErrorMessage = 'The AI service is temporarily unavailable. Please try again shortly.';
     let selectedModel = '';
     const generationStartedAt = Date.now();
 
-    for (const model of models) {
+    for (let attempt = 0; attempt < modelAttempts.length; attempt++) {
+      const model = modelAttempts[attempt];
       selectedModel = model;
+
       try {
         response = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
@@ -224,39 +234,45 @@ Return exactly three reply strings in the required JSON structure, in the order 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody),
-            signal: AbortSignal.timeout(20000),
+            signal: AbortSignal.timeout(10000),
           }
         );
       } catch (error: any) {
         const timedOut = error?.name === 'TimeoutError' || error?.name === 'AbortError';
-        const hasFallback = model !== models[models.length - 1];
+        if (!timedOut) throw error;
 
-        if (timedOut && hasFallback) {
-          console.warn(`Gemini model ${model} timed out after 20000ms; trying fallback model.`);
-          continue;
-        }
-
-        throw error;
+        console.warn(`Gemini model ${model} timed out; moving to the next configured model attempt.`);
+        response = null;
+        continue;
       }
 
       if (response.ok) break;
 
       const errorData = await response.json().catch(() => ({}));
-      lastErrorMessage =
-        errorData.error?.message || 'The AI service could not generate a reply.';
+      console.error(
+        `Gemini model ${model} returned HTTP ${response.status} after ${Date.now() - generationStartedAt}ms:`,
+        errorData
+      );
 
-      console.error(`Gemini model ${model} returned HTTP ${response.status} after ${Date.now() - generationStartedAt}ms:`, errorData);
-
-      if (response.status !== 503 || model === models[models.length - 1]) {
+      if (!transientStatuses.has(response.status)) {
         return NextResponse.json(
-          { error: lastErrorMessage },
-          { status: response.status }
+          { error: 'The AI service could not process that request. Please try again.' },
+          { status: 502 }
         );
+      }
+
+      if (attempt < modelAttempts.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, attempt === 0 ? 500 : 250));
       }
     }
 
     if (!response?.ok) {
-      return NextResponse.json({ error: lastErrorMessage }, { status: 503 });
+      return NextResponse.json(
+        {
+          error: "Tactfully's AI service is temporarily busy. Your draft allowance was not used. Please try again shortly.",
+        },
+        { status: 503 }
+      );
     }
 
     console.info(
