@@ -190,7 +190,7 @@ Return a concise, evidence-based summary of what the client appears to want (do 
 
     // The database function atomically enforces the free allowance and records usage.
     const { data: usageRows, error: usageError } = await supabase.rpc(
-      'increment_draft_count', { p_user_id: user.id }
+      'increment_draft_count', { user_id: user.id }
     );
     if (usageError) {
       console.error('Could not record draft usage:', usageError);
