@@ -2,14 +2,14 @@ export default function TermsPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
       <h1 className="text-3xl font-semibold tracking-tight">Terms of Service</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Last updated: July 19, 2026</p>
+      <p className="mt-2 text-sm text-muted-foreground">Last updated: November 22, 2026</p>
 
       <div className="mt-8 space-y-8 text-sm leading-relaxed text-muted-foreground">
         <section>
           <h2 className="text-base font-semibold text-foreground">The service</h2>
           <p className="mt-2">
             Tactfully helps you draft professional replies to client messages using AI.
-            The Free plan includes 3 drafts. The Pro plan ($12/month) removes that
+            The Free plan includes 3 AI replies per day. The Pro plan ($12/month) removes that
             limit. We may change these limits or pricing in the future, and we'll do
             our best to give notice before we do.
           </p>
@@ -28,7 +28,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-base font-semibold text-foreground">Payments and refunds</h2>
           <p className="mt-2">
-            Pro subscriptions are billed through PayPal. If you believe you were
+            Pro payments are processed through PayPal. Review the amount and billing terms presented during checkout before approving a payment. If you believe you were
             charged in error, contact us at{" "}
             <a href="mailto:daniellutagwa34@gmail.com" className="text-foreground underline">
               daniellutagwa34@gmail.com
