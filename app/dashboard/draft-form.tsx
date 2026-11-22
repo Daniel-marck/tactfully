@@ -279,6 +279,7 @@ export function DraftForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: incomingMessage, tone, situation }),
+        signal: AbortSignal.timeout(45000),
       })
       const data = await response.json()
 
@@ -310,7 +311,13 @@ export function DraftForm() {
         .limit(20)
       setDraftsList(updatedDrafts || [])
     } catch (err) {
-      setError('Something went wrong drafting that. Try again.')
+      if (err instanceof DOMException && err.name === 'TimeoutError') {
+        setError('The AI service is taking too long to respond. Please try again in a moment.')
+      } else if (err instanceof Error && err.message) {
+        setError(err.message)
+      } else {
+        setError('Something went wrong drafting that. Please try again.')
+      }
     } finally {
       setLoading(false)
     }
