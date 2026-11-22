@@ -35,7 +35,7 @@ async function fetchGeminiWithRetry(url: string, init: RequestInit, maxAttempts 
       return response;
     }
 
-    // Retry transient provider overload/rate-limit errors with short exponential backoff.
+    // Retry transient upstream server failures with short exponential backoff; quota errors are surfaced immediately.
     await new Promise((resolve) => setTimeout(resolve, 500 * 2 ** attempt));
   }
 
