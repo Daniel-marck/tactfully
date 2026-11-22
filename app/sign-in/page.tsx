@@ -47,7 +47,11 @@ export default function SignInPage() {
       setError(error.message)
       return
     }
-    router.push("/dashboard")
+    const requestedNext = new URLSearchParams(window.location.search).get("next")
+    const next = requestedNext && requestedNext.startsWith("/") && !requestedNext.startsWith("//") && !requestedNext.includes("\\")
+      ? requestedNext
+      : "/dashboard"
+    router.replace(next)
     router.refresh()
   }
 
