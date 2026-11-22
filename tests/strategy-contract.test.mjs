@@ -48,8 +48,8 @@ test('API keeps the three-option response contract and sufficient output budget'
 test('AI generation retries transient provider overload across fallback models', () => {
   assert.match(route, /export const maxDuration = 50/);
   assert.match(route, /gemini-3\.5-flash-lite/);
-  assert.match(route, /gemini-3\.6-flash/);
-  assert.match(route, /gemini-3\.5-flash/);
+  assert.match(route, /gemini-3\.8-flash/);
+  assert.match(route, /gemini-3\.8-flash/);
   assert.match(route, /new Set\(\[429, 500, 502, 503, 504\]\)/);
   assert.match(route, /AbortSignal\.timeout\(10000\)/);
   assert.match(route, /Your draft allowance was not used/);
