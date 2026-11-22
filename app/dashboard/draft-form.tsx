@@ -1,8 +1,8 @@
 "use client"
 
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
 import React, { useState, useEffect, useRef } from 'react'
 import { createClient } from "@/lib/supabase/client"
+import type { User } from "@supabase/supabase-js"
 
 const supabase = createClient()
 
@@ -31,6 +31,27 @@ const TONES = [
 ]
 
 const OPTIONS_SEPARATOR = '\n\n---\n\n'
+const FREE_DAILY_LIMIT = 3
+
+type SavedDraft = {
+  id: string
+  user_id: string
+  original_message: string
+  user_context: string | null
+  situation: string
+  tone: string
+  generated_reply: string
+  analysis: {
+    summary: string
+    situation: string
+    riskFlags: string[]
+    recommendedStrategy: string
+    boundaryToProtect: string
+    replyOptions?: { approach: string; bestWhen: string }[]
+  } | null
+  created_at: string
+}
+
 
 const QUICK_START_STEPS = [
   'Paste the client message',
@@ -91,6 +112,7 @@ function InfoPopover({ text }: { text: string }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLSpanElement>(null)
 
+
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -148,19 +170,31 @@ function EyeIcon({ open }: { open: boolean }) {
 
 export function DraftForm() {
   const [incomingMessage, setIncomingMessage] = useState('')
+  const [userContext, setUserContext] = useState('')
+  const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null)
+  const [savingDraft, setSavingDraft] = useState(false)
+  const [deletingDraftId, setDeletingDraftId] = useState<string | null>(null)
   const [situation, setSituation] = useState(SITUATIONS[0])
   const [tone, setTone] = useState(TONES[0].value)
   const [draftOptions, setDraftOptions] = useState<string[]>([])
+  const [analysis, setAnalysis] = useState<{
+    summary: string
+    situation: string
+    riskFlags: string[]
+    recommendedStrategy: string
+    boundaryToProtect: string
+    replyOptions?: { approach: string; bestWhen: string }[]
+  } | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [saveNotice, setSaveNotice] = useState<string | null>(null)
   const [limitReached, setLimitReached] = useState(false)
   const [draftsRemaining, setDraftsRemaining] = useState<number | null>(null)
-  const [paypalError, setPaypalError] = useState<string | null>(null)
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
 
-  const [user, setUser] = useState<any | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [plan, setPlan] = useState<'free' | 'pro'>('free')
-  const [draftsList, setDraftsList] = useState<any[]>([])
+  const [draftsList, setDraftsList] = useState<SavedDraft[]>([])
 
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authEmail, setAuthEmail] = useState('')
@@ -170,7 +204,43 @@ export function DraftForm() {
   const [authError, setAuthError] = useState<string | null>(null)
   const [authLoading, setAuthLoading] = useState(false)
 
+
   useEffect(() => {
+    const handleUserChange = async (currentUser: User | null) => {
+      setUser(currentUser)
+      if (currentUser) {
+        const { data: profile } = await supabase
+          .from('profiles')
+           .select('plan, draft_count, last_draft_date')
+          .eq('id', currentUser.id)
+          .single()
+        const currentPlan = profile?.plan === 'pro' ? 'pro' : 'free'
+        setPlan(currentPlan)
+        if (currentPlan === 'pro') {
+          setDraftsRemaining(null)
+          setLimitReached(false)
+        } else {
+          const todayUtc = new Date().toISOString().slice(0, 10)
+          const usedToday = profile?.last_draft_date === todayUtc ? (profile?.draft_count ?? 0) : 0
+          const remaining = Math.max(0, FREE_DAILY_LIMIT - usedToday)
+          setDraftsRemaining(remaining)
+          setLimitReached(remaining === 0)
+        }
+
+        const { data: drafts } = await supabase
+          .from('drafts')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(20)
+        setDraftsList(drafts || [])
+      } else {
+        setPlan('free')
+        setDraftsList([])
+        setDraftsRemaining(null)
+        setLimitReached(false)
+      }
+    }
+
     async function initUser() {
       const { data: { session } } = await supabase.auth.getSession()
       handleUserChange(session?.user || null)
@@ -178,40 +248,22 @@ export function DraftForm() {
     initUser()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      handleUserChange(session?.user || null)
+      const currentUser = session?.user || null
+      window.setTimeout(() => {
+        void handleUserChange(currentUser)
+      }, 0)
     })
 
     return () => subscription.unsubscribe()
   }, [])
 
-  const handleUserChange = async (currentUser: any) => {
-    setUser(currentUser)
-    if (currentUser) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('plan')
-        .eq('id', currentUser.id)
-        .single()
-      setPlan(profile?.plan === 'pro' ? 'pro' : 'free')
-
-      const { data: drafts } = await supabase
-        .from('drafts')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20)
-      setDraftsList(drafts || [])
-    } else {
-      setPlan('free')
-      setDraftsList([])
-      setDraftsRemaining(null)
-      setLimitReached(false)
-    }
-  }
-
-  const handleSelectDraft = (draft: any) => {
+  const handleSelectDraft = (draft: SavedDraft) => {
+    setSelectedDraftId(draft.id)
     setIncomingMessage(draft.original_message)
+    setUserContext(draft.user_context || '')
     setSituation(draft.situation)
     setTone(draft.tone)
+    setAnalysis(draft.analysis || null)
     setDraftOptions(
       draft.generated_reply.includes(OPTIONS_SEPARATOR)
         ? draft.generated_reply.split(OPTIONS_SEPARATOR)
@@ -219,15 +271,20 @@ export function DraftForm() {
     )
     setLimitReached(false)
     setError(null)
+    setSaveNotice(null)
   }
 
   const handleNewDraft = () => {
+    setSelectedDraftId(null)
     setIncomingMessage('')
+    setUserContext('')
     setSituation(SITUATIONS[0])
     setTone(TONES[0].value)
     setDraftOptions([])
+    setAnalysis(null)
     setLimitReached(false)
     setError(null)
+    setSaveNotice(null)
   }
 
   const handleAuthAction = async (e: React.FormEvent) => {
@@ -247,8 +304,8 @@ export function DraftForm() {
       setAuthEmail('')
       setAuthPassword('')
       setShowAuthPassword(false)
-    } catch (err: any) {
-      setAuthError(err.message || 'Authentication failed.')
+    } catch (err) {
+      setAuthError(err instanceof Error ? err.message : 'Authentication failed.')
     } finally {
       setAuthLoading(false)
     }
@@ -271,14 +328,16 @@ export function DraftForm() {
 
     setLoading(true)
     setError(null)
+    setSaveNotice(null)
     setLimitReached(false)
     setDraftOptions([])
+    setAnalysis(null)
 
     try {
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: incomingMessage, tone, situation }),
+        body: JSON.stringify({ message: incomingMessage, tone, situation, userContext }),
       })
       const data = await response.json()
 
@@ -286,23 +345,41 @@ export function DraftForm() {
         setLimitReached(true)
         return
       }
-      if (!response.ok) throw new Error(data.error || 'Server returned an error')
+      if (!response.ok) throw new Error(data.message || data.error || 'Server returned an error')
 
       const replies: string[] = Array.isArray(data.replies) && data.replies.length > 0
         ? data.replies
         : [data.reply]
 
+      const conversationAnalysis = {
+        ...data.analysis,
+        replyOptions: Array.isArray(data.replyOptions)
+          ? data.replyOptions.map((option: { approach: string; bestWhen: string }) => ({
+              approach: option.approach,
+              bestWhen: option.bestWhen,
+            }))
+          : [],
+      }
       setDraftOptions(replies)
+      setAnalysis(conversationAnalysis)
       setDraftsRemaining(typeof data.draftsRemaining === 'number' ? data.draftsRemaining : null)
 
-      await supabase.from('drafts').insert({
+      const { data: savedDraft, error: saveError } = await supabase.from('drafts').insert({
         user_id: user.id,
         original_message: incomingMessage,
+        user_context: userContext,
         situation,
         tone,
         generated_reply: replies.join(OPTIONS_SEPARATOR),
-      })
+        analysis: conversationAnalysis,
+      }).select('id').single()
+      if (saveError) {
+        console.error('Could not save Tactfully conversation:', saveError)
+        setError('Your replies are ready, but this conversation could not be saved. Copy the reply before leaving this page.')
+        return
+      }
 
+      setSelectedDraftId(savedDraft.id)
       const { data: updatedDrafts } = await supabase
         .from('drafts')
         .select('*')
@@ -310,10 +387,44 @@ export function DraftForm() {
         .limit(20)
       setDraftsList(updatedDrafts || [])
     } catch (err) {
-      setError('Something went wrong drafting that. Try again.')
+      setError(err instanceof Error ? err.message : 'Something went wrong drafting that. Try again.')
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleSaveEdits = async () => {
+    if (!user || !selectedDraftId) return
+    setSavingDraft(true)
+    setError(null)
+    setSaveNotice(null)
+    const { error: updateError } = await supabase
+      .from('drafts')
+      .update({ generated_reply: draftOptions.join(OPTIONS_SEPARATOR) })
+      .eq('id', selectedDraftId)
+      .eq('user_id', user.id)
+    if (updateError) {
+      setError('Could not save your edits. Please try again.')
+    } else {
+      setSaveNotice('Your edited replies have been saved.')
+      const { data } = await supabase.from('drafts').select('*').order('created_at', { ascending: false }).limit(20)
+      setDraftsList(data || [])
+    }
+    setSavingDraft(false)
+  }
+
+  const handleDeleteDraft = async (draftId: string) => {
+    if (!user || deletingDraftId || !window.confirm('Delete this saved conversation? This cannot be undone.')) return
+    setDeletingDraftId(draftId)
+    const { error: deleteError } = await supabase
+      .from('drafts').delete().eq('id', draftId).eq('user_id', user.id)
+    if (deleteError) {
+      setError('Could not delete that conversation. Please try again.')
+    } else {
+      setDraftsList((items) => items.filter((item) => item.id !== draftId))
+      if (selectedDraftId === draftId) handleNewDraft()
+    }
+    setDeletingDraftId(null)
   }
 
   const handleCopy = (text: string, index: number) => {
@@ -412,24 +523,23 @@ export function DraftForm() {
               className="rounded-md p-4 text-[12px]"
               style={{ background: 'rgba(245,239,225,0.06)', color: '#B8C2CE', fontFamily: "var(--font-work-sans), sans-serif" }}
             >
-              Sign in to start drafting. Paste a client message, choose the situation, and Tactfully will suggest replies in seconds.
+              Sign in to analyze a client message, understand the situation, and prepare a considered response.
             </div>
           ) : draftsList.length === 0 ? (
             <div
               className="rounded-md p-4 text-[12px]"
               style={{ background: 'rgba(245,239,225,0.06)', color: '#B8C2CE', fontFamily: "var(--font-work-sans), sans-serif" }}
             >
-              Your first draft will appear here. Paste the message, select the scenario, and click “Draft my reply.”
+              Your saved conversations will appear here. Analyze a message to create your first one.
             </div>
           ) : (
             <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible lg:max-h-[70vh] lg:overflow-y-auto paper-scroll pb-1">
               {draftsList.map((draft) => (
-                <button
-                  key={draft.id}
-                  onClick={() => handleSelectDraft(draft)}
-                  className="text-left rounded-md px-3 py-2.5 shrink-0 w-48 lg:w-full transition-colors"
-                  style={{ background: 'rgba(245,239,225,0.06)' }}
-                >
+                <div key={draft.id} className="flex shrink-0 w-52 lg:w-full items-stretch gap-1 rounded-md" style={{ background: 'rgba(245,239,225,0.06)' }}>
+                  <button
+                    onClick={() => handleSelectDraft(draft)}
+                    className="min-w-0 flex-1 text-left px-3 py-2.5 transition-colors"
+                  >
                   <span
                     className="block uppercase mb-0.5"
                     style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 9, letterSpacing: '0.08em', color: '#B8722A' }}
@@ -442,7 +552,19 @@ export function DraftForm() {
                   <span className="block text-[10px] mt-1" style={{ color: '#6B7A8C', fontFamily: "var(--font-plex-mono), monospace" }}>
                     {new Date(draft.created_at).toLocaleDateString()}
                   </span>
-                </button>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteDraft(draft.id)}
+                    disabled={deletingDraftId === draft.id}
+                    aria-label="Delete saved conversation"
+                    title="Delete saved conversation"
+                    className="px-2 text-[11px] self-stretch"
+                    style={{ color: '#D99A79' }}
+                  >
+                    {deletingDraftId === draft.id ? '…' : 'Delete'}
+                  </button>
+                </div>
               ))}
             </div>
           )}
@@ -494,11 +616,28 @@ export function DraftForm() {
             </span>
             <textarea
               value={incomingMessage}
+              maxLength={8000}
               onChange={(e) => setIncomingMessage(e.target.value)}
               placeholder={`Paste what the client actually said... e.g. "Hey, can you just knock the price down a bit?"`}
               className="w-full min-h-[120px] sm:min-h-[150px] bg-transparent border-none outline-none resize-y"
               style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.55, color: '#24303B' }}
             />
+
+            <div className="mt-5">
+              <label htmlFor="project-context" className="mb-2 block uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
+                Project context (optional)
+              </label>
+              <textarea
+                id="project-context"
+                value={userContext}
+                maxLength={2000}
+                onChange={(e) => setUserContext(e.target.value)}
+                placeholder="Add relevant details such as agreed scope, deadlines, payment terms, or what has already been discussed. Avoid sensitive information."
+                className="w-full min-h-[76px] rounded-md p-3 outline-none resize-y"
+                style={{ background: 'rgba(255,255,255,0.55)', border: '1px solid rgba(36,48,59,0.15)', color: '#24303B', fontFamily: "var(--font-work-sans), sans-serif", fontSize: 13, lineHeight: 1.5 }}
+              />
+              <p className="mt-1 text-[10px] text-right" style={{ color: '#6B7A8C' }}>{userContext.length}/2,000</p>
+            </div>
 
             <div className="mt-5">
               <div className="flex items-center gap-1.5 mb-3.5">
@@ -555,7 +694,7 @@ export function DraftForm() {
               className="mt-6 w-full py-[15px] rounded-md font-semibold text-[15px] text-white transition-all active:scale-[0.99] disabled:cursor-not-allowed"
               style={{ background: loading ? '#8a8a8a' : '#B8722A', fontFamily: "var(--font-work-sans), sans-serif" }}
             >
-              {loading ? 'Drafting...' : user ? 'Draft my reply' : 'Sign in to draft a reply'}
+              {loading ? 'Analyzing message...' : user ? 'Analyze & draft replies' : 'Sign in to analyze a message'}
             </button>
 
             {error && (
@@ -563,10 +702,15 @@ export function DraftForm() {
                 {error}
               </div>
             )}
+            {saveNotice && (
+              <div role="status" className="text-center mt-3 text-[12px]" style={{ color: '#9FC6A5', fontFamily: "var(--font-work-sans), sans-serif" }}>
+                {saveNotice}
+              </div>
+            )}
 
             {draftsRemaining !== null && !limitReached && plan !== 'pro' && (
               <div className="text-center mt-3 text-[12px]" style={{ color: '#6B7A8C', fontFamily: "var(--font-work-sans), sans-serif" }}>
-                {draftsRemaining} free {draftsRemaining === 1 ? 'draft' : 'drafts'} remaining
+                {draftsRemaining} free {draftsRemaining === 1 ? 'analysis' : 'analyses'} remaining
               </div>
             )}
           </div>
@@ -576,52 +720,44 @@ export function DraftForm() {
               {limitReached && plan !== 'pro' && (
                 <div className="rise-anim relative rounded-md p-6 text-center lg:sticky lg:top-6" style={{ background: '#24303B', color: '#F5EFE1' }}>
                   <div className="mb-2 font-semibold" style={{ fontFamily: "var(--font-newsreader), serif", fontSize: 18 }}>
-                    You've used your 3 free drafts
+                    You've used today's free analyses
                   </div>
                   <p className="mb-5 text-[14px]" style={{ fontFamily: "var(--font-work-sans), sans-serif", color: '#B8C2CE' }}>
-                    Upgrade to Pro for unlimited replies, every tone, every situation.
+                    Your free allowance resets daily at 00:00 UTC. Paid plans are not available yet.
                   </p>
 
-                  {paypalError && (
-                    <p className="mb-3 text-[12px]" style={{ color: '#E08A6B' }}>{paypalError}</p>
-                  )}
-
-                  <div className="w-full max-w-xs mx-auto">
-                    <PayPalScriptProvider options={{ clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "", currency: "USD" }}>
-                      <PayPalButtons
-                        style={{ layout: "vertical", color: "gold", shape: "rect", tagline: false }}
-                        createOrder={async () => {
-                          setPaypalError(null)
-                          const res = await fetch('/api/paypal/create-order', { method: 'POST' })
-                          const data = await res.json()
-                          if (!res.ok) {
-                            setPaypalError(data.error || 'Could not start checkout.')
-                            throw new Error(data.error)
-                          }
-                          return data.id
-                        }}
-                        onApprove={async (data) => {
-                          const res = await fetch('/api/paypal/capture-order', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ orderID: data.orderID }),
-                          })
-                          const result = await res.json()
-                          if (!res.ok) {
-                            setPaypalError(result.error || 'Payment could not be verified.')
-                            return
-                          }
-                          setPlan('pro')
-                          setLimitReached(false)
-                        }}
-                        onError={(err) => {
-                          console.error('PayPal error:', err)
-                          setPaypalError('Something went wrong with checkout. Try again.')
-                        }}
-                      />
-                    </PayPalScriptProvider>
-                  </div>
+                  <p className="text-[13px] leading-relaxed" style={{ color: '#B8C2CE', fontFamily: "var(--font-work-sans), sans-serif" }}>
+                    Paid plans are being prepared. We will open upgrades only when recurring billing and account controls are ready. Your saved conversations remain available.
+                  </p>
                 </div>
+              )}
+
+              {analysis && (
+                <section className="mb-4 rounded-md p-5 sm:p-6" style={{ background: '#E9E3D5', color: '#24303B' }}>
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <span className="text-xs font-bold uppercase tracking-[0.12em]" style={{ color: '#B8722A' }}>Conversation intelligence</span>
+                    <span className="rounded-full px-2.5 py-1 text-[10px] uppercase tracking-wide" style={{ background: '#1B2A3A', color: '#F5EFE1' }}>{analysis.situation}</span>
+                  </div>
+                  <p className="text-sm leading-relaxed">{analysis.summary}</p>
+                  {Array.isArray(analysis.riskFlags) && analysis.riskFlags.length > 0 && (
+                    <div className="mt-4">
+                      <h3 className="text-xs font-bold uppercase tracking-wide">Watch for</h3>
+                      <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
+                        {analysis.riskFlags.map((flag: string, index: number) => <li key={index}>{flag}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-md p-3" style={{ background: 'rgba(255,255,255,0.65)' }}>
+                      <h3 className="text-xs font-bold uppercase tracking-wide">Recommended approach</h3>
+                      <p className="mt-1 text-sm leading-relaxed">{analysis.recommendedStrategy}</p>
+                    </div>
+                    <div className="rounded-md p-3" style={{ background: 'rgba(255,255,255,0.65)' }}>
+                      <h3 className="text-xs font-bold uppercase tracking-wide">Protect this boundary</h3>
+                      <p className="mt-1 text-sm leading-relaxed">{analysis.boundaryToProtect}</p>
+                    </div>
+                  </div>
+                </section>
               )}
 
               {draftOptions.length > 0 && (!limitReached || plan === 'pro') && (
@@ -644,12 +780,29 @@ export function DraftForm() {
 
                       <div className="flex items-center justify-between mb-3">
                         <span style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 15, color: '#B8722A' }}>
-                          {draftOptions.length > 1 ? `Option ${index + 1}` : 'Your reply'}
+                          {analysis?.replyOptions?.[index]?.approach || (draftOptions.length > 1 ? `Option ${index + 1}` : 'Your reply')}
                         </span>
                       </div>
-                      <p className="whitespace-pre-wrap" style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.6 }}>
-                        {option}
-                      </p>
+                      {analysis?.replyOptions?.[index]?.bestWhen && <p className="mb-3 text-xs italic" style={{ color: '#6B7A8C' }}>{analysis.replyOptions[index].bestWhen}</p>}
+                      <textarea
+                        aria-label={`Edit ${analysis?.replyOptions?.[index]?.approach || `reply option ${index + 1}`}`}
+                        value={option}
+                        onChange={(e) => setDraftOptions((items) => items.map((item, itemIndex) => itemIndex === index ? e.target.value : item))}
+                        rows={Math.max(4, Math.min(12, option.split('\n').length + 2))}
+                        className="w-full resize-y rounded-md p-3 outline-none"
+                        style={{ background: 'rgba(255,255,255,0.55)', border: '1px solid rgba(36,48,59,0.15)', color: '#24303B', fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.6 }}
+                      />
+                      {selectedDraftId && index === draftOptions.length - 1 && (
+                        <button
+                          type="button"
+                          onClick={handleSaveEdits}
+                          disabled={savingDraft}
+                          className="mt-4 mr-2 uppercase text-[11px] px-3.5 py-2 rounded"
+                          style={{ fontFamily: "var(--font-plex-mono), monospace", letterSpacing: '0.08em', border: '1px solid rgba(36,48,59,0.25)', color: '#24303B' }}
+                        >
+                          {savingDraft ? 'Saving...' : 'Save edits'}
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => handleCopy(option, index)}

@@ -1,8 +1,3 @@
-import { Button } from "@/components/ui/button"
-
-// Keep in sync with the Pro checkout link in pricing-section.tsx.
-const GUMROAD_PRO_CHECKOUT_URL = "https://smartoolkit.gumroad.com/l/dzlkij"
-
 export function FinalCta() {
   return (
     <section className="border-b border-border">
@@ -12,22 +7,14 @@ export function FinalCta() {
           <div className="pointer-events-none absolute -bottom-20 -left-16 size-64 rounded-full bg-primary-foreground/10 blur-3xl" />
           <div className="relative mx-auto max-w-2xl">
             <h2 className="text-3xl font-semibold tracking-tight text-balance text-primary-foreground sm:text-4xl">
-              Standardize client communication at scale.
+              Make your next difficult client reply a considered one.
             </h2>
             <p className="mt-4 text-lg leading-relaxed text-pretty text-primary-foreground/80">
-              Give your team a smarter way to respond, negotiate, and improve every client conversation.
+              Understand the message, protect what matters, and choose how you want to respond. You remain in control of every message.
             </p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <a href="/sign-up" className="h-11 px-6 text-sm inline-flex items-center justify-center whitespace-nowrap rounded-lg font-medium bg-secondary text-secondary-foreground hover:bg-secondary/80">
-                Start Free
-              </a>
-              <a
-                href={GUMROAD_PRO_CHECKOUT_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="h-11 border border-primary-foreground/30 bg-transparent px-6 text-sm inline-flex items-center justify-center whitespace-nowrap rounded-lg font-medium text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
-              >
-                Upgrade to Pro
+              <a href="/sign-up" className="inline-flex h-11 items-center justify-center whitespace-nowrap rounded-lg bg-secondary px-6 text-sm font-medium text-secondary-foreground hover:bg-secondary/80">
+                Create your free account
               </a>
             </div>
           </div>

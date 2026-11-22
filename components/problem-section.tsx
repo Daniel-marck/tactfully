@@ -1,21 +1,9 @@
-import { Clock, Waves, ShieldAlert } from "lucide-react"
+import { Clock, ShieldAlert, MessageSquareText } from "lucide-react"
 
 const painPoints = [
-  {
-    icon: Clock,
-    title: "Replies take too long to draft",
-    body: "Agents rewrite the same responses from scratch, slowing down every conversation and burning capacity.",
-  },
-  {
-    icon: Waves,
-    title: "Tone varies between team members",
-    body: "Without a shared standard, one thread reads warm and helpful while the next feels cold or off-brand.",
-  },
-  {
-    icon: ShieldAlert,
-    title: "Risky conversations aren't flagged early",
-    body: "Frustration and churn signals slip through until it's too late to change the outcome.",
-  },
+  { icon: Clock, title: "You spend too long wording a difficult reply", body: "A short client message can take 30 minutes when the stakes involve money, deadlines, or a working relationship." },
+  { icon: ShieldAlert, title: "You risk agreeing to something unclear", body: "A rushed response can accidentally accept extra work, a discount, or a deadline you never intended to commit to." },
+  { icon: MessageSquareText, title: "You need more than a polished sentence", body: "The hard part is deciding what to say, what to clarify, and which boundary needs to stay intact." },
 ]
 
 export function ProblemSection() {
@@ -25,22 +13,20 @@ export function ProblemSection() {
         <div className="max-w-2xl">
           <span className="text-sm font-semibold text-primary">The problem</span>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-            Client communication breaks down when every reply is manual.
+            One difficult client message can put a project off balance.
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-pretty">
-            Support and revenue teams lose time drafting from scratch, struggle to keep tone consistent, and miss
-            sentiment signals that could change the outcome of a conversation. When volume grows, quality often drops.
+            Independent professionals manage scope, deadlines, money, and relationships in the same inbox. The right reply needs judgment as well as good writing.
           </p>
         </div>
-
         <div className="mt-12 grid gap-6 md:grid-cols-3">
-          {painPoints.map((p) => (
-            <div key={p.title} className="rounded-xl border border-border bg-card p-6">
+          {painPoints.map((point) => (
+            <div key={point.title} className="rounded-xl border border-border bg-card p-6">
               <span className="flex size-10 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
-                <p.icon className="size-5" />
+                <point.icon className="size-5" />
               </span>
-              <h3 className="mt-4 text-base font-semibold">{p.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{p.body}</p>
+              <h3 className="mt-4 text-base font-semibold">{point.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{point.body}</p>
             </div>
           ))}
         </div>

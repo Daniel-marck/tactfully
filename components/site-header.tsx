@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Menu, X, MessagesSquare } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 const navLinks = [
   { label: "Product", href: "#product" },
@@ -17,12 +17,12 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <a href="/" className="flex items-center gap-2" aria-label="Tactfully home">
+        <Link href="/" className="flex items-center gap-2" aria-label="Tactfully home">
           <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <MessagesSquare className="size-4" />
           </span>
           <span className="text-lg font-semibold tracking-tight">Tactfully</span>
-        </a>
+        </Link>
 
         <nav className="hidden items-center gap-8 md:flex" aria-label="Primary">
           {navLinks.map((link) => (

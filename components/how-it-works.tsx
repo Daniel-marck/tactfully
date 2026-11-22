@@ -1,24 +1,8 @@
 const steps = [
-  {
-    n: "01",
-    title: "Paste or open a client message",
-    body: "Bring in the conversation from support, sales, or success tools you already use.",
-  },
-  {
-    n: "02",
-    title: "Choose a tone and generate reply options",
-    body: "Pick the right voice for the moment and get multiple ready-to-edit drafts.",
-  },
-  {
-    n: "03",
-    title: "Review sentiment signals and refine",
-    body: "See how the thread is trending and adjust phrasing before anything is sent.",
-  },
-  {
-    n: "04",
-    title: "Send the final message with confidence",
-    body: "Ship a consistent, on-brand response your whole team can stand behind.",
-  },
+  { n: "01", title: "Paste the client message", body: "Add the message that is difficult to answer. Include only the project context needed to understand it." },
+  { n: "02", title: "Review the situation", body: "Tactfully summarizes the likely intent, identifies practical risks, and highlights a boundary to protect." },
+  { n: "03", title: "Compare two approaches", body: "See a collaborative option and a more direct alternative, with guidance on when each may fit." },
+  { n: "04", title: "Edit, copy, and save", body: "You stay in control. Refine the draft, copy it into your own channel, and keep the conversation in your private history." },
 ]
 
 export function HowItWorks() {
@@ -28,16 +12,15 @@ export function HowItWorks() {
         <div className="max-w-2xl">
           <span className="text-sm font-semibold text-primary">How it works</span>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-            Simple workflow, minimal friction.
+            From uncertainty to a considered reply.
           </h2>
         </div>
-
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {steps.map((s) => (
-            <div key={s.n} className="rounded-xl border border-border bg-card p-6">
-              <span className="font-mono text-sm font-semibold text-primary">{s.n}</span>
-              <h3 className="mt-3 text-base font-semibold text-balance">{s.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.body}</p>
+          {steps.map((step) => (
+            <div key={step.n} className="rounded-xl border border-border bg-card p-6">
+              <span className="font-mono text-sm font-semibold text-primary">{step.n}</span>
+              <h3 className="mt-3 text-base font-semibold text-balance">{step.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{step.body}</p>
             </div>
           ))}
         </div>

@@ -1,38 +1,11 @@
 import { Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
 
-const plans = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "/month",
-    description: "Everything you need to try Tactfully in real conversations.",
-    features: [
-      "3 AI replies/day",
-      "3 reply tones",
-      "2 reply options",
-      "Copy response",
-      "Basic client sentiment detection",
-    ],
-    cta: "Start Free",
-    href: "/sign-up",
-    featured: false,
-  },
-  {
-    name: "Pro",
-    price: "$12",
-    period: "/month",
-    description: "Unlimited scale plus advanced negotiation and coaching.",
-    features: [
-      "Unlimited AI replies",
-      "No daily limits",
-      "Advanced negotiation",
-      "Personal AI communication coach",
-    ],
-    cta: "Upgrade to Pro",
-    href: "/sign-up",
-    featured: true,
-  },
+const features = [
+  "3 message analyses per day",
+  "Two distinct reply approaches",
+  "Situation and risk analysis",
+  "Copy and save your replies",
+  "Private conversation history",
 ]
 
 export function PricingSection() {
@@ -40,54 +13,36 @@ export function PricingSection() {
     <section id="pricing" className="border-b border-border">
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
         <div className="mx-auto max-w-2xl text-center">
-          <span className="text-sm font-semibold text-primary">Pricing</span>
+          <span className="text-sm font-semibold text-primary">Early access</span>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-            Start free, upgrade when you need scale.
+            Start with the complete core workflow.
           </h2>
+          <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+            Tactfully is free to use while we validate the product with independent professionals. Paid plans will be introduced only after recurring billing and account management are ready.
+          </p>
         </div>
-        <div className="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-2">
-          {plans.map((plan) => {
-            const linkClassName = plan.featured
-              ? "mt-8 h-11 w-full inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90"
-              : "mt-8 h-11 w-full inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground"
-
-            return (
-              <div
-                key={plan.name}
-                className={
-                  "flex flex-col rounded-2xl border p-8 " +
-                  (plan.featured
-                    ? "border-primary bg-card shadow-lg shadow-primary/10 ring-1 ring-primary"
-                    : "border-border bg-card")
-                }
-              >
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">{plan.name}</h3>
-                  {plan.featured && (
-                    <span className="rounded-full bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground">
-                      Most popular
-                    </span>
-                  )}
-                </div>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-4xl font-semibold tracking-tight">{plan.price}</span>
-                  <span className="text-sm text-muted-foreground">{plan.period}</span>
-                </div>
-                <p className="mt-2 text-sm text-muted-foreground">{plan.description}</p>
-                <ul className="mt-6 flex flex-1 flex-col gap-3">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2.5 text-sm">
-                      <span className="flex size-4 items-center justify-center rounded-full bg-primary/10 text-primary">
-                        <Check className="size-3" />
-                      </span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <a href={plan.href} className={linkClassName}>{plan.cta}</a>
-              </div>
-            )
-          })}
+        <div className="mx-auto mt-10 max-w-xl rounded-2xl border border-primary bg-card p-8 shadow-lg shadow-primary/10">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Early access</h3>
+            <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">Available now</span>
+          </div>
+          <div className="mt-4 flex items-baseline gap-1">
+            <span className="text-4xl font-semibold tracking-tight">$0</span>
+            <span className="text-sm text-muted-foreground">during early access</span>
+          </div>
+          <ul className="mt-6 flex flex-col gap-3">
+            {features.map((feature) => (
+              <li key={feature} className="flex items-center gap-2.5 text-sm">
+                <span className="flex size-4 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Check className="size-3" />
+                </span>
+                {feature}
+              </li>
+            ))}
+          </ul>
+          <a href="/sign-up" className="mt-8 inline-flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+            Create your free account
+          </a>
         </div>
       </div>
     </section>
