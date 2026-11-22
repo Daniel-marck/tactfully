@@ -2,15 +2,15 @@ export default function PrivacyPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
       <h1 className="text-3xl font-semibold tracking-tight">Privacy Policy</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Last updated: July 19, 2026</p>
+      <p className="mt-2 text-sm text-muted-foreground">Last updated: November 22, 2026</p>
 
       <div className="mt-8 space-y-8 text-sm leading-relaxed text-muted-foreground">
         <section>
           <h2 className="text-base font-semibold text-foreground">What we collect</h2>
           <p className="mt-2">
             When you create an account, we collect your email address and password
-            (stored securely and encrypted by our authentication provider, Supabase --
-            we never see your raw password). When you use Tactfully to draft a reply,
+            (stored securely by our authentication provider, Supabase -- we never see
+            your raw password). When you use Tactfully to draft a reply,
             we store the client message you paste in, the situation and tone you
             select, and the reply Tactfully generates, so you can find them again
             later in your "Filed letters" history.
@@ -42,7 +42,7 @@ export default function PrivacyPage() {
           <ul className="mt-2 list-disc space-y-1 pl-5">
             <li>Supabase -- authentication and database storage</li>
             <li>Google (Gemini API) -- generating your draft replies</li>
-            <li>PayPal -- processing Pro subscription payments</li>
+            <li>PayPal -- processing Pro payments</li>
             <li>Vercel -- hosting this application</li>
           </ul>
         </section>
