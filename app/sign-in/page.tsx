@@ -40,15 +40,20 @@ export default function SignInPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    setLoading(false)
-    if (error) {
-      setError(error.message)
-      return
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) {
+        setError(error.message)
+        return
+      }
+      router.push("/dashboard")
+      router.refresh()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not sign in. Please try again.")
+    } finally {
+      setLoading(false)
     }
-    router.push("/dashboard")
-    router.refresh()
   }
 
   return (
