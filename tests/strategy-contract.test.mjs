@@ -55,6 +55,6 @@ test('AI generation retries transient provider overload across fallback models',
 
 test('email confirmation callback rejects backslash-based external redirects', async () => {
   const callback = await readFile(new URL('../app/auth/callback/route.ts', import.meta.url), 'utf8');
-  assert.match(callback, /requestedNext\.includes\("\\\\\\\"\)/);
-  assert.match(callback, /requestedNext\.startsWith\("\/\/"\)/);
+  assert.ok(callback.includes('requestedNext.includes("\\\\")'));
+  assert.ok(callback.includes('requestedNext.startsWith("//")'));
 });
