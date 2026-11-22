@@ -345,7 +345,7 @@ export function DraftForm() {
         setLimitReached(true)
         return
       }
-      if (!response.ok) throw new Error(data.error || 'Server returned an error')
+      if (!response.ok) throw new Error(data.message || data.error || 'Server returned an error')
 
       const replies: string[] = Array.isArray(data.replies) && data.replies.length > 0
         ? data.replies
