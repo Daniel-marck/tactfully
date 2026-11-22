@@ -260,8 +260,8 @@ Return exactly three reply strings in the required JSON structure, in the order 
             signal: AbortSignal.timeout(10000),
           }
         );
-      } catch (error: any) {
-        const timedOut = error?.name === 'TimeoutError' || error?.name === 'AbortError';
+      } catch (error: unknown) {
+        const timedOut = error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError');
         if (!timedOut) throw error;
 
         console.warn(`Gemini model ${model} timed out; moving to the next configured model attempt.`);
@@ -364,14 +364,15 @@ Return exactly three reply strings in the required JSON structure, in the order 
           ? null
           : Math.max(0, FREE_DRAFT_LIMIT - newCount),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Server route crashed:', error);
-    const isTimeout = error?.name === 'TimeoutError' || error?.name === 'AbortError';
+    const isTimeout = error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError');
+    const errorMessage = error instanceof Error ? error.message : 'Something went wrong generating your reply.';
     return NextResponse.json(
       {
         error: isTimeout
           ? 'The AI service took too long to respond. Please try again.'
-          : error?.message || 'Something went wrong generating your reply.',
+          : errorMessage,
       },
       { status: isTimeout ? 504 : 500 }
     );
