@@ -73,7 +73,7 @@ test('launch page only advertises implemented product capabilities', () => {
 
 test('legal pages disclose AI provider data handling and daily free limits', () => {
   assert.match(privacy, /free-tier content may be used to improve its products/);
-  assert.match(privacy, /paid-tier content is not/);
+  assert.match(privacy, /paid-tier\\s+content is not/);
   assert.match(terms, /3 AI replies per day/);
 });
 
