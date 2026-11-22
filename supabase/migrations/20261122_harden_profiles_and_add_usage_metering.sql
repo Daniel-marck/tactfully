@@ -19,7 +19,7 @@ alter table public.profiles
 -- their own account by updating profiles.plan from a browser client.
 drop policy if exists "Users can update own profile" on public.profiles;
 
-create or replace function public.increment_draft_count(p_user_id uuid)
+create or replace function public.increment_draft_count(user_id uuid)
 returns table (
   allowed boolean,
   new_count integer
@@ -31,7 +31,7 @@ as $$
 declare
   v_count integer;
 begin
-  if auth.uid() is distinct from p_user_id then
+  if auth.uid() is distinct from user_id then
     raise exception 'Not authorized to update another user profile'
       using errcode = '42501';
   end if;
@@ -44,7 +44,7 @@ begin
     end,
     last_draft_date = (now() at time zone 'utc')::date,
     updated_at = now()
-  where p.id = p_user_id
+  where p.id = user_id
     and (
       p.plan = 'pro'
       or p.last_draft_date is distinct from (now() at time zone 'utc')::date
@@ -60,7 +60,7 @@ begin
   select p.draft_count
     into v_count
   from public.profiles as p
-  where p.id = p_user_id;
+  where p.id = user_id;
 
   if not found then
     raise exception 'Profile not found'
