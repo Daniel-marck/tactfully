@@ -5,7 +5,18 @@ import { assertServerEnv } from '@/lib/config';
 const FREE_DRAFT_LIMIT = 3;
 const NUM_OPTIONS = 2;
 
+// Server-side allowlist for isolated preview testing. Never expose this via NEXT_PUBLIC_*.
+function isTactfullyTester(email: string | undefined) {
+  const testerEmails = (process.env.TACTFULLY_TESTER_EMAILS ?? '')
+    .split(',')
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean);
+
+  return Boolean(email && testerEmails.includes(email.trim().toLowerCase()));
+}
+
 export async function POST(req: Request) {
+  const requestStartedAt = Date.now();
   try {
     assertServerEnv(['GEMINI_API_KEY'], 'AI generation');
 
@@ -36,11 +47,12 @@ export async function POST(req: Request) {
       );
     }
 
+    const isTester = isTactfullyTester(user.email);
     const today = new Date().toISOString().slice(0, 10);
     const effectiveDraftCount =
       profile.last_draft_date === today ? profile.draft_count : 0;
 
-    if (profile.plan === 'free' && effectiveDraftCount >= FREE_DRAFT_LIMIT) {
+    if (!isTester && profile.plan === 'free' && effectiveDraftCount >= FREE_DRAFT_LIMIT) {
       return NextResponse.json(
         {
           error: 'limit_reached',
@@ -78,48 +90,76 @@ Additional context: ${context || 'None'}.
 
 Each reply must take a genuinely different approach -- a different opening, a different level of detail, or a different way of framing the same point -- while staying in the requested tone. Do not simply rewrite the user message. Keep each reply concise, polite, and ready to send. Write in the first person.`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          systemInstruction: {
-            parts: [
-              {
-                text: 'You help freelancers and support teams write professional, concise email and message replies.',
-              },
-            ],
+    const requestBody = {
+      contents: [{ parts: [{ text: prompt }] }],
+      systemInstruction: {
+        parts: [
+          {
+            text: 'You help freelancers and support teams write professional, concise email and message replies.',
           },
-          generationConfig: {
-            responseMimeType: 'application/json',
-            responseSchema: {
-              type: 'OBJECT',
-              properties: {
-                replies: {
-                  type: 'ARRAY',
-                  minItems: NUM_OPTIONS,
-                  maxItems: NUM_OPTIONS,
-                  items: { type: 'STRING' },
-                },
-              },
-              required: ['replies'],
+        ],
+      },
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: 'OBJECT',
+          properties: {
+            replies: {
+              type: 'ARRAY',
+              minItems: NUM_OPTIONS,
+              maxItems: NUM_OPTIONS,
+              items: { type: 'STRING' },
             },
           },
-        }),
-      }
-    );
+          required: ['replies'],
+        },
+        maxOutputTokens: 512,
+      },
+    };
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('❌ Gemini API returned an error:', errorData);
-      return NextResponse.json(
-        { error: errorData.error?.message || 'Failed to generate content' },
-        { status: response.status }
+    // Try the primary model first, then a lower-cost supported fallback on capacity errors.
+    // Only retry on 503; authentication, quota and request errors should remain visible.
+    const models = ['gemini-flash-latest', 'gemini-3.5-flash-lite'];
+    let response: Response | null = null;
+    let lastErrorMessage = 'The AI service is temporarily unavailable. Please try again shortly.';
+    let selectedModel = '';
+    const generationStartedAt = Date.now();
+
+    for (const model of models) {
+      selectedModel = model;
+      response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody),
+          signal: AbortSignal.timeout(40000),
+        }
       );
+
+      if (response.ok) break;
+
+      const errorData = await response.json().catch(() => ({}));
+      lastErrorMessage =
+        errorData.error?.message || 'The AI service could not generate a reply.';
+
+      console.error(`Gemini model ${model} returned HTTP ${response.status}:`, errorData);
+
+      if (response.status !== 503 || model === models[models.length - 1]) {
+        return NextResponse.json(
+          { error: lastErrorMessage },
+          { status: response.status }
+        );
+      }
     }
 
+    if (!response?.ok) {
+      return NextResponse.json({ error: lastErrorMessage }, { status: 503 });
+    }
+
+    console.info(
+      `Gemini generation succeeded using ${selectedModel} in ${Date.now() - generationStartedAt}ms.`
+    );
     const data = await response.json();
     const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
@@ -129,7 +169,7 @@ Each reply must take a genuinely different approach -- a different opening, a di
       if (Array.isArray(parsed.replies)) {
         replies = parsed.replies.filter((r: unknown) => typeof r === 'string' && r.trim());
       }
-    } catch (parseErr) {
+    } catch {
       console.error('⚠️ Could not parse Gemini JSON response:', rawText);
     }
 
@@ -141,16 +181,24 @@ Each reply must take a genuinely different approach -- a different opening, a di
       return NextResponse.json({ error: 'Failed to generate a reply. Try again.' }, { status: 502 });
     }
 
-    const { data: incrementResult, error: incrementError } = await supabase.rpc(
-      'increment_draft_count',
-      { user_id: user.id }
-    );
+    // Tester requests do not consume the account's daily free allowance.
+    let newCount = effectiveDraftCount;
+    if (!isTester) {
+      const { data: incrementResult, error: incrementError } = await supabase.rpc(
+        'increment_draft_count',
+        { user_id: user.id }
+      );
 
-    if (incrementError) {
-      console.error('⚠️ Failed to increment draft count:', incrementError);
+      if (incrementError) {
+        console.error('⚠️ Failed to increment draft count:', incrementError);
+      }
+
+      newCount = incrementResult?.[0]?.new_count ?? effectiveDraftCount + 1;
     }
 
-    const newCount = incrementResult?.[0]?.new_count ?? effectiveDraftCount + 1;
+    console.info(
+      `Draft request completed in ${Date.now() - requestStartedAt}ms (model: ${selectedModel}).`
+    );
 
     return NextResponse.json({
       replies,
@@ -159,10 +207,20 @@ Each reply must take a genuinely different approach -- a different opening, a di
       text: replies[0],
       draftsUsed: newCount,
       draftsRemaining:
-        profile.plan === 'pro' ? null : Math.max(0, FREE_DRAFT_LIMIT - newCount),
+        isTester || profile.plan === 'pro'
+          ? null
+          : Math.max(0, FREE_DRAFT_LIMIT - newCount),
     });
   } catch (error: any) {
     console.error('❌ Server route crashed:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const isTimeout = error?.name === 'TimeoutError' || error?.name === 'AbortError';
+    return NextResponse.json(
+      {
+        error: isTimeout
+          ? 'The AI service took too long to respond. Please try again.'
+          : error?.message || 'Something went wrong generating your reply.',
+      },
+      { status: isTimeout ? 504 : 500 }
+    );
   }
 }

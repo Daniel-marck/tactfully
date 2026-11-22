@@ -279,6 +279,7 @@ export function DraftForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: incomingMessage, tone, situation }),
+        signal: AbortSignal.timeout(45000),
       })
       const data = await response.json()
 
@@ -310,7 +311,13 @@ export function DraftForm() {
         .limit(20)
       setDraftsList(updatedDrafts || [])
     } catch (err) {
-      setError('Something went wrong drafting that. Try again.')
+      if (err instanceof DOMException && err.name === 'TimeoutError') {
+        setError('The AI service is taking too long to respond. Please try again in a moment.')
+      } else if (err instanceof Error && err.message) {
+        setError(err.message)
+      } else {
+        setError('Something went wrong drafting that. Please try again.')
+      }
     } finally {
       setLoading(false)
     }
@@ -326,8 +333,8 @@ export function DraftForm() {
 
   return (
     <div
-      className="min-h-screen w-full"
-      style={{ background: '#1B2A3A', color: '#F5EFE1' }}
+      className="tactfully-workspace min-h-screen w-full"
+      style={{ background: '#F5F7FC', color: '#101828' }}
     >
       <style jsx global>{`
         @keyframes stamp {
@@ -343,6 +350,46 @@ export function DraftForm() {
         .paper-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .paper-scroll::-webkit-scrollbar-thumb { background: rgba(36,48,59,0.25); border-radius: 3px; }
       `}</style>
+
+      <style jsx global>{`
+        /* Clean, typography-led workspace */
+        .tactfully-workspace, .tactfully-workspace * {
+          font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+          letter-spacing: normal !important;
+        }
+        .tactfully-workspace { background:#f7f8fc !important; color:#172033 !important; font-size:15px; line-height:1.55; }
+        .tactfully-workspace header { background:#fff !important; border-color:#e6eaf0 !important; height:68px; }
+        .tactfully-workspace header > span { color:#263b83 !important; font-size:18px !important; font-weight:800 !important; letter-spacing:-.04em !important; }
+        .tactfully-workspace header div span { background:#eef2ff !important; color:#34469a !important; border-radius:999px !important; font-size:12px !important; font-weight:700 !important; padding:5px 11px !important; }
+        .tactfully-workspace header button { color:#475467 !important; font-size:13px !important; font-weight:600 !important; }
+        .tactfully-workspace aside > div:first-child > span { color:#667085 !important; font-size:12px !important; font-weight:700 !important; text-transform:none !important; }
+        .tactfully-workspace aside > div:first-child button { color:#34469a !important; font-size:13px !important; font-weight:700 !important; }
+        .tactfully-workspace aside button[style] { background:#fff !important; border:1px solid #e6e9f0 !important; border-radius:10px !important; box-shadow:0 1px 2px rgba(16,24,40,.04); }
+        .tactfully-workspace aside button span:first-child { color:#475467 !important; font-size:12px !important; font-weight:700 !important; }
+        .tactfully-workspace aside button span:nth-child(2) { color:#172033 !important; font-size:13px !important; line-height:1.45 !important; }
+        .tactfully-workspace aside button span:last-child { color:#98a2b3 !important; font-size:11px !important; }
+        .tactfully-workspace .lg\\:col-span-2 > div { background:#eef2ff !important; border:1px solid #dbe3ff !important; border-radius:12px !important; color:#263b83 !important; padding:16px 18px !important; }
+        .tactfully-workspace .lg\\:col-span-2 > div > div:first-child { color:#1f2f70 !important; font-size:14px !important; font-weight:700 !important; }
+        .tactfully-workspace .lg\\:col-span-2 span { color:#475467 !important; background:#fff !important; border:1px solid #dfe5f4 !important; font-size:12px !important; padding:5px 10px !important; }
+        .tactfully-workspace .relative.rounded-md.p-5, .tactfully-workspace .relative.rounded-md.p-6 { background:#fff !important; color:#172033 !important; border:1px solid #e6e9f0 !important; border-radius:16px !important; box-shadow:0 8px 24px rgba(16,24,40,.06) !important; transform:none !important; }
+        .tactfully-workspace textarea { color:#172033 !important; font-size:16px !important; line-height:1.65 !important; min-height:180px !important; padding:14px 15px !important; border:1px solid #d0d5dd !important; border-radius:10px !important; background:#fff !important; }
+        .tactfully-workspace textarea::placeholder { color:#98a2b3 !important; }
+        .tactfully-workspace .relative.rounded-md.p-5 > span, .tactfully-workspace .relative.rounded-md.p-6 > span { color:#34469a !important; font-size:13px !important; font-weight:700 !important; }
+        .tactfully-workspace button.rounded-full { font-size:13px !important; font-weight:600 !important; padding:8px 13px !important; border-radius:8px !important; border:1px solid #d0d5dd !important; color:#344054 !important; background:#fff !important; cursor:pointer !important; pointer-events:auto !important; position:relative; z-index:2; }
+        .tactfully-workspace button.option-chip[aria-pressed="true"] { background:#34469a !important; color:#fff !important; border-color:#34469a !important; box-shadow:0 0 0 2px rgba(52,70,154,.14) !important; }
+        .tactfully-workspace button.option-chip[aria-pressed="false"] { background:#fff !important; color:#344054 !important; border-color:#d0d5dd !important; }
+        .tactfully-workspace .option-group { position:relative; z-index:1; pointer-events:auto; }
+        .tactfully-workspace button.mt-6 { background:#34469a !important; color:#fff !important; border-radius:10px !important; min-height:52px !important; font-size:15px !important; font-weight:700 !important; }
+        .tactfully-workspace .rise-anim { background:#fff !important; color:#172033 !important; border:1px solid #e6e9f0 !important; border-radius:14px !important; box-shadow:0 8px 24px rgba(16,24,40,.06) !important; }
+        .tactfully-workspace .rise-anim p { color:#344054 !important; font-size:15px !important; line-height:1.7 !important; }
+        .tactfully-workspace .rise-anim button { background:#eef2ff !important; color:#34469a !important; border:1px solid #dbe3ff !important; border-radius:8px !important; font-size:13px !important; font-weight:700 !important; padding:9px 13px !important; }
+        .tactfully-workspace .fixed.inset-0 > div { background:#fff !important; color:#172033 !important; border-radius:16px !important; }
+        .tactfully-workspace .fixed.inset-0 h2 { color:#172033 !important; font-size:24px !important; font-style:normal !important; font-weight:750 !important; letter-spacing:-.03em !important; }
+        .tactfully-workspace .fixed.inset-0 input { color:#172033 !important; border-radius:9px !important; min-height:44px !important; }
+        .tactfully-workspace .fixed.inset-0 button[type="submit"] { background:#34469a !important; color:#fff !important; border-radius:9px !important; min-height:46px !important; }
+        @media(max-width:1023px) { .tactfully-workspace .relative.rounded-md.p-5, .tactfully-workspace .relative.rounded-md.p-6 { transform:none !important; } }
+      `}</style>
+
 
       <header
         className="h-14 px-5 sm:px-6 flex items-center justify-between shrink-0 border-b"
@@ -507,13 +554,14 @@ export function DraftForm() {
                 </span>
                 <InfoPopover text="Situation tells the AI what kind of conversation this is -- a late payment, a lowball offer, and so on -- so it can shape the reply around the right context." />
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="option-group flex flex-wrap gap-2">
                 {SITUATIONS.map((s) => (
                   <button
                     key={s}
                     type="button"
+                    aria-pressed={situation === s}
                     onClick={() => setSituation(s)}
-                    className="rounded-full px-3.5 py-1.5 text-[13px] transition-all"
+                    className="option-chip rounded-full px-3.5 py-1.5 text-[13px] transition-all"
                     style={situation === s
                       ? { background: '#1B2A3A', color: '#F5EFE1', border: '1px solid #1B2A3A' }
                       : { background: 'transparent', color: '#24303B', border: '1px solid rgba(36,48,59,0.18)' }}
@@ -531,13 +579,14 @@ export function DraftForm() {
                 </span>
                 <InfoPopover text="Tone sets how the reply should sound -- Diplomatic keeps it warm, Firm is direct with no fluff, Formal keeps it strictly businesslike." />
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="option-group flex flex-wrap gap-2">
                 {TONES.map((t) => (
                   <button
                     key={t.value}
                     type="button"
+                    aria-pressed={tone === t.value}
                     onClick={() => setTone(t.value)}
-                    className="rounded-full px-3.5 py-1.5 text-[13px] transition-all"
+                    className="option-chip rounded-full px-3.5 py-1.5 text-[13px] transition-all"
                     style={tone === t.value
                       ? { background: '#1B2A3A', color: '#F5EFE1', border: '1px solid #1B2A3A' }
                       : { background: 'transparent', color: '#24303B', border: '1px solid rgba(36,48,59,0.18)' }}

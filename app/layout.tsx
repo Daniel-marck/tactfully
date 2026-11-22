@@ -3,8 +3,8 @@ import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Tactfully',
-  description: 'AI client communication assistant for freelancers',
+  title: 'Tactfully — Find the right words for difficult client messages',
+  description: 'Turn awkward client messages into clear, professional replies. Start free with Tactfully.',
 }
 
 export default function RootLayout({
