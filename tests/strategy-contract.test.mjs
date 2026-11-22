@@ -76,3 +76,12 @@ test('legal pages disclose AI provider data handling and daily free limits', () 
   assert.match(privacy, /paid-tier content is not/);
   assert.match(terms, /3 AI replies per day/);
 });
+
+
+test('generation endpoint validates and bounds untrusted request input', () => {
+  assert.match(route, /MAX_MESSAGE_LENGTH = 6000/);
+  assert.match(route, /MAX_CONTEXT_FIELD_LENGTH = 500/);
+  assert.match(route, /Array\.isArray\(body\)/);
+  assert.match(route, /message\.length > MAX_MESSAGE_LENGTH/);
+  assert.doesNotMatch(route, /smartoolkit\.gumroad\.com/);
+});
