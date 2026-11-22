@@ -31,6 +31,7 @@ const TONES = [
 ]
 
 const OPTIONS_SEPARATOR = '\n\n---\n\n'
+const STRATEGY_LABELS = ['Diplomatic', 'Firm & professional', 'Direct']
 
 const QUICK_START_STEPS = [
   'Paste the client message',
@@ -148,6 +149,8 @@ function EyeIcon({ open }: { open: boolean }) {
 
 export function DraftForm() {
   const [incomingMessage, setIncomingMessage] = useState('')
+  const [desiredOutcome, setDesiredOutcome] = useState('')
+  const [avoid, setAvoid] = useState('')
   const [situation, setSituation] = useState(SITUATIONS[0])
   const [tone, setTone] = useState(TONES[0].value)
   const [draftOptions, setDraftOptions] = useState<string[]>([])
@@ -223,6 +226,8 @@ export function DraftForm() {
 
   const handleNewDraft = () => {
     setIncomingMessage('')
+    setDesiredOutcome('')
+    setAvoid('')
     setSituation(SITUATIONS[0])
     setTone(TONES[0].value)
     setDraftOptions([])
@@ -278,7 +283,7 @@ export function DraftForm() {
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: incomingMessage, tone, situation }),
+        body: JSON.stringify({ message: incomingMessage, tone, situation, desiredOutcome, avoid }),
         signal: AbortSignal.timeout(45000),
       })
       const data = await response.json()
@@ -547,6 +552,31 @@ export function DraftForm() {
               style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.55, color: '#24303B' }}
             />
 
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label className="block">
+                <span className="block mb-1.5 text-xs font-semibold text-slate-600">What outcome do you want?</span>
+                <input
+                  type="text"
+                  value={desiredOutcome}
+                  onChange={(e) => setDesiredOutcome(e.target.value)}
+                  placeholder="e.g. Get the overdue invoice paid"
+                  className="w-full rounded-lg border px-3 py-2.5 text-sm"
+                  style={{ borderColor: '#D0D5DD', background: '#fff', color: '#172033' }}
+                />
+              </label>
+              <label className="block">
+                <span className="block mb-1.5 text-xs font-semibold text-slate-600">Anything the reply should avoid?</span>
+                <input
+                  type="text"
+                  value={avoid}
+                  onChange={(e) => setAvoid(e.target.value)}
+                  placeholder="e.g. Don't offer a discount"
+                  className="w-full rounded-lg border px-3 py-2.5 text-sm"
+                  style={{ borderColor: '#D0D5DD', background: '#fff', color: '#172033' }}
+                />
+              </label>
+            </div>
+
             <div className="mt-5">
               <div className="flex items-center gap-1.5 mb-3.5">
                 <span className="uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
@@ -604,7 +634,7 @@ export function DraftForm() {
               className="mt-6 w-full py-[15px] rounded-md font-semibold text-[15px] text-white transition-all active:scale-[0.99] disabled:cursor-not-allowed"
               style={{ background: loading ? '#8a8a8a' : '#B8722A', fontFamily: "var(--font-work-sans), sans-serif" }}
             >
-              {loading ? 'Drafting...' : user ? 'Draft my reply' : 'Sign in to draft a reply'}
+              {loading ? 'Building your 3 response strategies...' : user ? 'Generate 3 response strategies' : 'Sign in to draft a reply'}
             </button>
 
             {error && (
@@ -693,7 +723,7 @@ export function DraftForm() {
 
                       <div className="flex items-center justify-between mb-3">
                         <span style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 15, color: '#B8722A' }}>
-                          {draftOptions.length > 1 ? `Option ${index + 1}` : 'Your reply'}
+                          {STRATEGY_LABELS[index] || `Option ${index + 1}`}
                         </span>
                       </div>
                       <p className="whitespace-pre-wrap" style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.6 }}>
