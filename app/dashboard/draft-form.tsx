@@ -326,8 +326,8 @@ export function DraftForm() {
 
   return (
     <div
-      className="min-h-screen w-full"
-      style={{ background: '#1B2A3A', color: '#F5EFE1' }}
+      className="tactfully-workspace min-h-screen w-full"
+      style={{ background: '#F5F7FC', color: '#101828' }}
     >
       <style jsx global>{`
         @keyframes stamp {
