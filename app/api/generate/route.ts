@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { assertServerEnv } from '@/lib/config';
 
 const FREE_DRAFT_LIMIT = 3;
-const NUM_OPTIONS = 2;
+const NUM_OPTIONS = 3;
 
 // Server-side allowlist for isolated preview testing. Never expose this via NEXT_PUBLIC_*.
 function isTactfullyTester(email: string | undefined) {
@@ -65,8 +65,10 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const message = body.incomingMessage || body.message || body.prompt || '';
-    const tone = body.tone || 'Formal';
-    const context = body.userContext || body.situation || '';
+    const tone = typeof body.tone === 'string' ? body.tone : 'Formal';
+    const situation = typeof body.situation === 'string' ? body.situation : 'A general difficult message';
+    const desiredOutcome = typeof body.desiredOutcome === 'string' ? body.desiredOutcome.trim() : '';
+    const avoid = typeof body.avoid === 'string' ? body.avoid.trim() : '';
 
     if (!message) {
       return NextResponse.json(
@@ -84,18 +86,36 @@ export async function POST(req: Request) {
       );
     }
 
-    const prompt = `Draft ${NUM_OPTIONS} distinct professional business replies to this client message: "${message}".
-Desired tone: ${tone}.
-Additional context: ${context || 'None'}.
+    const prompt = `You are helping a freelancer handle a difficult client conversation.
 
-Each reply must take a genuinely different approach -- a different opening, a different level of detail, or a different way of framing the same point -- while staying in the requested tone. Do not simply rewrite the user message. Keep each reply concise, polite, and ready to send. Write in the first person.`;
+CLIENT MESSAGE:
+"${message}"
+
+SITUATION:
+${situation}
+
+PREFERRED WRITING TONE:
+${tone}
+
+USER'S DESIRED OUTCOME:
+${desiredOutcome || 'Not specified — infer a reasonable, conservative objective from the situation.'}
+
+WHAT THE RESPONSE SHOULD AVOID:
+${avoid || 'Do not invent facts, promises, deadlines, prices, contract terms, or concessions.'}
+
+Write exactly three distinct, ready-to-send replies:
+1. DIPLOMATIC: warm and relationship-preserving while still addressing the issue.
+2. FIRM & PROFESSIONAL: clear boundaries and expectations without sounding hostile.
+3. DIRECT: concise and unambiguous, with no unnecessary softening.
+
+All three must respect the user's desired outcome and preferred writing tone. Do not invent facts or agree to unpaid work, discounts, deadlines, refunds, or contractual terms unless the user explicitly provided them. Avoid generic openings and filler. Write in the first person. Return only the three reply strings in the required JSON structure.`;
 
     const requestBody = {
       contents: [{ parts: [{ text: prompt }] }],
       systemInstruction: {
         parts: [
           {
-            text: 'You help freelancers and support teams write professional, concise email and message replies.',
+            text: 'You are a specialist communication assistant for freelancers. Help users protect professional boundaries, negotiate clearly, and preserve client relationships. Never invent facts or commitments.',
           },
         ],
       },
@@ -117,9 +137,9 @@ Each reply must take a genuinely different approach -- a different opening, a di
       },
     };
 
-    // Try the primary model first, then a lower-cost supported fallback on capacity errors.
-    // Only retry on 503; authentication, quota and request errors should remain visible.
-    const models = ['gemini-flash-latest', 'gemini-3.5-flash-lite'];
+    // Start with the lightweight model for lower latency. Fall back to the general Flash
+    // model only when Google reports temporary capacity exhaustion (503).
+    const models = ['gemini-3.5-flash-lite', 'gemini-flash-latest'];
     let response: Response | null = null;
     let lastErrorMessage = 'The AI service is temporarily unavailable. Please try again shortly.';
     let selectedModel = '';
@@ -133,7 +153,7 @@ Each reply must take a genuinely different approach -- a different opening, a di
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(requestBody),
-          signal: AbortSignal.timeout(40000),
+          signal: AbortSignal.timeout(20000),
         }
       );
 
@@ -143,7 +163,7 @@ Each reply must take a genuinely different approach -- a different opening, a di
       lastErrorMessage =
         errorData.error?.message || 'The AI service could not generate a reply.';
 
-      console.error(`Gemini model ${model} returned HTTP ${response.status}:`, errorData);
+      console.error(`Gemini model ${model} returned HTTP ${response.status} after ${Date.now() - generationStartedAt}ms:`, errorData);
 
       if (response.status !== 503 || model === models[models.length - 1]) {
         return NextResponse.json(
@@ -158,7 +178,7 @@ Each reply must take a genuinely different approach -- a different opening, a di
     }
 
     console.info(
-      `Gemini generation succeeded using ${selectedModel} in ${Date.now() - generationStartedAt}ms.`
+      `Gemini generation succeeded using ${selectedModel} in ${Date.now() - generationStartedAt}ms (request total: ${Date.now() - requestStartedAt}ms).`
     );
     const data = await response.json();
     const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
