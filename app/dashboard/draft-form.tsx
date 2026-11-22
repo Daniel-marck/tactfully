@@ -3,6 +3,7 @@
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
 import React, { useState, useEffect, useRef } from 'react'
 import { createClient } from "@/lib/supabase/client"
+import type { User } from "@supabase/supabase-js"
 
 const supabase = createClient()
 
