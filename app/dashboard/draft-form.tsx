@@ -368,7 +368,10 @@ export function DraftForm() {
         .tactfully-workspace textarea { color:#172033 !important; font-size:16px !important; line-height:1.65 !important; min-height:180px !important; padding:14px 15px !important; border:1px solid #d0d5dd !important; border-radius:10px !important; background:#fff !important; }
         .tactfully-workspace textarea::placeholder { color:#98a2b3 !important; }
         .tactfully-workspace .relative.rounded-md.p-5 > span, .tactfully-workspace .relative.rounded-md.p-6 > span { color:#34469a !important; font-size:13px !important; font-weight:700 !important; }
-        .tactfully-workspace button.rounded-full { font-size:13px !important; font-weight:600 !important; padding:8px 13px !important; border-radius:8px !important; border:1px solid #d0d5dd !important; color:#344054 !important; background:#fff !important; }
+        .tactfully-workspace button.rounded-full { font-size:13px !important; font-weight:600 !important; padding:8px 13px !important; border-radius:8px !important; border:1px solid #d0d5dd !important; color:#344054 !important; background:#fff !important; cursor:pointer !important; pointer-events:auto !important; position:relative; z-index:2; }
+        .tactfully-workspace button.option-chip[aria-pressed="true"] { background:#34469a !important; color:#fff !important; border-color:#34469a !important; box-shadow:0 0 0 2px rgba(52,70,154,.14) !important; }
+        .tactfully-workspace button.option-chip[aria-pressed="false"] { background:#fff !important; color:#344054 !important; border-color:#d0d5dd !important; }
+        .tactfully-workspace .option-group { position:relative; z-index:1; pointer-events:auto; }
         .tactfully-workspace button.mt-6 { background:#34469a !important; color:#fff !important; border-radius:10px !important; min-height:52px !important; font-size:15px !important; font-weight:700 !important; }
         .tactfully-workspace .rise-anim { background:#fff !important; color:#172033 !important; border:1px solid #e6e9f0 !important; border-radius:14px !important; box-shadow:0 8px 24px rgba(16,24,40,.06) !important; }
         .tactfully-workspace .rise-anim p { color:#344054 !important; font-size:15px !important; line-height:1.7 !important; }
@@ -544,13 +547,14 @@ export function DraftForm() {
                 </span>
                 <InfoPopover text="Situation tells the AI what kind of conversation this is -- a late payment, a lowball offer, and so on -- so it can shape the reply around the right context." />
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="option-group flex flex-wrap gap-2">
                 {SITUATIONS.map((s) => (
                   <button
                     key={s}
                     type="button"
+                    aria-pressed={situation === s}
                     onClick={() => setSituation(s)}
-                    className="rounded-full px-3.5 py-1.5 text-[13px] transition-all"
+                    className="option-chip rounded-full px-3.5 py-1.5 text-[13px] transition-all"
                     style={situation === s
                       ? { background: '#1B2A3A', color: '#F5EFE1', border: '1px solid #1B2A3A' }
                       : { background: 'transparent', color: '#24303B', border: '1px solid rgba(36,48,59,0.18)' }}
@@ -568,13 +572,14 @@ export function DraftForm() {
                 </span>
                 <InfoPopover text="Tone sets how the reply should sound -- Diplomatic keeps it warm, Firm is direct with no fluff, Formal keeps it strictly businesslike." />
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="option-group flex flex-wrap gap-2">
                 {TONES.map((t) => (
                   <button
                     key={t.value}
                     type="button"
+                    aria-pressed={tone === t.value}
                     onClick={() => setTone(t.value)}
-                    className="rounded-full px-3.5 py-1.5 text-[13px] transition-all"
+                    className="option-chip rounded-full px-3.5 py-1.5 text-[13px] transition-all"
                     style={tone === t.value
                       ? { background: '#1B2A3A', color: '#F5EFE1', border: '1px solid #1B2A3A' }
                       : { background: 'transparent', color: '#24303B', border: '1px solid rgba(36,48,59,0.18)' }}
