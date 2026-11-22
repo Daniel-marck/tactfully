@@ -5,6 +5,8 @@ import { assertServerEnv } from '@/lib/config';
 export const maxDuration = 50;
 
 const FREE_DRAFT_LIMIT = 3;
+const MAX_MESSAGE_LENGTH = 6000;
+const MAX_CONTEXT_FIELD_LENGTH = 500;
 
 const NUM_OPTIONS = 3;
 
@@ -92,23 +94,44 @@ export async function POST(req: Request) {
         {
           error: 'limit_reached',
           message: `You've used all ${FREE_DRAFT_LIMIT} free drafts for today. They reset tomorrow, or upgrade to Pro for unlimited replies.`,
-          upgradeUrl: 'https://smartoolkit.gumroad.com/l/dzlkij',
         },
         { status: 403 }
       );
     }
 
-    const body = await req.json();
-    const message = body.incomingMessage || body.message || body.prompt || '';
-    const tone = typeof body.tone === 'string' ? body.tone : 'Formal';
-    const situation = typeof body.situation === 'string' ? body.situation : 'A general difficult message';
-    const desiredOutcome = typeof body.desiredOutcome === 'string' ? body.desiredOutcome.trim() : '';
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return NextResponse.json({ error: 'Invalid request. Please submit a client message.' }, { status: 400 });
+    }
+
+    const rawMessage = [body.incomingMessage, body.message, body.prompt].find(
+      (value) => typeof value === 'string' && value.trim()
+    );
+    const message = typeof rawMessage === 'string' ? rawMessage.trim() : '';
+    const tone = typeof body.tone === 'string' ? body.tone.trim() : 'Formal';
+    const situation =
+      typeof body.situation === 'string' ? body.situation.trim() : 'A general difficult message';
+    const desiredOutcome =
+      typeof body.desiredOutcome === 'string' ? body.desiredOutcome.trim() : '';
     const avoid = typeof body.avoid === 'string' ? body.avoid.trim() : '';
 
     if (!message) {
       return NextResponse.json(
         { error: 'No message provided to generate a reply for.' },
         { status: 400 }
+      );
+    }
+
+    if (
+      message.length > MAX_MESSAGE_LENGTH ||
+      tone.length > 40 ||
+      situation.length > 120 ||
+      desiredOutcome.length > MAX_CONTEXT_FIELD_LENGTH ||
+      avoid.length > MAX_CONTEXT_FIELD_LENGTH
+    ) {
+      return NextResponse.json(
+        { error: 'Your message or context is too long. Shorten it and try again.' },
+        { status: 413 }
       );
     }
 
