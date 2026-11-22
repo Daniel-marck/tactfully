@@ -5,16 +5,19 @@ import { readFile } from 'node:fs/promises';
 const route = await readFile(new URL('../app/api/generate/route.ts', import.meta.url), 'utf8');
 
 test('generation prompt assigns three distinct tactical jobs', () => {
-  assert.match(route, /DIPLOMATIC — RELATIONSHIP + COLLABORATION/);
-  assert.match(route, /FIRM & PROFESSIONAL — BOUNDARY + RATIONALE/);
-  assert.match(route, /DIRECT — DECISION + CLOSE/);
+  assert.match(route, /DIPLOMATIC — RELATIONSHIP \+ COLLABORATION/);
+  assert.match(route, /FIRM & PROFESSIONAL — BOUNDARY \+ RATIONALE/);
+  assert.match(route, /DIRECT — DECISION \+ CLOSE/);
   assert.match(route, /Diplomatic should reduce friction and open a collaborative route/);
   assert.match(route, /Firm should establish the rule, scope, or condition and why it applies/);
   assert.match(route, /Direct should close the loop with a concise decision or choice/);
+  assert.match(route, /If two options use the same tactic, rewrite them/);
 });
 
-test('generation prompt covers the core client-conflict scenarios', () => {
-  assert.match(route, /For scope creep, distinguish discussing\/prioritizing additions/);
+test('generation prompt differentiates common client-conflict scenarios', () => {
+  assert.match(route, /For scope creep, distinguish a relationship-preserving invitation/);
+  assert.match(route, /from a clear explanation of the existing scope boundary/);
+  assert.match(route, /from asking the client to choose the original scope/);
   assert.match(route, /For low offers, distinguish exploring a scope adjustment/);
   assert.match(route, /For late payment, distinguish a courteous payment check-in/);
   assert.match(route, /For no response, distinguish a warm re-engagement/);
