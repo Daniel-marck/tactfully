@@ -51,3 +51,10 @@ test('AI generation retries transient provider overload across fallback models',
   assert.match(route, /AbortSignal\.timeout\(10000\)/);
   assert.match(route, /Your draft allowance was not used/);
 });
+
+
+test('email confirmation callback rejects backslash-based external redirects', async () => {
+  const callback = await readFile(new URL('../app/auth/callback/route.ts', import.meta.url), 'utf8');
+  assert.match(callback, /requestedNext\.includes\("\\\\\\\"\)/);
+  assert.match(callback, /requestedNext\.startsWith\("\/\/"\)/);
+});
