@@ -22,8 +22,12 @@ export default function PrivacyPage() {
           <p className="mt-2">
             Your pasted messages are sent to Google's Gemini API to generate reply
             drafts. We use your account data to enforce our free-tier usage limit and
-            to know whether you've upgraded to Pro. We do not sell your data, and we
-            do not use your messages to train any AI model.
+            to know whether you've upgraded to Pro. We do not sell your data or train
+            our own AI model on your messages. Google's handling of prompts and
+            responses depends on the Gemini API account tier: Google states that
+            free-tier content may be used to improve its products, while paid-tier
+            content is not. Avoid pasting sensitive or confidential client information
+            unless paid-tier processing has been confirmed.
           </p>
         </section>
 
