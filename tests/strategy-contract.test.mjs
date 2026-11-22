@@ -15,9 +15,11 @@ test('generation prompt assigns three distinct tactical jobs', () => {
 });
 
 test('generation prompt differentiates common client-conflict scenarios', () => {
-  assert.match(route, /For scope creep, distinguish a relationship-preserving invitation/);
-  assert.match(route, /from a clear explanation of the existing scope boundary/);
-  assert.match(route, /from asking the client to choose the original scope/);
+  assert.match(route, /For scope creep, the three moves must be observably different/);
+  assert.match(route, /DIPLOMATIC invites a collaborative review/);
+  assert.match(route, /FIRM states that the requested items are outside the agreed deliverables/);
+  assert.match(route, /DIRECT presents the two paths and asks the client to choose/);
+  assert.match(route, /These must not all ask whether the client wants an estimate/);
   assert.match(route, /For low offers, distinguish exploring a scope adjustment/);
   assert.match(route, /For late payment, distinguish a courteous payment check-in/);
   assert.match(route, /For no response, distinguish a warm re-engagement/);
