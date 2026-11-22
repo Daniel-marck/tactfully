@@ -1,6 +1,8 @@
 name: Tactfully CI
 
 on:
+  push:
+    branches: [audit/tactfully-end-to-end]
   pull_request:
     branches: [main]
   workflow_dispatch:
