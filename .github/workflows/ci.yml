@@ -4,7 +4,7 @@ on:
   push:
     branches: [audit/tactfully-end-to-end]
   pull_request:
-    branches: [main]
+    branches: [main, feature/tactfully-focused-mvp]
   workflow_dispatch:
 
 permissions:
