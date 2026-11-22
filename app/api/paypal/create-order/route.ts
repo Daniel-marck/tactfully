@@ -73,8 +73,9 @@ export async function POST() {
 
     const order = await orderRes.json()
     return NextResponse.json({ id: order.id })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ create-order route crashed:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Could not start checkout.'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
