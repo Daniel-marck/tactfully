@@ -24,6 +24,9 @@ test('generation prompt prohibits invented commercial commitments', () => {
   assert.match(route, /HARD FACTUALITY RULE/);
   assert.match(route, /Never introduce a deadline, date, time limit, price, percentage, quantity/);
   assert.match(route, /Do not turn the client's requested deadline into a commitment/);
+  assert.match(route, /assuring the client that extra work will not affect the current timeline/);
+  assert.match(route, /Do not present reprioritization as a way to include extra work for free/);
+  assert.match(route, /Never promise that added work will not affect timelines/);
 });
 
 test('API keeps the three-option response contract and sufficient output budget', () => {
