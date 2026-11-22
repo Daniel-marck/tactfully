@@ -1,6 +1,5 @@
 "use client"
 
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
 import React, { useState, useEffect, useRef } from 'react'
 import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
@@ -171,7 +170,6 @@ export function DraftForm() {
   const [error, setError] = useState<string | null>(null)
   const [limitReached, setLimitReached] = useState(false)
   const [draftsRemaining, setDraftsRemaining] = useState<number | null>(null)
-  const [paypalError, setPaypalError] = useState<string | null>(null)
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
 
   const [user, setUser] = useState<User | null>(null)
@@ -677,45 +675,9 @@ export function DraftForm() {
                     Upgrade to Pro for unlimited replies, every tone, every situation.
                   </p>
 
-                  {paypalError && (
-                    <p className="mb-3 text-[12px]" style={{ color: '#E08A6B' }}>{paypalError}</p>
-                  )}
-
-                  <div className="w-full max-w-xs mx-auto">
-                    <PayPalScriptProvider options={{ clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "", currency: "USD" }}>
-                      <PayPalButtons
-                        style={{ layout: "vertical", color: "gold", shape: "rect", tagline: false }}
-                        createOrder={async () => {
-                          setPaypalError(null)
-                          const res = await fetch('/api/paypal/create-order', { method: 'POST' })
-                          const data = await res.json()
-                          if (!res.ok) {
-                            setPaypalError(data.error || 'Could not start checkout.')
-                            throw new Error(data.error)
-                          }
-                          return data.id
-                        }}
-                        onApprove={async (data) => {
-                          const res = await fetch('/api/paypal/capture-order', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ orderID: data.orderID }),
-                          })
-                          const result = await res.json()
-                          if (!res.ok) {
-                            setPaypalError(result.error || 'Payment could not be verified.')
-                            return
-                          }
-                          setPlan('pro')
-                          setLimitReached(false)
-                        }}
-                        onError={(err) => {
-                          console.error('PayPal error:', err)
-                          setPaypalError('Something went wrong with checkout. Try again.')
-                        }}
-                      />
-                    </PayPalScriptProvider>
-                  </div>
+                  <p className="mx-auto max-w-sm text-[13px] leading-6" style={{ color: '#B8C2CE', fontFamily: "var(--font-work-sans), sans-serif" }}>
+                    Pro will cost <strong style={{ color: '#F5EFE1' }}>$12 USD per month</strong>, billed monthly. Subscription checkout will open once the payment account and recurring billing have been verified.
+                  </p>
                 </div>
               )}
 
