@@ -41,23 +41,27 @@ export default function SignUpPage() {
     setLoading(true)
     setError(null)
 
-    const supabase = createClient()
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
-      },
-    })
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+        },
+      })
 
-    setLoading(false)
+      if (error) {
+        setError(error.message)
+        return
+      }
 
-    if (error) {
-      setError(error.message)
-      return
+      setSubmitted(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not create your account. Please try again.")
+    } finally {
+      setLoading(false)
     }
-
-    setSubmitted(true)
   }
 
   return (
