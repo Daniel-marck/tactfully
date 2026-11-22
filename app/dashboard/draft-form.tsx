@@ -35,9 +35,10 @@ const STRATEGY_LABELS = ['Diplomatic', 'Firm & professional', 'Direct']
 
 const QUICK_START_STEPS = [
   'Paste the client message',
-  'Pick the situation and tone',
-  'Generate your draft',
-  'Copy and send',
+  'Add your desired outcome',
+  'Choose the situation and tone',
+  'Generate 3 response strategies',
+  'Refine, copy and send',
 ]
 
 function SealIcon() {
@@ -213,6 +214,8 @@ export function DraftForm() {
 
   const handleSelectDraft = (draft: any) => {
     setIncomingMessage(draft.original_message)
+    setDesiredOutcome('')
+    setAvoid('')
     setSituation(draft.situation)
     setTone(draft.tone)
     setDraftOptions(
