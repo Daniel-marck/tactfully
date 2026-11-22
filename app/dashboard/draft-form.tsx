@@ -30,6 +30,15 @@ const TONES = [
   { label: 'Formal', value: 'Formal and businesslike' },
 ]
 
+type SavedDraft = {
+  id: string
+  original_message: string
+  situation: string
+  tone: string
+  generated_reply: string
+  created_at: string
+}
+
 const OPTIONS_SEPARATOR = '\n\n---\n\n'
 const STRATEGY_LABELS = ['Diplomatic', 'Firm & professional', 'Direct']
 
@@ -162,9 +171,9 @@ export function DraftForm() {
   const [paypalError, setPaypalError] = useState<string | null>(null)
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
 
-  const [user, setUser] = useState<any | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [plan, setPlan] = useState<'free' | 'pro'>('free')
-  const [draftsList, setDraftsList] = useState<any[]>([])
+  const [draftsList, setDraftsList] = useState<SavedDraft[]>([])
 
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authEmail, setAuthEmail] = useState('')
@@ -188,7 +197,7 @@ export function DraftForm() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const handleUserChange = async (currentUser: any) => {
+  const handleUserChange = async (currentUser: User | null) => {
     setUser(currentUser)
     if (currentUser) {
       const { data: profile } = await supabase
@@ -212,7 +221,7 @@ export function DraftForm() {
     }
   }
 
-  const handleSelectDraft = (draft: any) => {
+  const handleSelectDraft = (draft: SavedDraft) => {
     setIncomingMessage(draft.original_message)
     setDesiredOutcome('')
     setAvoid('')
@@ -255,8 +264,8 @@ export function DraftForm() {
       setAuthEmail('')
       setAuthPassword('')
       setShowAuthPassword(false)
-    } catch (err: any) {
-      setAuthError(err.message || 'Authentication failed.')
+    } catch (err: unknown) {
+      setAuthError(err instanceof Error ? err.message : 'Authentication failed.')
     } finally {
       setAuthLoading(false)
     }
