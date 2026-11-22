@@ -103,6 +103,31 @@ function InfoPopover({ text }: { text: string }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLSpanElement>(null)
 
+  async function handleUserChange(currentUser: User | null) {
+    setUser(currentUser)
+    if (currentUser) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('plan')
+        .eq('id', currentUser.id)
+        .single()
+      setPlan(profile?.plan === 'pro' ? 'pro' : 'free')
+
+      const { data: drafts } = await supabase
+        .from('drafts')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(20)
+      setDraftsList(drafts || [])
+    } else {
+      setPlan('free')
+      setDraftsList([])
+      setDraftsRemaining(null)
+      setLimitReached(false)
+    }
+  }
+
+
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -197,30 +222,6 @@ export function DraftForm() {
 
     return () => subscription.unsubscribe()
   }, [])
-
-  async function handleUserChange(currentUser: User | null) {
-    setUser(currentUser)
-    if (currentUser) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('plan')
-        .eq('id', currentUser.id)
-        .single()
-      setPlan(profile?.plan === 'pro' ? 'pro' : 'free')
-
-      const { data: drafts } = await supabase
-        .from('drafts')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20)
-      setDraftsList(drafts || [])
-    } else {
-      setPlan('free')
-      setDraftsList([])
-      setDraftsRemaining(null)
-      setLimitReached(false)
-    }
-  }
 
   const handleSelectDraft = (draft: SavedDraft) => {
     setIncomingMessage(draft.original_message)
