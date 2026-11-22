@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, type FormEvent } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { MessagesSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -29,6 +30,7 @@ function EyeIcon({ open }: { open: boolean }) {
 }
 
 export default function SignUpPage() {
+  const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -42,11 +44,11 @@ export default function SignUpPage() {
     setError(null)
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
       },
     })
 
@@ -54,6 +56,12 @@ export default function SignUpPage() {
 
     if (error) {
       setError(error.message)
+      return
+    }
+
+    if (data.session) {
+      router.replace("/dashboard")
+      router.refresh()
       return
     }
 
