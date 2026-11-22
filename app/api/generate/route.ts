@@ -110,8 +110,9 @@ ${message}
 Return a concise, evidence-based summary of what the client appears to want (do not claim certainty about hidden intent), the most relevant situation label, 0-3 concrete risk flags, one recommended response strategy, and one boundary/fact the freelancer should protect. Return exactly two genuinely different reply approaches (not synonym swaps), with an explanation of when each is useful. Replies must be concise, professional, editable, and ready to send. Never invent contract terms, prices, dates, facts, commitments, or prior agreements. Use placeholders or ask a clarifying question when essential information is missing. Do not provide legal advice or send anything on the user's behalf.`;
 
     const apiKey = process.env.GEMINI_API_KEY!;
+    const model = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
     const response = await fetchGeminiWithRetry(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
