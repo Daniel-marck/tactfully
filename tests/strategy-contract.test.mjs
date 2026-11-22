@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const route = await readFile(new URL('../app/api/generate/route.ts', import.meta.url), 'utf8');
+const landing = await readFile(new URL('../app/page.tsx', import.meta.url), 'utf8');
 
 test('generation prompt assigns three distinct tactical jobs', () => {
   assert.match(route, /DIPLOMATIC — RELATIONSHIP \+ COLLABORATION/);
@@ -57,4 +58,12 @@ test('email confirmation callback rejects backslash-based external redirects', a
   const callback = await readFile(new URL('../app/auth/callback/route.ts', import.meta.url), 'utf8');
   assert.ok(callback.includes('requestedNext.includes("\\\\")'));
   assert.ok(callback.includes('requestedNext.startsWith("//")'));
+});
+
+
+test('launch page only advertises implemented product capabilities', () => {
+  assert.match(landing, /3 AI replies per day/);
+  assert.match(landing, /3 response strategies/);
+  assert.match(landing, /Review and approve every reply before sending/);
+  assert.doesNotMatch(landing, /sentiment detection|personal communication coach|advanced negotiation support/i);
 });
