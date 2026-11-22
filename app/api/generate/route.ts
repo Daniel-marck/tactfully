@@ -16,6 +16,7 @@ function isTactfullyTester(email: string | undefined) {
 }
 
 export async function POST(req: Request) {
+  const requestStartedAt = Date.now();
   try {
     assertServerEnv(['GEMINI_API_KEY'], 'AI generation');
 
@@ -112,6 +113,7 @@ Each reply must take a genuinely different approach -- a different opening, a di
           },
           required: ['replies'],
         },
+        maxOutputTokens: 512,
       },
     };
 
@@ -121,6 +123,7 @@ Each reply must take a genuinely different approach -- a different opening, a di
     let response: Response | null = null;
     let lastErrorMessage = 'The AI service is temporarily unavailable. Please try again shortly.';
     let selectedModel = '';
+    const generationStartedAt = Date.now();
 
     for (const model of models) {
       selectedModel = model;
@@ -154,7 +157,9 @@ Each reply must take a genuinely different approach -- a different opening, a di
       return NextResponse.json({ error: lastErrorMessage }, { status: 503 });
     }
 
-    console.info(`Gemini generation succeeded using ${selectedModel}.`);
+    console.info(
+      `Gemini generation succeeded using ${selectedModel} in ${Date.now() - generationStartedAt}ms.`
+    );
     const data = await response.json();
     const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
@@ -190,6 +195,10 @@ Each reply must take a genuinely different approach -- a different opening, a di
 
       newCount = incrementResult?.[0]?.new_count ?? effectiveDraftCount + 1;
     }
+
+    console.info(
+      `Draft request completed in ${Date.now() - requestStartedAt}ms (model: ${selectedModel}).`
+    );
 
     return NextResponse.json({
       replies,
