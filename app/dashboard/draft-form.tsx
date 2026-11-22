@@ -198,7 +198,7 @@ export function DraftForm() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const handleUserChange = async (currentUser: User | null) => {
+  async function handleUserChange(currentUser: User | null) {
     setUser(currentUser)
     if (currentUser) {
       const { data: profile } = await supabase
