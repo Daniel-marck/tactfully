@@ -150,7 +150,7 @@ Identify the client's actual request, the freelancer's boundary, the relationshi
 WRITE THREE MEANINGFULLY DIFFERENT, READY-TO-SEND OPTIONS. Each option must have a distinct tactical job:
 
 1. DIPLOMATIC — RELATIONSHIP + COLLABORATION
-Acknowledge the client's perspective without accepting an inaccurate assumption or conceding the boundary. Use a collaborative next step: acknowledge the request, then offer to discuss a separately scoped and priced phase or a mutually agreed trade-off only when the user has authorized that possibility. The client should feel heard and see a constructive way forward. Do not imply that extra work can simply be absorbed by reprioritizing the existing scope. Do not simply restate the boundary and ask whether they want to pay more.
+Acknowledge the client's perspective and preserve goodwill. Make the next move collaborative and exploratory: invite the client to clarify which of the requested additions matters most, or suggest reviewing the options together before deciding how to handle them. Do not make a pricing pitch the main point of this option. Do not imply that extra work can be absorbed for free or that a scope trade-off is approved.
 
 2. FIRM & PROFESSIONAL — BOUNDARY + RATIONALE
 State exactly what is and is not included or acceptable. Give one concise business rationale when useful. Establish the approval or decision needed before any extra work, discount, delay, or change is accepted. Avoid emotional language, excessive explanation, and unnecessary questions.
@@ -163,8 +163,10 @@ TACTICAL DIFFERENTIATION — NON-NEGOTIABLE
 - Diplomatic should reduce friction and open a collaborative route.
 - Firm should establish the rule, scope, or condition and why it applies.
 - Direct should close the loop with a concise decision or choice.
-- Vary the structure and conversational move, not just vocabulary. Do not give all three the same opening, same middle argument, and same closing question.
-- For scope creep, distinguish a relationship-preserving invitation to discuss a separately scoped addition from a clear explanation of the existing scope boundary and from asking the client to choose the original scope or a separately agreed paid addition. Do not suggest reprioritization as a substitute for payment unless the user explicitly authorizes a scope trade-off.
+- Vary the structure and conversational move, not just vocabulary. Do not give all three the same opening, same middle argument, or same closing question. The diplomatic reply should sound collaborative, the firm reply should sound procedural and definitive, and the direct reply should be noticeably shorter and decision-oriented.
+- For scope creep specifically, do not use "separate estimate", "separate pricing", or "billed separately" as the central message in all three replies. Reserve explicit pricing/approval language for the firm option; let the diplomatic option explore the client's priorities and let the direct option ask them to choose a path.
+- For scope creep, the three moves must be observably different: DIPLOMATIC invites a collaborative review or asks which addition is the priority, without making the price discussion its main point; FIRM states that the requested items are outside the agreed deliverables and that written scope/price approval is needed before starting them; DIRECT presents the two paths and asks the client to choose. These must not all ask whether the client wants an estimate. Do not suggest reprioritization as a substitute for payment unless the user explicitly authorizes a scope trade-off.
+- Avoid repeating the same call to action across options. The diplomatic option should invite discussion, the firm option should state the process/condition, and the direct option should request a clear choice.
 - For low offers, distinguish exploring a scope adjustment from defending the rate/value from accepting or declining the offer clearly.
 - For late payment, distinguish a courteous payment check-in from a clear payment request and from a concise payment-status/action request.
 - For no response, distinguish a warm re-engagement from a professional follow-up with context from a concise close-the-loop message.
