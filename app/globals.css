@@ -183,3 +183,42 @@
 .tactfully-workspace button {
   border-radius: 12px;
 }
+
+.tactfully-workspace > div[class*="max-w-6xl"] {
+  max-width: 1280px;
+  gap: 24px;
+  padding-top: 32px;
+}
+.tactfully-workspace aside {
+  border: 1px solid #E6EAF2;
+  border-radius: 20px;
+  background: #FFFFFF;
+  padding: 18px;
+  box-shadow: 0 8px 30px -24px rgba(16,24,40,.25);
+}
+.tactfully-workspace textarea {
+  min-height: 170px;
+  border-radius: 12px;
+  background: #F8FAFC !important;
+  padding: 14px !important;
+  resize: vertical;
+}
+.tactfully-workspace button[style*="#B8722A"] {
+  background: #4F46E5 !important;
+  color: #FFFFFF !important;
+  border-color: #4F46E5 !important;
+}
+.tactfully-workspace [style*="rgba(184,114,42,0.08)"] {
+  background: #EEF2FF !important;
+  border-color: #C7D2FE !important;
+  color: #3730A3 !important;
+}
+.tactfully-workspace [style*="rgba(245,239,225,0.06)"] {
+  background: #F1F3F9 !important;
+  color: #344054 !important;
+}
+@media (max-width: 1023px) {
+  .tactfully-workspace aside {
+    padding: 14px;
+  }
+}
