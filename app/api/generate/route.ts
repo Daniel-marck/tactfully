@@ -238,8 +238,8 @@ Return exactly three reply strings in the required JSON structure, in the order 
     const modelAttempts = [
       'gemini-3.5-flash-lite',
       'gemini-3.5-flash-lite',
-      'gemini-3.6-flash',
-      'gemini-3.5-flash',
+      'gemini-3.8-flash',
+      'gemini-3.8-flash',
     ];
     const transientStatuses = new Set([429, 500, 502, 503, 504]);
     let response: Response | null = null;
