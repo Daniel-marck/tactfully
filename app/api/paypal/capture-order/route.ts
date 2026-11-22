@@ -96,8 +96,9 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: true, plan: 'pro' })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ capture-order route crashed:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Payment could not be processed.'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
