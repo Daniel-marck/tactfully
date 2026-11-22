@@ -89,48 +89,72 @@ Additional context: ${context || 'None'}.
 
 Each reply must take a genuinely different approach -- a different opening, a different level of detail, or a different way of framing the same point -- while staying in the requested tone. Do not simply rewrite the user message. Keep each reply concise, polite, and ready to send. Write in the first person.`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          systemInstruction: {
-            parts: [
-              {
-                text: 'You help freelancers and support teams write professional, concise email and message replies.',
-              },
-            ],
+    const requestBody = {
+      contents: [{ parts: [{ text: prompt }] }],
+      systemInstruction: {
+        parts: [
+          {
+            text: 'You help freelancers and support teams write professional, concise email and message replies.',
           },
-          generationConfig: {
-            responseMimeType: 'application/json',
-            responseSchema: {
-              type: 'OBJECT',
-              properties: {
-                replies: {
-                  type: 'ARRAY',
-                  minItems: NUM_OPTIONS,
-                  maxItems: NUM_OPTIONS,
-                  items: { type: 'STRING' },
-                },
-              },
-              required: ['replies'],
+        ],
+      },
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: 'OBJECT',
+          properties: {
+            replies: {
+              type: 'ARRAY',
+              minItems: NUM_OPTIONS,
+              maxItems: NUM_OPTIONS,
+              items: { type: 'STRING' },
             },
           },
-        }),
-      }
-    );
+          required: ['replies'],
+        },
+      },
+    };
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('❌ Gemini API returned an error:', errorData);
-      return NextResponse.json(
-        { error: errorData.error?.message || 'Failed to generate content' },
-        { status: response.status }
+    // Try the primary model first, then a lower-cost supported fallback on capacity errors.
+    // Only retry on 503; authentication, quota and request errors should remain visible.
+    const models = ['gemini-flash-latest', 'gemini-3.5-flash-lite'];
+    let response: Response | null = null;
+    let lastErrorMessage = 'The AI service is temporarily unavailable. Please try again shortly.';
+    let selectedModel = '';
+
+    for (const model of models) {
+      selectedModel = model;
+      response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody),
+          signal: AbortSignal.timeout(40000),
+        }
       );
+
+      if (response.ok) break;
+
+      const errorData = await response.json().catch(() => ({}));
+      lastErrorMessage =
+        errorData.error?.message || 'The AI service could not generate a reply.';
+
+      console.error(`Gemini model ${model} returned HTTP ${response.status}:`, errorData);
+
+      if (response.status !== 503 || model === models[models.length - 1]) {
+        return NextResponse.json(
+          { error: lastErrorMessage },
+          { status: response.status }
+        );
+      }
     }
 
+    if (!response?.ok) {
+      return NextResponse.json({ error: lastErrorMessage }, { status: 503 });
+    }
+
+    console.info(`Gemini generation succeeded using ${selectedModel}.`);
     const data = await response.json();
     const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
@@ -140,7 +164,7 @@ Each reply must take a genuinely different approach -- a different opening, a di
       if (Array.isArray(parsed.replies)) {
         replies = parsed.replies.filter((r: unknown) => typeof r === 'string' && r.trim());
       }
-    } catch (parseErr) {
+    } catch {
       console.error('⚠️ Could not parse Gemini JSON response:', rawText);
     }
 
@@ -180,6 +204,14 @@ Each reply must take a genuinely different approach -- a different opening, a di
     });
   } catch (error: any) {
     console.error('❌ Server route crashed:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const isTimeout = error?.name === 'TimeoutError' || error?.name === 'AbortError';
+    return NextResponse.json(
+      {
+        error: isTimeout
+          ? 'The AI service took too long to respond. Please try again.'
+          : error?.message || 'Something went wrong generating your reply.',
+      },
+      { status: isTimeout ? 504 : 500 }
+    );
   }
 }
