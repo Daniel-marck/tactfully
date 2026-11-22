@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --test",
+    "prebuild": "npm test"
   },
   "dependencies": {
     "@paypal/react-paypal-js": "^8.1.3",
