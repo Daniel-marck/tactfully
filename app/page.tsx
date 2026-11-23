@@ -28,7 +28,7 @@ function Brand({ light = false }: { light?: boolean }) {
 function ProductWindow() {
   return <div className="relative mx-auto w-full max-w-[570px]">
     <div className="absolute -inset-5 rounded-[34px] bg-forest-400/20 blur-3xl" />
-    <div className="relative overflow-hidden rounded-[26px] border border-white/70 bg-white shadow-[0_32px_100px_-35px_rgba(30,41,99,.45)]">
+    <div className="relative overflow-hidden rounded-[26px] border border-white/70 bg-white shadow-[0_32px_100px_-35px_rgba(49,93,71,.22)]">
       <div className="flex items-center justify-between border-b border-stone-100 bg-white px-5 py-4">
         <div className="flex items-center gap-2.5"><span className="grid size-8 place-items-center rounded-lg bg-forest-600 text-white"><MessageSquareText size={15}/></span><span className="text-sm font-semibold text-stone-900">Reply studio</span></div>
         <div className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-forest-400"/><span className="text-[11px] font-medium text-stone-500">Ready to draft</span></div>
@@ -43,7 +43,7 @@ function ProductWindow() {
           <p className="mt-3 text-center text-[10px] text-stone-400">You review every reply before sending.</p>
         </div>
         <div className="p-5">
-          <div className="mb-3 flex items-center justify-between"><span className="text-[10px] font-bold uppercase tracking-[.16em] text-stone-400">Your response strategies</span><span className="rounded-full bg-forest-50 px-2 py-1 text-[9px] font-semibold text-forest-700" >2 reply options</span></div>
+          <div className="mb-3 flex items-center justify-between"><span className="text-[10px] font-bold uppercase tracking-[.16em] text-stone-400">Your reply options</span><span className="rounded-full bg-forest-50 px-2 py-1 text-[9px] font-semibold text-forest-700" >2 reply options</span></div>
           <div className="rounded-2xl border border-forest-100 bg-forest-50/60 p-4">
             <div className="mb-2 flex items-center justify-between"><span className="text-[11px] font-bold text-forest-700">Diplomatic approach</span><Sparkles size={13} className="text-forest-500"/></div>
             <p className="text-[12px] leading-[1.75] text-stone-700">“Happy to help with those additions. They sit outside our original scope, so I can send over an updated estimate before we proceed.”</p>
@@ -53,11 +53,6 @@ function ProductWindow() {
             <div className="mb-2 text-[11px] font-bold text-stone-600">Firm & professional</div>
             <p className="text-[12px] leading-[1.75] text-stone-600">“I can take those on. Let me map out the extra work and send a revised timeline and price so we&apos;re aligned.”</p>
             <div className="mt-3 border-t border-stone-100 pt-3 text-[10px] text-stone-400">Clear · Professional</div>
-          </div>
-          <div className="mt-3 rounded-2xl border border-stone-200 p-4">
-            <div className="mb-2 text-[11px] font-bold text-stone-600">Direct approach</div>
-            <p className="text-[12px] leading-[1.75] text-stone-600">“I can take on the additional work, but it will need a separate estimate and timeline. Let me know if you&apos;d like me to prepare that.”</p>
-            <div className="mt-3 border-t border-stone-100 pt-3 text-[10px] text-stone-400">Concise · Unambiguous</div>
           </div>
         </div>
       </div>
@@ -79,7 +74,7 @@ export default function Page() {
     </header>
     <main>
       <section className="relative isolate bg-[#F4F0E7]">
-        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_78%_12%,rgba(129,140,248,.18),transparent_38%),radial-gradient(ellipse_at_5%_70%,rgba(196,181,253,.18),transparent_35%)]"/>
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_78%_12%,rgba(127,159,138,.18),transparent_38%),radial-gradient(ellipse_at_5%_70%,rgba(168,95,67,.12),transparent_35%)]"/>
         <div className="mx-auto grid max-w-7xl items-center gap-14 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[.95fr_1.05fr] lg:gap-12 lg:py-28">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-forest-100 bg-white/80 px-3.5 py-2 text-[11px] font-semibold text-forest-700 shadow-sm"><Sparkles size={13}/> A calmer way to handle client messages</div>
@@ -87,7 +82,7 @@ export default function Page() {
             <p className="mt-6 max-w-xl text-[17px] leading-8 text-stone-600">Turn awkward requests, late payments and price pushback into clear, professional replies with a strategy that fits the conversation.</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row"><Link href="/sign-up" className="inline-flex h-13 items-center justify-center gap-2 rounded-xl bg-forest-600 px-6 text-sm font-semibold text-white shadow-xl shadow-forest-600/20 transition hover:-translate-y-0.5 hover:bg-forest-700">Draft your first reply free <ArrowRight size={16}/></Link><a href="#how-it-works" className="inline-flex h-13 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white px-6 text-sm font-semibold text-stone-700 transition hover:border-stone-300 hover:bg-stone-50">See how it works</a></div>
             <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-[12px] font-medium text-stone-500"><span className="inline-flex items-center gap-1.5"><Check size={14} className="text-forest-600"/> Free plan available</span><span className="inline-flex items-center gap-1.5"><Check size={14} className="text-forest-600"/> No card to try</span><span className="inline-flex items-center gap-1.5"><Check size={14} className="text-forest-600"/> You approve every reply</span></div>
-            <div className="mt-12 grid max-w-lg grid-cols-3 border-t border-forest-100 pt-6"><div><div className="text-2xl font-semibold tracking-tight text-stone-900">3/day</div><div className="mt-1 text-[10px] font-medium text-stone-500 sm:text-xs">Free generations</div></div><div className="border-x border-forest-100 px-4"><div className="text-2xl font-semibold tracking-tight text-stone-900">3</div><div className="mt-1 text-[10px] font-medium text-stone-500 sm:text-xs">Response strategies</div></div><div className="pl-4"><div className="text-2xl font-semibold tracking-tight text-stone-900">3</div><div className="mt-1 text-[10px] font-medium text-stone-500 sm:text-xs">Tone choices</div></div></div>
+            <div className="mt-12 grid max-w-lg grid-cols-3 border-t border-forest-100 pt-6"><div><div className="text-2xl font-semibold tracking-tight text-stone-900">3/day</div><div className="mt-1 text-[10px] font-medium text-stone-500 sm:text-xs">Free generations</div></div><div className="border-x border-forest-100 px-4"><div className="text-2xl font-semibold tracking-tight text-stone-900">2</div><div className="mt-1 text-[10px] font-medium text-stone-500 sm:text-xs">Reply options</div></div><div className="pl-4"><div className="text-2xl font-semibold tracking-tight text-stone-900">3</div><div className="mt-1 text-[10px] font-medium text-stone-500 sm:text-xs">Tone choices</div></div></div>
           </div>
           <ProductWindow/>
         </div>
