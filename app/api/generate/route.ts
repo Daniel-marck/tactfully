@@ -342,11 +342,27 @@ Return exactly three reply strings in the required JSON structure, in the order 
         { user_id: user.id }
       );
 
-      if (incrementError) {
+      if (incrementError || !incrementResult?.[0]) {
         console.error('⚠️ Failed to increment draft count:', incrementError);
+        return NextResponse.json(
+          { error: "We couldn't update your draft allowance. Please try again." },
+          { status: 503 }
+        );
       }
 
-      newCount = incrementResult?.[0]?.new_count ?? effectiveDraftCount + 1;
+      newCount = incrementResult[0].new_count;
+
+      // Enforce the limit again after the atomic database increment so concurrent
+      // requests cannot receive more than the daily free allowance.
+      if (profile.plan === 'free' && newCount > FREE_DRAFT_LIMIT) {
+        return NextResponse.json(
+          {
+            error: 'limit_reached',
+            message: `You've used all ${FREE_DRAFT_LIMIT} free drafts for today. They reset tomorrow.`,
+          },
+          { status: 403 }
+        );
+      }
     }
 
     console.info(
