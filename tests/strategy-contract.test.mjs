@@ -64,7 +64,7 @@ test('email confirmation callback rejects backslash-based external redirects', a
 
 
 test('launch page only advertises implemented product capabilities', () => {
-  assert.match(landing, /3 AI replies per day/);
+  assert.match(landing, /3 generations per day/);
   assert.match(landing, /3 response strategies/);
   assert.match(landing, /Review and approve every reply before sending/);
   assert.doesNotMatch(landing, /sentiment detection|personal communication coach|advanced negotiation support/i);
@@ -73,9 +73,9 @@ test('launch page only advertises implemented product capabilities', () => {
 
 test('legal pages disclose AI provider data handling and daily free limits', () => {
   assert.match(privacy, /free-tier content may be used to improve its products/);
-  assert.match(privacy, /paid-tier\s+content is not/);
-  assert.match(terms, /3 AI replies per day/);
-  assert.match(terms, /Pro subscriptions are not available yet/);
+  assert.match(privacy, /paid-tier content is not used/);
+  assert.match(terms, /three generations per day/);
+  assert.match(terms, /Pro subscriptions are not\s+available/);
   assert.match(landing, /Pro subscriptions coming soon/);
 });
 
@@ -119,4 +119,22 @@ test('saved reply edits persist only to the selected owner draft', async () => {
   assert.match(dashboard, /\.eq\('id', selectedDraftId\)/);
   assert.match(dashboard, /\.eq\('user_id', user\.id\)/);
   assert.match(dashboard, /Changes saved to your draft history/);
+});
+
+test('saved draft context is persisted and restored', async () => {
+  const migration = await readFile(new URL('../supabase/migrations/20261123211444_persist_draft_context_and_tighten_user_access.sql', import.meta.url), 'utf8');
+  assert.match(migration, /add column if not exists desired_outcome text not null default ''/i);
+  assert.match(migration, /add column if not exists avoid text not null default ''/i);
+  assert.match(dashboard, /desired_outcome: desiredOutcome/);
+  assert.match(dashboard, /avoid,/);
+  assert.match(dashboard, /setDesiredOutcome\(draft\.desired_outcome \|\| ''\)/);
+  assert.match(dashboard, /setAvoid\(draft\.avoid \|\| ''\)/);
+});
+
+test('users can delete only their own saved drafts', async () => {
+  const migration = await readFile(new URL('../supabase/migrations/20261123211949_add_draft_deletion_and_harden_quota_function.sql', import.meta.url), 'utf8');
+  assert.match(migration, /for delete to authenticated/i);
+  assert.match(migration, /\(select auth\.uid\(\)\) = user_id/i);
+  assert.match(dashboard, /\.delete\(\)/);
+  assert.match(dashboard, /Delete this saved draft\?/);
 });
