@@ -75,7 +75,7 @@ export default function SignUpPage() {
             <h1 className="text-xl font-semibold tracking-tight">Check your email</h1>
             <p className="mt-2 text-sm text-muted-foreground">
               We sent a confirmation link to <span className="font-medium">{email}</span>.
-              Click it to activate your account, then sign in.
+              Click it to confirm your email and open your dashboard.
             </p>
             <Link href="/sign-in">
               <Button className="mt-6 h-10 w-full">Back to sign in</Button>
@@ -113,11 +113,11 @@ export default function SignUpPage() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     required
-                    minLength={6}
+                    minLength={8}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="h-10 w-full rounded-lg border border-border bg-background px-3 pr-10 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                    placeholder="At least 6 characters"
+                    placeholder="At least 8 characters"
                   />
                   <button
                     type="button"
