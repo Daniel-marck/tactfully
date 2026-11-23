@@ -61,6 +61,7 @@ async function requestGemini(apiKey: string, prompt: string): Promise<Response> 
       if (response.ok || !RETRYABLE_STATUSES.has(response.status) || attempt === 1) {
         return response;
       }
+      await response.body?.cancel().catch(() => undefined);
     } catch (error) {
       lastError = error;
       if (attempt === 1) throw lastError;
