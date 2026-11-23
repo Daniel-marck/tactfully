@@ -468,8 +468,8 @@ export function DraftForm() {
           to { transform: scale(1) rotate(8deg); }
         }
         @keyframes rise {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
+          from { opacity: 0; transform: transtoneY(8px); }
+          to { opacity: 1; transform: transtoneY(0); }
         }
         .seal-anim { animation: stamp 0.5s cubic-bezier(.2,1.4,.4,1) forwards; }
         .rise-anim { animation: rise 0.4s ease forwards; }
@@ -510,12 +510,12 @@ export function DraftForm() {
         .tactfully-workspace button.mt-4.w-full:hover:not(:disabled) { background:#193A2C !important; }
         .tactfully-workspace button.mt-4.w-full:disabled { background:#A9B5A9 !important; border-color:#A9B5A9 !important; color:#FFFFFF !important; box-shadow:none !important; }
         .tactfully-workspace .rise-anim p { color:#403D34 !important; font-size:15px !important; line-height:1.7 !important; }
-        .tactfully-workspace .rise-anim button, .tactfully-workspace .bg-indigo-600 { background:#E8EFE8 !important; border:1px solid #C8D8CB !important; color:#244A3A !important; border-radius:8px !important; font-size:13px !important; font-weight:750 !important; padding:9px 13px !important; }
-        .tactfully-workspace .bg-indigo-100 { background:#E8EFE8 !important; }
-        .tactfully-workspace .text-indigo-700, .tactfully-workspace .text-indigo-800 { color:#315D47 !important; }
-        .tactfully-workspace .text-slate-900 { color:#302F29 !important; }
-        .tactfully-workspace .text-slate-500, .tactfully-workspace .text-slate-600 { color:#77756D !important; }
-        .tactfully-workspace .border-slate-200 { border-color:#E5DDCE !important; }
+        .tactfully-workspace .rise-anim button, .tactfully-workspace .bg-forest-600 { background:#E8EFE8 !important; border:1px solid #C8D8CB !important; color:#244A3A !important; border-radius:8px !important; font-size:13px !important; font-weight:750 !important; padding:9px 13px !important; }
+        .tactfully-workspace .bg-forest-100 { background:#E8EFE8 !important; }
+        .tactfully-workspace .text-forest-700, .tactfully-workspace .text-forest-800 { color:#315D47 !important; }
+        .tactfully-workspace .text-stone-900 { color:#302F29 !important; }
+        .tactfully-workspace .text-stone-500, .tactfully-workspace .text-stone-600 { color:#77756D !important; }
+        .tactfully-workspace .border-stone-200 { border-color:#E5DDCE !important; }
         .tactfully-workspace .fixed.inset-0 > div, .tactfully-workspace .fixed.inset-0 > section { background:#FFFCF5 !important; color:#302F29 !important; border-radius:16px !important; }
         .tactfully-workspace .fixed.inset-0 h2 { color:#244A3A !important; font-size:24px !important; font-style:normal !important; font-weight:750 !important; }
         .tactfully-workspace .fixed.inset-0 button[type="submit"] { background:#244A3A !important; color:#FFFFFF !important; border-radius:9px !important; min-height:46px !important; }
@@ -617,7 +617,7 @@ export function DraftForm() {
                   onChange={(event) => setDraftSearch(event.target.value)}
                   placeholder="Search saved drafts..."
                   aria-label="Search saved drafts"
-                  className="w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-forest-200"
                   style={{ borderColor: '#D0D5DD', background: '#fff', color: '#172033' }}
                 />
               </label>
@@ -666,7 +666,7 @@ export function DraftForm() {
                     draft.situation.toLowerCase().includes(query) ||
                     (SITUATION_LABELS[draft.situation] || '').toLowerCase().includes(query)
                 }) && (
-                  <p className="px-2 py-3 text-xs text-slate-500">No saved drafts match that search.</p>
+                  <p className="px-2 py-3 text-xs text-stone-500">No saved drafts match that search.</p>
                 )}
               </div>
             </div>
@@ -687,14 +687,14 @@ export function DraftForm() {
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="quick-start-title mb-0 font-semibold">Quick start</div>
-                <button type="button" onClick={() => setShowQuickStart(false)} aria-label="Dismiss quick start" className="rounded-md px-2 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600">Hide</button>
+                <button type="button" onClick={() => setShowQuickStart(false)} aria-label="Dismiss quick start" className="rounded-md px-2 py-1 text-xs font-semibold text-forest-700 hover:bg-forest-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest-600">Hide</button>
               </div>
-              <p className="mt-1 text-xs text-indigo-800">Paste the client message, set the context, then generate three reply strategies.</p>
+              <p className="mt-1 text-xs text-forest-800">Paste the client message, set the context, then generate three reply strategies.</p>
             </div>
           </div>
           ) : (
             <div className="lg:col-span-2 flex justify-end">
-              <button type="button" onClick={() => setShowQuickStart(true)} className="rounded-lg border border-indigo-200 bg-white px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-50">Show quick start</button>
+              <button type="button" onClick={() => setShowQuickStart(true)} className="rounded-lg border border-forest-200 bg-white px-3 py-1.5 text-xs font-semibold text-forest-700 hover:bg-forest-50">Show quick start</button>
             </div>
           )}
 
@@ -727,7 +727,7 @@ export function DraftForm() {
 
             <div className="mt-3 grid grid-cols-1 gap-3">
               <label className="block">
-                <span className="block mb-1.5 text-xs font-semibold text-slate-600">What outcome do you want?</span>
+                <span className="block mb-1.5 text-xs font-semibold text-stone-600">What outcome do you want?</span>
                 <input
                   type="text"
                   value={desiredOutcome}
@@ -738,7 +738,7 @@ export function DraftForm() {
                 />
               </label>
               <label className="block">
-                <span className="block mb-1.5 text-xs font-semibold text-slate-600">Anything the reply should avoid?</span>
+                <span className="block mb-1.5 text-xs font-semibold text-stone-600">Anything the reply should avoid?</span>
                 <input
                   type="text"
                   value={avoid}
@@ -826,13 +826,13 @@ export function DraftForm() {
 
           <div className="min-w-0 mt-5 lg:mt-0 flex flex-col gap-4">
             {draftOptions.length === 0 && !limitReached && (
-              <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 xl:sticky xl:top-5">
-                <div className="text-sm font-semibold text-slate-900">Your response strategies will appear here</div>
-                <p className="mt-2 text-sm leading-6 text-slate-500">Add the client’s message and context, then generate three distinct replies. You can edit and copy your preferred version here.</p>
+              <div className="rounded-2xl border border-dashed border-stone-300 bg-white p-6 xl:sticky xl:top-5">
+                <div className="text-sm font-semibold text-stone-900">Your response strategies will appear here</div>
+                <p className="mt-2 text-sm leading-6 text-stone-500">Add the client’s message and context, then generate three distinct replies. You can edit and copy your preferred version here.</p>
                 <div className="mt-5 grid grid-cols-3 gap-2" aria-hidden="true">
-                  <div className="h-2 rounded-full bg-indigo-100" />
-                  <div className="h-2 rounded-full bg-slate-100" />
-                  <div className="h-2 rounded-full bg-slate-100" />
+                  <div className="h-2 rounded-full bg-forest-100" />
+                  <div className="h-2 rounded-full bg-stone-100" />
+                  <div className="h-2 rounded-full bg-stone-100" />
                 </div>
               </div>
             )}
@@ -853,10 +853,10 @@ export function DraftForm() {
 
               {draftOptions.length > 0 && (!limitReached || plan === 'pro') && (
                 <div className="flex flex-col gap-4 lg:sticky lg:top-6 lg:max-h-[80vh] lg:overflow-y-auto paper-scroll pr-0.5">
-                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-stone-200 bg-white px-4 py-3">
                     <div>
-                      <div className="text-sm font-semibold text-slate-900">Your reply options</div>
-                      <div className="mt-0.5 text-xs text-slate-500">Edit any draft, save your changes, then copy the version you want to send.</div>
+                      <div className="text-sm font-semibold text-stone-900">Your reply options</div>
+                      <div className="mt-0.5 text-xs text-stone-500">Edit any draft, save your changes, then copy the version you want to send.</div>
                     </div>
                     <div className="flex items-center gap-2">
                       {selectedDraftId && (
@@ -864,7 +864,7 @@ export function DraftForm() {
                           type="button"
                           onClick={handleSaveDraft}
                           disabled={savingDraft || loading}
-                          className="shrink-0 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                          className="shrink-0 rounded-lg bg-forest-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
                         >
                           {savingDraft ? 'Saving...' : 'Save changes'}
                         </button>
@@ -908,7 +908,7 @@ export function DraftForm() {
                           value={option}
                           onChange={(event) => setDraftOptions((current) => current.map((value, optionIndex) => optionIndex === index ? event.target.value : value))}
                           aria-label={`Edit ${STRATEGY_LABELS[index] || `option ${index + 1}`} reply`}
-                          className="reply-editor w-full resize-y rounded-lg border p-3 outline-none focus:ring-2 focus:ring-indigo-200"
+                          className="reply-editor w-full resize-y rounded-lg border p-3 outline-none focus:ring-2 focus:ring-forest-200"
                           style={{ minHeight: 140, borderColor: '#E6E9F0', background: '#fff', color: '#344054', fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.7 }}
                         />
                       </label>
@@ -1015,7 +1015,7 @@ export function DraftForm() {
                     type="button"
                     onClick={() => setShowAuthPassword((v) => !v)}
                     aria-label={showAuthPassword ? 'Hide password' : 'Show password'}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2"
+                    className="absolute right-2.5 top-1/2 -transtone-y-1/2"
                     style={{ color: '#6B7A8C' }}
                   >
                     <EyeIcon open={showAuthPassword} />
