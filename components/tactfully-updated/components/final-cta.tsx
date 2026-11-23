@@ -1,8 +1,3 @@
-import { Button } from "@/components/ui/button"
-
-// Keep in sync with the Pro checkout link in pricing-section.tsx.
-const GUMROAD_PRO_CHECKOUT_URL = "https://smartoolkit.gumroad.com/l/dzlkij"
-
 export function FinalCta() {
   return (
     <section className="border-b border-border">
@@ -15,20 +10,15 @@ export function FinalCta() {
               Standardize client communication at scale.
             </h2>
             <p className="mt-4 text-lg leading-relaxed text-pretty text-primary-foreground/80">
-              Give your team a smarter way to respond, negotiate, and improve every client conversation.
+              Generate three distinct reply strategies, review the wording, and stay in control of every client response.
             </p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <a href="/sign-up" className="h-11 px-6 text-sm inline-flex items-center justify-center whitespace-nowrap rounded-lg font-medium bg-secondary text-secondary-foreground hover:bg-secondary/80">
                 Start Free
               </a>
-              <a
-                href={GUMROAD_PRO_CHECKOUT_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="h-11 border border-primary-foreground/30 bg-transparent px-6 text-sm inline-flex items-center justify-center whitespace-nowrap rounded-lg font-medium text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
-              >
-                Upgrade to Pro
-              </a>
+              <span aria-disabled="true" className="h-11 border border-primary-foreground/30 bg-transparent px-6 text-sm inline-flex items-center justify-center whitespace-nowrap rounded-lg font-medium text-primary-foreground/70">
+                Pro subscriptions coming soon
+              </span>
             </div>
           </div>
         </div>
