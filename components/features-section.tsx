@@ -1,35 +1,29 @@
-import { Wand2, SlidersHorizontal, Activity, Handshake, GraduationCap } from "lucide-react"
+import { Wand2, SlidersHorizontal, Activity, Archive } from "lucide-react"
 
 const features = [
   {
     icon: Wand2,
-    title: "Generate client-ready replies in seconds",
-    body: "Create multiple response options from one message so teams can choose the best version before sending.",
-    tag: "AI reply generation",
+    title: "Generate two reply options",
+    body: "Turn one client message into two distinct AI-generated drafts you can compare, edit, and choose from.",
+    tag: "AI reply drafting",
   },
   {
     icon: SlidersHorizontal,
-    title: "Match the tone to the conversation",
-    body: "Use different reply tones for support, escalation, sales follow-up, or negotiation contexts.",
+    title: "Choose a tone for the situation",
+    body: "Adjust the tone to suit the conversation, from warm and diplomatic to direct and professional.",
     tag: "Tone control",
   },
   {
     icon: Activity,
-    title: "Spot at-risk conversations earlier",
-    body: "Surface basic sentiment signals so agents and managers can prioritize sensitive threads faster.",
-    tag: "Sentiment detection",
+    title: "See a basic sentiment signal",
+    body: "Get a simple indication of the message's emotional direction before deciding how to respond.",
+    tag: "Sentiment insight",
   },
   {
-    icon: Handshake,
-    title: "Improve reply language for better outcomes",
-    body: "Strengthen phrasing for retention, objection handling, and deal recovery with advanced negotiation tools in Pro.",
-    tag: "Negotiation support",
-  },
-  {
-    icon: GraduationCap,
-    title: "Build better communication habits over time",
-    body: "Give teams guidance that improves consistency, response quality, and confidence in difficult exchanges.",
-    tag: "Communication coach",
+    icon: Archive,
+    title: "Keep your previous drafts organised",
+    body: "Return to saved drafts, review earlier replies, and reuse useful wording when similar situations come up.",
+    tag: "Draft history",
   },
 ]
 
@@ -40,23 +34,15 @@ export function FeaturesSection() {
         <div className="max-w-2xl">
           <span className="text-sm font-semibold text-primary">Features</span>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-            Everything your team needs to respond with confidence.
+            A clearer workflow for everyday client replies.
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-pretty">
-            Each capability answers a distinct question, from drafting the first reply to coaching the whole team toward
-            better outcomes.
+            Tactfully focuses on the practical steps: draft, compare, refine, and keep a record of your client communication.
           </p>
         </div>
-
-        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {features.map((f, i) => (
-            <div
-              key={f.title}
-              className={
-                "flex flex-col rounded-xl border border-border bg-card p-6" +
-                (i === 0 ? " lg:col-span-2 lg:bg-primary/[0.03]" : "")
-              }
-            >
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {features.map((f) => (
+            <div key={f.title} className="flex flex-col rounded-xl border border-border bg-card p-6">
               <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <f.icon className="size-5" />
               </span>

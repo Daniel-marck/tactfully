@@ -2,10 +2,10 @@ import { Check, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 const bullets = [
-  "3 AI replies/day on Free",
-  "Unlimited replies on Pro",
-  "Basic sentiment detection included",
-  "Advanced negotiation support in Pro",
+  "3 AI replies per day on Free",
+  "Two distinct reply options",
+  "Choose a tone for each situation",
+  "Review and edit before sending",
 ]
 
 function SealIcon() {
@@ -138,18 +138,17 @@ export function Hero() {
             AI communication platform for client-facing teams
           </span>
           <h1 className="mt-5 text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-[3.4rem] lg:leading-[1.05]">
-            Client communication intelligence for support and revenue teams.
+            Better client replies, without starting from scratch.
           </h1>
           <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground text-pretty">
-            Generate better replies, detect sentiment, and optimize negotiation workflows with AI that helps your team
-            respond faster and close more effectively.
+            Turn a client message into two professional reply options. Choose a tone, review the drafts, and send the response that feels right.
           </p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
             <Button className="h-11 px-6 text-sm" nativeButton={false} render={<a href="/sign-up" />}>
               Start Free
             </Button>
-            <Button variant="outline" className="h-11 px-6 text-sm" nativeButton={false} render={<a href="/sign-up" />}>
-              Upgrade to Pro
+            <Button variant="outline" className="h-11 px-6 text-sm" nativeButton={false} render={<a href="#pricing" />}>
+              See plan availability
             </Button>
           </div>
           <ul className="mt-8 grid gap-x-6 gap-y-2.5 sm:grid-cols-2">
