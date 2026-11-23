@@ -831,7 +831,7 @@ export function DraftForm() {
               {limitReached && plan !== 'pro' && (
                 <div className="rise-anim relative rounded-md p-6 text-center lg:sticky lg:top-6" style={{ background: '#24303B', color: '#F5EFE1' }}>
                   <div className="mb-2 font-semibold" style={{ fontFamily: "var(--font-newsreader), serif", fontSize: 18 }}>
-                    You've used your 3 free drafts
+                    You&apos;ve used your 3 free drafts
                   </div>
                   <p className="mb-5 text-[14px]" style={{ fontFamily: "var(--font-work-sans), sans-serif", color: '#B8C2CE' }}>
                     Pro subscriptions are not open yet. Your free drafts reset tomorrow.
