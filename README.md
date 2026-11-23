@@ -1,64 +1,35 @@
 # Tactfully
 
-Tactfully is an AI-powered client communication assistant for freelancers and support teams. It helps users draft better replies, choose a tone for the situation, and maintain a cleaner communication workflow.
+Tactfully is an AI-assisted workspace for freelancers handling difficult client conversations. It turns a pasted client message and the user's context into three distinct, editable reply strategies.
 
-## What it does
+## Current product capabilities
 
-- Generate polished client replies from raw incoming messages
-- Suggest tone and response strategies based on situation context
-- Save drafts in Supabase for later editing
-- Gate advanced usage behind a simple Pro plan flow
-- Support authentication and protected dashboard access
+- Generate three tactically different reply options: diplomatic, firm and professional, and direct.
+- Set the situation, preferred tone, desired outcome, and constraints to avoid.
+- Edit, copy, save, reopen, and delete saved drafts.
+- Search the latest saved drafts.
+- Sign in with Supabase Auth and keep each user's drafts private.
+- Enforce a free allowance of 3 generations per day. Each generation returns three response strategies.
+
+**Billing status:** Pro is planned at $12 USD/month, but subscriptions are not open and Tactfully is not currently accepting payments. PayPal checkout endpoints are intentionally disabled until recurring billing and entitlement verification are implemented.
 
 ## Stack
 
-- Next.js 16
-- React 19
-- TypeScript
+- Next.js 16, React 19, TypeScript
 - Tailwind CSS
-- Supabase Auth + Postgres
-- PayPal Checkout
-- Vercel Analytics
-- Gemini API for reply generation
+- Supabase Auth and Postgres with row-level security
+- Google Gemini API for reply generation
+- Vercel hosting and Analytics
 
-## Repository structure
+## Repository layout
 
-```text
-app/
-  api/                API routes for auth, generation, and PayPal flows
-  dashboard/          authenticated workspace and draft management UI
-  sign-in/            sign-in pages
-  sign-up/            sign-up pages
-  privacy/            privacy policy pages
-  terms/              terms pages
-  globals.css         global styling
-  layout.tsx          root layout
-  page.tsx            landing page
-components/
-  ui/                 shadcn-style primitives
-  *.tsx               landing-page sections and shared UI
-lib/
-  supabase/           auth and database client helpers
-  utils.ts            utility helpers
-public/               static assets and placeholders
-middleware.ts         route protection middleware
-next.config.mjs       Next.js config
-package.json          app metadata and scripts
-supabase/
-  migrations/         database schema files
-```
+- `app/` — routes, landing page, dashboard, auth, legal pages, and API handlers
+- `components/` — shared UI components
+- `lib/supabase/` — browser, server, and session helpers
+- `supabase/migrations/` — ordered database migrations
+- `proxy.ts` — Supabase session refresh and route protection
 
-## Quick start checklist
-
-Before the app works, make sure you have all of these configured:
-
-1. Supabase project created and URL/anon key added to `.env.local`
-2. Supabase migration applied: `supabase/migrations/20260920_create_profiles_and_drafts.sql`
-3. Gemini key added: `GEMINI_API_KEY`
-4. PayPal sandbox credentials added for Pro checkout
-5. App started locally with `npm run dev`
-
-## Local development
+## Local setup
 
 1. Install dependencies:
 
@@ -66,63 +37,46 @@ Before the app works, make sure you have all of these configured:
 npm install
 ```
 
-2. Copy the example environment file and add real values:
+2. Copy the example environment file:
 
 ```bash
 cp .env.example .env.local
 ```
 
-3. Start the app:
-
-```bash
-npm run dev
-```
-
-4. Open the app in your browser at `http://localhost:3000`.
-
-## Required environment variables
-
-Create a `.env.local` file using the values from `.env.example`.
+3. Configure these required values:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-PAYPAL_CLIENT_ID=
-PAYPAL_CLIENT_SECRET=
-NEXT_PUBLIC_PAYPAL_CLIENT_ID=
-PAYPAL_MODE=sandbox
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 GEMINI_API_KEY=
 ```
 
-Important: the AI reply generation route requires `GEMINI_API_KEY` in order to work. Without it, the app cannot generate drafts.
+The legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY` is supported as a fallback. Never expose a Supabase service-role key or other server secret through a `NEXT_PUBLIC_*` variable.
 
-## Database setup
+4. Apply every SQL migration in `supabase/migrations/` in ascending filename order to the Supabase project. Do not apply only the original schema migration: later migrations add daily usage tracking, draft history, ownership restrictions, saved context fields, and delete permissions.
 
-This project expects a Supabase project with at least the following schema. The migration file is stored in:
-
-```text
-supabase/migrations/20260920_create_profiles_and_drafts.sql
-```
-
-Apply it in the Supabase SQL editor or with your migration tool before signing in for the first time.
-
-## Useful commands
+5. Start the app:
 
 ```bash
 npm run dev
-npm run build
-npm run lint
-npm run typecheck
 ```
 
-## Deployment
+Open `http://localhost:3000`.
 
-This app is designed for deployment on Vercel with a connected Supabase project and PayPal credentials. Configure the environment variables in the Vercel project settings before deploying.
+## Useful checks
 
-## Notes
+```bash
+npm run test
+npm run lint
+npm run typecheck
+npm run build
+```
 
-- The repository currently expects a configured Supabase project for authentication and draft persistence.
-- The PayPal checkout flow is server-side and verifies the capture before enabling Pro access.
-- If you are moving to production, set `PAYPAL_MODE=live` and use your live PayPal credentials.
-- If you are testing locally, generate the `.env.local` file first so the app can create drafts immediately.
+The build script runs the test suite before the Next.js production build. Vercel preview builds also run tests and linting.
+
+## Deployment notes
+
+- Deploy preview branches first and verify sign-in, generation, draft persistence, editing, copying, and deletion before promoting a release.
+- Configure Supabase Auth email delivery with a production SMTP provider before opening public registration. Supabase's default email service is limited for production use.
+- Pro checkout remains disabled. Do not enable or advertise payment collection until recurring subscriptions, cancellation, webhook verification, and entitlement lifecycle handling are implemented and tested.
+- Keep the Supabase service-role key, Gemini key, and any future payment secrets in server-only environment variables.
