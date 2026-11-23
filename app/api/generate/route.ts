@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { createAdminClient } from '@/lib/supabase/admin';
 import { assertServerEnv } from '@/lib/config';
 
 export const maxDuration = 50;
