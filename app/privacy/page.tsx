@@ -29,9 +29,7 @@ export default function PrivacyPage() {
           </p>
           <p className="mt-2">
             Google's handling of prompts and responses depends on the Gemini API
-            account tier and applicable terms. Google states that free-tier content
-            may be used to improve its products, while paid-tier content is not used
-            for that purpose. Do not paste confidential, regulated, or sensitive
+            account tier and applicable terms. Google states that free-tier content may be used to improve its products, while paid-tier content is not used for that purpose. Do not paste confidential, regulated, or sensitive
             client information unless you have confirmed that the provider terms and
             account tier are appropriate for that information.
           </p>
