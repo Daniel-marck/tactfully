@@ -17,6 +17,7 @@ import {
   Search,
   Settings,
   Sparkles,
+  WandSparkles,
 } from "lucide-react"
 import styles from "./product-preview.module.css"
 
