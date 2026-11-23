@@ -447,7 +447,7 @@ export function DraftForm() {
         </aside>
 
         <div className="min-w-0 grid grid-cols-1 gap-5 lg:grid-cols-1 lg:gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(360px,.92fr)] lg:items-start">
-          <div className="workspace-heading flex flex-wrap items-end justify-between gap-4 lg:col-span-2 mb-1">
+          <div className="workspace-heading flex flex-wrap items-end justify-between gap-4 xl:col-span-2 mb-1">
             <div
               className="rounded-md border px-4 py-3 text-sm"
               style={{
