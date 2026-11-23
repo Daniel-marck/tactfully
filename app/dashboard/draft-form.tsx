@@ -701,11 +701,11 @@ export function DraftForm() {
                     You've used your 3 free drafts
                   </div>
                   <p className="mb-5 text-[14px]" style={{ fontFamily: "var(--font-work-sans), sans-serif", color: '#B8C2CE' }}>
-                    Upgrade to Pro for unlimited replies, every tone, every situation.
+                    Pro subscriptions are not open yet. Your free drafts reset tomorrow.
                   </p>
 
                   <p className="mx-auto max-w-sm text-[13px] leading-6" style={{ color: '#B8C2CE', fontFamily: "var(--font-work-sans), sans-serif" }}>
-                    Pro will cost <strong style={{ color: '#F5EFE1' }}>$12 USD per month</strong>, billed monthly. Subscription checkout will open once the payment account and recurring billing have been verified.
+                    The planned Pro price is <strong style={{ color: '#F5EFE1' }}>$12 USD per month</strong>. Checkout will open only after recurring billing has been verified.
                   </p>
                 </div>
               )}

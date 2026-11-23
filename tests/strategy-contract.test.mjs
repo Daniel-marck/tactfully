@@ -74,6 +74,8 @@ test('legal pages disclose AI provider data handling and daily free limits', () 
   assert.match(privacy, /free-tier content may be used to improve its products/);
   assert.match(privacy, /paid-tier\s+content is not/);
   assert.match(terms, /3 AI replies per day/);
+  assert.match(terms, /Pro subscriptions are not available yet/);
+  assert.match(landing, /Pro subscriptions coming soon/);
 });
 
 

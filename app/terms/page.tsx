@@ -28,8 +28,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-base font-semibold text-foreground">Payments and refunds</h2>
           <p className="mt-2">
-            Pro payments are processed through PayPal. Review the amount and billing terms presented during checkout before approving a payment. If you believe you were
-            charged in error, contact us at{" "}
+            Pro subscriptions are not available yet, and Tactfully is not currently accepting payments. When recurring checkout is enabled, the checkout screen will show the price, renewal schedule, and cancellation terms before any payment is approved. Do not send payment outside the Tactfully checkout. If you have a billing question, contact us at{" "}
             <a href="mailto:daniellutagwa34@gmail.com" className="text-foreground underline">
               daniellutagwa34@gmail.com
             </a>{" "}
