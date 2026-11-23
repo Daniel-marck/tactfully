@@ -241,14 +241,13 @@ Return exactly three reply strings in the required JSON structure, in the order 
       },
     };
 
-    // Try independent Gemini model capacity pools. Retry the first model once on
-    // transient overload, then move to broader Flash models instead of surfacing
-    // Google's raw capacity message to the customer.
+    // Use distinct stable model pools instead of retrying the same overloaded
+    // endpoint. Keep the total timeout comfortably below this route's maxDuration.
     const modelAttempts = [
       'gemini-3.5-flash-lite',
-      'gemini-3.5-flash-lite',
       'gemini-3.8-flash',
-      'gemini-3.8-flash',
+      'gemini-3.1-flash-lite',
+      'gemini-3.5-flash',
     ];
     const transientStatuses = new Set([429, 500, 502, 503, 504]);
     let response: Response | null = null;
@@ -266,7 +265,7 @@ Return exactly three reply strings in the required JSON structure, in the order 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody),
-            signal: AbortSignal.timeout(10000),
+            signal: AbortSignal.timeout(8000),
           }
         );
       } catch (error: unknown) {
@@ -294,7 +293,7 @@ Return exactly three reply strings in the required JSON structure, in the order 
       }
 
       if (attempt < modelAttempts.length - 1) {
-        await new Promise((resolve) => setTimeout(resolve, attempt === 0 ? 500 : 250));
+        await new Promise((resolve) => setTimeout(resolve, attempt === 0 ? 350 : 200));
       }
     }
 
