@@ -1,8 +1,7 @@
 import Link from "next/link"
 import {
   ArrowRight, ArrowUpRight, Check, ChevronDown, Clock3, Copy, MessageSquareText,
-  ShieldCheck, Sparkles, WandSparkles, Zap, Target, HeartHandshake, FileText,
-  CircleCheck, Quote, Layers3, Send, Menu, MessageCircleMore
+  ShieldCheck, Sparkles, HeartHandshake, FileText, Send
 } from "lucide-react"
 
 const scenarios = [
