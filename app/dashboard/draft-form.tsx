@@ -182,6 +182,8 @@ export function DraftForm() {
   const [savingDraft, setSavingDraft] = useState(false)
   const [saveNotice, setSaveNotice] = useState<string | null>(null)
   const [showQuickStart, setShowQuickStart] = useState(true)
+  const [messageExpanded, setMessageExpanded] = useState(false)
+  const messageInputRef = useRef<HTMLTextAreaElement>(null)
 
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authEmail, setAuthEmail] = useState('')
@@ -216,6 +218,15 @@ export function DraftForm() {
     }
   }
 
+
+  useEffect(() => {
+    const textarea = messageInputRef.current
+    if (!textarea) return
+    textarea.style.height = 'auto'
+    const maxHeight = messageExpanded ? 0 : 420
+    textarea.style.height = messageExpanded ? '100%' : `${Math.min(textarea.scrollHeight, maxHeight)}px`
+    textarea.style.overflowY = !messageExpanded && textarea.scrollHeight > maxHeight ? 'auto' : 'hidden'
+  }, [incomingMessage, messageExpanded])
 
   useEffect(() => {
     async function initUser() {
@@ -452,9 +463,11 @@ export function DraftForm() {
         .tactfully-workspace .quick-start-number { display:inline-flex !important; align-items:center !important; justify-content:center !important; width:21px !important; height:21px !important; flex:0 0 21px !important; border-radius:999px !important; background:#34469a !important; color:#fff !important; font-size:11px !important; font-weight:800 !important; }
         .tactfully-workspace .relative.rounded-md.p-5, .tactfully-workspace .relative.rounded-md.p-6 { background:#fff !important; color:#172033 !important; border:1px solid #e6e9f0 !important; border-radius:16px !important; box-shadow:0 8px 24px rgba(16,24,40,.06) !important; transform:none !important; }
         .tactfully-workspace textarea { color:#172033 !important; font-size:16px !important; line-height:1.65 !important; min-height:180px !important; padding:14px 15px !important; border:1px solid #d0d5dd !important; border-radius:10px !important; background:#fff !important; }        .tactfully-workspace textarea::placeholder { color:#98a2b3 !important; }
-        .tactfully-workspace textarea.message-input { min-height:104px !important; height:104px; padding:10px 12px !important; line-height:1.5 !important; }
+        .tactfully-workspace textarea.message-input { min-height:220px !important; max-height:420px; height:auto; overflow-y:hidden; padding:14px 15px !important; line-height:1.6 !important; resize:vertical; }
+        .tactfully-workspace .message-expand-button { border:1px solid #D8D2C6; background:#FFFCF5; color:#315D47; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700; }
+        .tactfully-workspace .message-expand-button:hover { background:#E8EFE8; }
         @media(min-width:1024px) {
-          .tactfully-workspace textarea.message-input { height:104px; }
+          .tactfully-workspace textarea.message-input { min-height:240px !important; }
           .tactfully-workspace .relative.rounded-md.p-5, .tactfully-workspace .relative.rounded-md.p-6 { padding:16px !important; }
         }
         .tactfully-workspace .relative.rounded-md.p-5 > span, .tactfully-workspace .relative.rounded-md.p-6 > span { color:#34469a !important; font-size:13px !important; font-weight:700 !important; }
@@ -678,15 +691,23 @@ export function DraftForm() {
               style={{ background: 'rgba(184,114,42,0.35)', border: '1px solid rgba(184,114,42,0.5)' }}
             />
 
-            <span className="block mb-3.5 uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
-              The message
-            </span>
+            <div className="mb-2.5 flex items-center justify-between gap-3">
+              <span className="block uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
+                The message
+              </span>
+              <button type="button" className="message-expand-button" onClick={() => setMessageExpanded(true)} aria-haspopup="dialog" aria-label="Expand client message editor">
+                Expand editor
+              </button>
+            </div>
             <textarea
+              ref={messageInputRef}
               value={incomingMessage}
               onChange={(e) => setIncomingMessage(e.target.value)}
               placeholder={`Paste what the client actually said... e.g. "Hey, can you just knock the price down a bit?"`}
-              className="message-input w-full min-h-[104px] sm:min-h-[112px] bg-transparent border-none outline-none resize-y"
-              style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.55, color: '#24303B' }}            />
+              className="message-input w-full bg-transparent border-none outline-none"
+              aria-label="The message from the client"
+              style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.6, color: '#24303B' }}
+            />
 
             <div className="mt-3 grid grid-cols-1 gap-3">
               <label className="block">
@@ -890,6 +911,32 @@ export function DraftForm() {
           </div>
         </div>
       </div>
+
+      {messageExpanded && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6" style={{ background: 'rgba(28,35,30,0.68)' }}>
+          <section role="dialog" aria-modal="true" aria-labelledby="expanded-message-title" className="flex h-[92vh] w-full max-w-5xl flex-col rounded-2xl p-4 sm:p-6 shadow-2xl" style={{ background: '#FFFCF5', color: '#302F29' }}>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <h2 id="expanded-message-title" className="text-lg font-semibold" style={{ color: '#244A3A' }}>Review client message</h2>
+                <p className="mt-1 text-xs" style={{ color: '#77756D' }}>Edit the message here. Your dashboard form and generated replies will be preserved.</p>
+              </div>
+              <button type="button" onClick={() => setMessageExpanded(false)} className="rounded-lg border px-3 py-2 text-sm font-semibold" style={{ borderColor: '#D8D2C6', color: '#315D47' }} aria-label="Close expanded message editor">Done</button>
+            </div>
+            <textarea
+              autoFocus
+              value={incomingMessage}
+              onChange={(e) => setIncomingMessage(e.target.value)}
+              aria-label="Expanded client message editor"
+              placeholder="Paste or edit the full client message..."
+              className="min-h-0 flex-1 resize-none rounded-xl border p-4 text-sm leading-7 outline-none focus:ring-2"
+              style={{ borderColor: '#D8D2C6', background: '#fff', color: '#302F29', fontFamily: "var(--font-work-sans), sans-serif" }}
+            />
+            <div className="mt-3 flex justify-end">
+              <button type="button" onClick={() => setMessageExpanded(false)} className="rounded-lg px-5 py-2.5 text-sm font-bold text-white" style={{ background: '#244A3A' }}>Done editing</button>
+            </div>
+          </section>
+        </div>
+      )}
 
       {showAuthModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ background: 'rgba(0,0,0,0.55)' }}>
