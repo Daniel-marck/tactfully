@@ -58,6 +58,12 @@ test('AI generation retries transient provider overload across distinct stable m
 });
 
 
+test('Gemini API key is sent in a header rather than exposed in the request URL', () => {
+  assert.match(route, /'x-goog-api-key': apiKey/);
+  assert.match(route, /generateContent`\s*,/);
+  assert.doesNotMatch(route, /generateContent\?key=/);
+});
+
 test('email confirmation callback rejects backslash-based external redirects', async () => {
   const callback = await readFile(new URL('../app/auth/callback/route.ts', import.meta.url), 'utf8');
   assert.ok(callback.includes('requestedNext.includes("\\\\")'));
