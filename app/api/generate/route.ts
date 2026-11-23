@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { assertServerEnv } from '@/lib/config';
 
 export const maxDuration = 50;
@@ -55,7 +56,7 @@ function isTactfullyTester(email: string | undefined) {
 export async function POST(req: Request) {
   const requestStartedAt = Date.now();
   try {
-    assertServerEnv(['GEMINI_API_KEY'], 'AI generation');
+    assertServerEnv(['GEMINI_API_KEY', 'SUPABASE_SERVICE_ROLE_KEY'], 'AI generation and secure quota recording');
 
     const supabase = await createClient();
     const {
@@ -344,8 +345,12 @@ Return exactly three reply strings in the required JSON structure, in the order 
 
     // Tester requests do not consume the account's daily free allowance.
     let newCount = effectiveDraftCount;
+    let resultingPlan = profile.plan;
     if (!isTester) {
-      const { data: incrementResult, error: incrementError } = await supabase.rpc(
+      // Use the server-only service-role client. The quota RPC is not callable
+      // with browser/session credentials and enforces the free limit under a row lock.
+      const admin = createAdminClient();
+      const { data: incrementResult, error: incrementError } = await admin.rpc(
         'increment_draft_count',
         { user_id: user.id }
       );
@@ -358,11 +363,7 @@ Return exactly three reply strings in the required JSON structure, in the order 
         );
       }
 
-      newCount = incrementResult[0].new_count;
-
-      // Enforce the limit again after the atomic database increment so concurrent
-      // requests cannot receive more than the daily free allowance.
-      if (profile.plan === 'free' && newCount > FREE_DRAFT_LIMIT) {
+      if (!incrementResult[0].allowed) {
         return NextResponse.json(
           {
             error: 'limit_reached',
@@ -371,6 +372,9 @@ Return exactly three reply strings in the required JSON structure, in the order 
           { status: 403 }
         );
       }
+
+      newCount = incrementResult[0].new_count;
+      resultingPlan = incrementResult[0].user_plan;
     }
 
     console.info(
@@ -384,7 +388,7 @@ Return exactly three reply strings in the required JSON structure, in the order 
       text: replies[0],
       draftsUsed: newCount,
       draftsRemaining:
-        isTester || profile.plan === 'pro'
+        isTester || resultingPlan === 'pro'
           ? null
           : Math.max(0, FREE_DRAFT_LIMIT - newCount),
     });
