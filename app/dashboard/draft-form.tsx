@@ -1,6 +1,5 @@
 "use client"
 
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
 import React, { useState, useEffect, useRef } from 'react'
 import { createClient } from "@/lib/supabase/client"
 
@@ -155,7 +154,6 @@ export function DraftForm() {
   const [error, setError] = useState<string | null>(null)
   const [limitReached, setLimitReached] = useState(false)
   const [draftsRemaining, setDraftsRemaining] = useState<number | null>(null)
-  const [paypalError, setPaypalError] = useState<string | null>(null)
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
 
   const [user, setUser] = useState<any | null>(null)
@@ -579,47 +577,15 @@ export function DraftForm() {
                     You've used your 3 free drafts
                   </div>
                   <p className="mb-5 text-[14px]" style={{ fontFamily: "var(--font-work-sans), sans-serif", color: '#B8C2CE' }}>
-                    Upgrade to Pro for unlimited replies, every tone, every situation.
+                    Pro billing is being prepared. Paid upgrades are not available yet.
                   </p>
-
-                  {paypalError && (
-                    <p className="mb-3 text-[12px]" style={{ color: '#E08A6B' }}>{paypalError}</p>
-                  )}
-
-                  <div className="w-full max-w-xs mx-auto">
-                    <PayPalScriptProvider options={{ clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "", currency: "USD" }}>
-                      <PayPalButtons
-                        style={{ layout: "vertical", color: "gold", shape: "rect", tagline: false }}
-                        createOrder={async () => {
-                          setPaypalError(null)
-                          const res = await fetch('/api/paypal/create-order', { method: 'POST' })
-                          const data = await res.json()
-                          if (!res.ok) {
-                            setPaypalError(data.error || 'Could not start checkout.')
-                            throw new Error(data.error)
-                          }
-                          return data.id
-                        }}
-                        onApprove={async (data) => {
-                          const res = await fetch('/api/paypal/capture-order', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ orderID: data.orderID }),
-                          })
-                          const result = await res.json()
-                          if (!res.ok) {
-                            setPaypalError(result.error || 'Payment could not be verified.')
-                            return
-                          }
-                          setPlan('pro')
-                          setLimitReached(false)
-                        }}
-                        onError={(err) => {
-                          console.error('PayPal error:', err)
-                          setPaypalError('Something went wrong with checkout. Try again.')
-                        }}
-                      />
-                    </PayPalScriptProvider>
+                  <div className="w-full max-w-xs mx-auto rounded-md border p-4 text-left" style={{ borderColor: 'rgba(245,239,225,0.18)', background: 'rgba(245,239,225,0.06)' }}>
+                    <p className="text-[13px] font-semibold" style={{ color: '#F5EFE1', fontFamily: "var(--font-work-sans), sans-serif" }}>
+                      Pro checkout is temporarily unavailable.
+                    </p>
+                    <p className="mt-1 text-[12px]" style={{ color: '#B8C2CE', fontFamily: "var(--font-work-sans), sans-serif" }}>
+                      We are preparing secure recurring billing. You will not be charged.
+                    </p>
                   </div>
                 </div>
               )}
