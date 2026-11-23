@@ -176,6 +176,9 @@ export function DraftForm() {
   const [plan, setPlan] = useState<'free' | 'pro'>('free')
   const [draftsList, setDraftsList] = useState<SavedDraft[]>([])
   const [draftSearch, setDraftSearch] = useState('')
+  const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null)
+  const [savingDraft, setSavingDraft] = useState(false)
+  const [saveNotice, setSaveNotice] = useState<string | null>(null)
 
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authEmail, setAuthEmail] = useState('')
@@ -226,6 +229,8 @@ export function DraftForm() {
   }, [])
 
   const handleSelectDraft = (draft: SavedDraft) => {
+    setSelectedDraftId(draft.id)
+    setSaveNotice(null)
     setIncomingMessage(draft.original_message)
     setDesiredOutcome('')
     setAvoid('')
@@ -241,6 +246,8 @@ export function DraftForm() {
   }
 
   const handleNewDraft = () => {
+    setSelectedDraftId(null)
+    setSaveNotice(null)
     setIncomingMessage('')
     setDesiredOutcome('')
     setAvoid('')
@@ -328,13 +335,16 @@ export function DraftForm() {
       setDraftOptions(replies)
       setDraftsRemaining(typeof data.draftsRemaining === 'number' ? data.draftsRemaining : null)
 
-      await supabase.from('drafts').insert({
+      const { data: savedDraft, error: saveError } = await supabase.from('drafts').insert({
         user_id: user.id,
         original_message: incomingMessage,
         situation,
         tone,
         generated_reply: replies.join(OPTIONS_SEPARATOR),
-      })
+      }).select().single()
+      if (saveError) throw new Error("Your replies were generated, but could not be saved to history. Please try saving again.")
+      if (savedDraft) setSelectedDraftId(savedDraft.id)
+      setSaveNotice(null)
 
       const { data: updatedDrafts } = await supabase
         .from('drafts')
@@ -352,6 +362,39 @@ export function DraftForm() {
       }
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleSaveDraft = async () => {
+    if (!user || !selectedDraftId || draftOptions.length === 0) return
+
+    setSavingDraft(true)
+    setSaveNotice(null)
+    setError(null)
+    try {
+      const { data, error: saveError } = await supabase
+        .from('drafts')
+        .update({
+          original_message: incomingMessage,
+          situation,
+          tone,
+          generated_reply: draftOptions.join(OPTIONS_SEPARATOR),
+        })
+        .eq('id', selectedDraftId)
+        .eq('user_id', user.id)
+        .select()
+        .single()
+
+      if (saveError || !data) {
+        throw new Error("Couldn't save these edits. Please try again.")
+      }
+
+      setDraftsList((current) => current.map((draft) => draft.id === data.id ? data : draft))
+      setSaveNotice('Changes saved to your draft history.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't save these edits. Please try again.")
+    } finally {
+      setSavingDraft(false)
     }
   }
 
@@ -724,20 +767,33 @@ export function DraftForm() {
 
               {draftOptions.length > 0 && (!limitReached || plan === 'pro') && (
                 <div className="flex flex-col gap-4 lg:sticky lg:top-6 lg:max-h-[80vh] lg:overflow-y-auto paper-scroll pr-0.5">
-                  <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
                     <div>
                       <div className="text-sm font-semibold text-slate-900">Your reply options</div>
-                      <div className="mt-0.5 text-xs text-slate-500">Edit any draft, then copy the version you want to send.</div>
+                      <div className="mt-0.5 text-xs text-slate-500">Edit any draft, save your changes, then copy the version you want to send.</div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleDraftReply}
-                      disabled={loading}
-                      className="shrink-0 rounded-lg border px-3 py-2 text-xs font-semibold disabled:opacity-50"
-                      style={{ borderColor: '#D0D5DD', color: '#34469A', background: '#fff' }}
-                    >
-                      {loading ? 'Regenerating...' : 'Regenerate'}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {selectedDraftId && (
+                        <button
+                          type="button"
+                          onClick={handleSaveDraft}
+                          disabled={savingDraft || loading}
+                          className="shrink-0 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                        >
+                          {savingDraft ? 'Saving...' : 'Save changes'}
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleDraftReply}
+                        disabled={loading || savingDraft}
+                        className="shrink-0 rounded-lg border px-3 py-2 text-xs font-semibold disabled:opacity-50"
+                        style={{ borderColor: '#D0D5DD', color: '#34469A', background: '#fff' }}
+                      >
+                        {loading ? 'Regenerating...' : 'Regenerate'}
+                      </button>
+                    </div>
+                    {saveNotice && <p role="status" className="w-full text-xs text-emerald-700">{saveNotice}</p>}
                   </div>
                   {draftOptions.map((option, index) => (
                     <div
