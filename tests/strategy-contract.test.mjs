@@ -109,3 +109,14 @@ test('profile billing state and payment reconciliation records are server-manage
   assert.match(migration, /grant select on table public\.profiles to authenticated/i);
   assert.match(migration, /revoke all privileges on table public\.gumroad_unmatched_sales from anon, authenticated/i);
 });
+
+
+test('saved reply edits persist only to the selected owner draft', async () => {
+  const migration = await readFile(new URL('../supabase/migrations/202611230002_enable_owner_only_draft_edits.sql', import.meta.url), 'utf8');
+  assert.match(migration, /create policy "Users can update own drafts"/i);
+  assert.match(migration, /\(select auth\.uid\(\)\) = user_id/i);
+  assert.match(migration, /grant update \(original_message, situation, tone, generated_reply\)/i);
+  assert.match(dashboard, /\.eq\('id', selectedDraftId\)/);
+  assert.match(dashboard, /\.eq\('user_id', user\.id\)/);
+  assert.match(dashboard, /Changes saved to your draft history/);
+});
