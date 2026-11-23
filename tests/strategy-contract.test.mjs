@@ -84,3 +84,9 @@ test('generation endpoint validates and bounds untrusted request input', () => {
   assert.match(route, /message\.length > MAX_MESSAGE_LENGTH/);
   assert.doesNotMatch(route, /smartoolkit\.gumroad\.com/);
 });
+
+test('draft quota enforcement fails closed and checks the atomic increment result', () => {
+  assert.match(route, /incrementError \|\| !incrementResult\?\.\[0\]/);
+  assert.match(route, /newCount > FREE_DRAFT_LIMIT/);
+  assert.match(route, /We couldn't update your draft allowance/);
+});
