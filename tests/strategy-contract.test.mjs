@@ -6,6 +6,7 @@ const route = await readFile(new URL('../app/api/generate/route.ts', import.meta
 const landing = await readFile(new URL('../app/page.tsx', import.meta.url), 'utf8');
 const privacy = await readFile(new URL('../app/privacy/page.tsx', import.meta.url), 'utf8');
 const terms = await readFile(new URL('../app/terms/page.tsx', import.meta.url), 'utf8');
+const dashboard = await readFile(new URL('../app/dashboard/draft-form.tsx', import.meta.url), 'utf8');
 
 test('generation prompt assigns three distinct tactical jobs', () => {
   assert.match(route, /DIPLOMATIC — RELATIONSHIP \+ COLLABORATION/);
@@ -91,4 +92,11 @@ test('draft quota enforcement fails closed and checks the atomic increment resul
   assert.match(route, /incrementError \|\| !incrementResult\?\.\[0\]/);
   assert.match(route, /newCount > FREE_DRAFT_LIMIT/);
   assert.match(route, /We couldn't update your draft allowance/);
+});
+
+
+test('workspace signup uses the email confirmation callback and shows a clear next step', () => {
+  assert.match(dashboard, /emailRedirectTo: `\$\{window\.location\.origin\}\/auth\/callback\?next=\/dashboard`/);
+  assert.match(dashboard, /Account created\. Check your inbox and confirm your email before signing in\./);
+  assert.match(dashboard, /role="status"/);
 });
