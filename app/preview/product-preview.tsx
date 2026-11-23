@@ -85,7 +85,7 @@ export function ProductPreview() {
           <button className={styles.navItem}><Settings size={16} /><span>Settings</span></button>
           <button className={styles.navItem}><CircleHelp size={16} /><span>Help & feedback</span></button>
           <div className={styles.usageCard}>
-            <div className={styles.usageTop}><span>Starter</span><strong>68%</strong></div>
+            <div className={styles.usageTop}><span>Free</span><strong>33%</strong></div>
             <div className={styles.usageTrack}><span /></div>
             <p>1 of 3 generations used today</p>
           </div>
