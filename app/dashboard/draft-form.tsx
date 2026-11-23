@@ -175,6 +175,7 @@ export function DraftForm() {
   const [user, setUser] = useState<User | null>(null)
   const [plan, setPlan] = useState<'free' | 'pro'>('free')
   const [draftsList, setDraftsList] = useState<SavedDraft[]>([])
+  const [draftSearch, setDraftSearch] = useState('')
 
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authEmail, setAuthEmail] = useState('')
@@ -488,28 +489,56 @@ export function DraftForm() {
               Your first draft will appear here. Paste the message, select the scenario, and click “Draft my reply.”
             </div>
           ) : (
-            <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible lg:max-h-[70vh] lg:overflow-y-auto paper-scroll pb-1">
-              {draftsList.map((draft) => (
-                <button
-                  key={draft.id}
-                  onClick={() => handleSelectDraft(draft)}
-                  className="text-left rounded-md px-3 py-2.5 shrink-0 w-48 lg:w-full transition-colors"
-                  style={{ background: 'rgba(245,239,225,0.06)' }}
-                >
-                  <span
-                    className="block uppercase mb-0.5"
-                    style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 9, letterSpacing: '0.08em', color: '#B8722A' }}
+            <div className="space-y-2">
+              <label className="block">
+                <span className="sr-only">Search saved drafts</span>
+                <input
+                  type="search"
+                  value={draftSearch}
+                  onChange={(event) => setDraftSearch(event.target.value)}
+                  placeholder="Search saved drafts..."
+                  aria-label="Search saved drafts"
+                  className="w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-200"
+                  style={{ borderColor: '#D0D5DD', background: '#fff', color: '#172033' }}
+                />
+              </label>
+              <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible lg:max-h-[65vh] lg:overflow-y-auto paper-scroll pb-1">
+                {draftsList.filter((draft) => {
+                  const query = draftSearch.trim().toLowerCase()
+                  return !query ||
+                    draft.original_message.toLowerCase().includes(query) ||
+                    draft.situation.toLowerCase().includes(query) ||
+                    (SITUATION_LABELS[draft.situation] || '').toLowerCase().includes(query)
+                }).map((draft) => (
+                  <button
+                    key={draft.id}
+                    onClick={() => handleSelectDraft(draft)}
+                    className="text-left rounded-md px-3 py-2.5 shrink-0 w-48 lg:w-full transition-colors"
+                    style={{ background: '#fff', border: '1px solid #E6E9F0', boxShadow: '0 1px 2px rgba(16,24,40,.04)' }}
                   >
-                    {SITUATION_LABELS[draft.situation] || draft.situation}
-                  </span>
-                  <span className="block text-[12px] truncate" style={{ color: '#F5EFE1', fontFamily: "var(--font-work-sans), sans-serif" }}>
-                    {draft.original_message}
-                  </span>
-                  <span className="block text-[10px] mt-1" style={{ color: '#6B7A8C', fontFamily: "var(--font-plex-mono), monospace" }}>
-                    {new Date(draft.created_at).toLocaleDateString()}
-                  </span>
-                </button>
-              ))}
+                    <span
+                      className="block uppercase mb-0.5"
+                      style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 9, letterSpacing: '0.08em', color: '#34469A' }}
+                    >
+                      {SITUATION_LABELS[draft.situation] || draft.situation}
+                    </span>
+                    <span className="block text-[12px] truncate" style={{ color: '#172033', fontFamily: "var(--font-work-sans), sans-serif" }}>
+                      {draft.original_message}
+                    </span>
+                    <span className="block text-[10px] mt-1" style={{ color: '#667085', fontFamily: "var(--font-plex-mono), monospace" }}>
+                      {new Date(draft.created_at).toLocaleDateString()}
+                    </span>
+                  </button>
+                ))}
+                {draftSearch.trim() && !draftsList.some((draft) => {
+                  const query = draftSearch.trim().toLowerCase()
+                  return draft.original_message.toLowerCase().includes(query) ||
+                    draft.situation.toLowerCase().includes(query) ||
+                    (SITUATION_LABELS[draft.situation] || '').toLowerCase().includes(query)
+                }) && (
+                  <p className="px-2 py-3 text-xs text-slate-500">No saved drafts match that search.</p>
+                )}
+              </div>
             </div>
           )}
         </aside>
