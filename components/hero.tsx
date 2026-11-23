@@ -62,7 +62,7 @@ function ProductPreview() {
           The message
         </span>
         <p className="text-[13px] mb-4" style={{ fontFamily: "var(--font-work-sans), sans-serif", color: '#24303B' }}>
-          "Hey, can you just knock the price down a bit? Thought this was cheaper..."
+          &quot;Hey, can you just knock the price down a bit? Thought this was cheaper...&quot;
         </p>
         <div className="flex flex-wrap gap-1.5 mb-3">
           {['Lowball offer', 'Diplomatic'].map((tag) => (
