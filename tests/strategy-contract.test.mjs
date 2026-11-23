@@ -100,3 +100,12 @@ test('workspace signup uses the email confirmation callback and shows a clear ne
   assert.match(dashboard, /Account created\. Check your inbox and confirm your email before signing in\./);
   assert.match(dashboard, /role="status"/);
 });
+
+
+test('profile billing state and payment reconciliation records are server-managed', async () => {
+  const migration = await readFile(new URL('../supabase/migrations/202611230001_harden_profile_and_payment_record_permissions.sql', import.meta.url), 'utf8');
+  assert.match(migration, /drop policy if exists "Users can update own profile"/i);
+  assert.match(migration, /revoke all privileges on table public\.profiles from anon, authenticated/i);
+  assert.match(migration, /grant select on table public\.profiles to authenticated/i);
+  assert.match(migration, /revoke all privileges on table public\.gumroad_unmatched_sales from anon, authenticated/i);
+});
