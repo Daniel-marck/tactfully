@@ -247,8 +247,7 @@ export function DraftForm() {
 
   const handleNewDraft = () => {
     setSelectedDraftId(null)
-    setSaveNotice(null)
-    setIncomingMessage('')
+    setSaveNotice(null)    setIncomingMessage('')
     setDesiredOutcome('')
     setAvoid('')
     setSituation(SITUATIONS[0])
@@ -443,12 +442,17 @@ export function DraftForm() {
         .tactfully-workspace aside button span:first-child { color:#475467 !important; font-size:12px !important; font-weight:700 !important; }
         .tactfully-workspace aside button span:nth-child(2) { color:#172033 !important; font-size:13px !important; line-height:1.45 !important; }
         .tactfully-workspace aside button span:last-child { color:#98a2b3 !important; font-size:11px !important; }
-        .tactfully-workspace .lg\\:col-span-2 > div { background:#eef2ff !important; border:1px solid #dbe3ff !important; border-radius:12px !important; color:#263b83 !important; padding:16px 18px !important; }
-        .tactfully-workspace .lg\\:col-span-2 > div > div:first-child { color:#1f2f70 !important; font-size:14px !important; font-weight:700 !important; }
-        .tactfully-workspace .lg\\:col-span-2 span { color:#475467 !important; background:#fff !important; border:1px solid #dfe5f4 !important; font-size:12px !important; padding:5px 10px !important; }
+        .tactfully-workspace .quick-start-banner { background:#eef2ff !important; border:1px solid #c7d2fe !important; border-radius:12px !important; color:#263b83 !important; padding:13px 16px !important; }
+        .tactfully-workspace .quick-start-title { color:#1e2f78 !important; font-size:14px !important; font-weight:800 !important; margin-bottom:9px !important; }
+        .tactfully-workspace .quick-start-step { display:inline-flex !important; align-items:center !important; gap:7px !important; color:#263b83 !important; background:#fff !important; border:1px solid #c7d2fe !important; border-radius:999px !important; font-size:12px !important; font-weight:650 !important; padding:5px 10px 5px 6px !important; }
+        .tactfully-workspace .quick-start-number { display:inline-flex !important; align-items:center !important; justify-content:center !important; width:21px !important; height:21px !important; flex:0 0 21px !important; border-radius:999px !important; background:#34469a !important; color:#fff !important; font-size:11px !important; font-weight:800 !important; }
         .tactfully-workspace .relative.rounded-md.p-5, .tactfully-workspace .relative.rounded-md.p-6 { background:#fff !important; color:#172033 !important; border:1px solid #e6e9f0 !important; border-radius:16px !important; box-shadow:0 8px 24px rgba(16,24,40,.06) !important; transform:none !important; }
-        .tactfully-workspace textarea { color:#172033 !important; font-size:16px !important; line-height:1.65 !important; min-height:180px !important; padding:14px 15px !important; border:1px solid #d0d5dd !important; border-radius:10px !important; background:#fff !important; }
-        .tactfully-workspace textarea::placeholder { color:#98a2b3 !important; }
+        .tactfully-workspace textarea { color:#172033 !important; font-size:16px !important; line-height:1.65 !important; min-height:180px !important; padding:14px 15px !important; border:1px solid #d0d5dd !important; border-radius:10px !important; background:#fff !important; }        .tactfully-workspace textarea::placeholder { color:#98a2b3 !important; }
+        .tactfully-workspace textarea.message-input { min-height:104px !important; height:104px; padding:10px 12px !important; line-height:1.5 !important; }
+        @media(min-width:1024px) {
+          .tactfully-workspace textarea.message-input { height:104px; }
+          .tactfully-workspace .relative.rounded-md.p-5, .tactfully-workspace .relative.rounded-md.p-6 { padding:16px !important; }
+        }
         .tactfully-workspace .relative.rounded-md.p-5 > span, .tactfully-workspace .relative.rounded-md.p-6 > span { color:#34469a !important; font-size:13px !important; font-weight:700 !important; }
         .tactfully-workspace button.rounded-full { font-size:13px !important; font-weight:600 !important; padding:8px 13px !important; border-radius:8px !important; border:1px solid #d0d5dd !important; color:#344054 !important; background:#fff !important; cursor:pointer !important; pointer-events:auto !important; position:relative; z-index:2; }
         .tactfully-workspace button.option-chip[aria-pressed="true"] { background:#34469a !important; color:#fff !important; border-color:#34469a !important; box-shadow:0 0 0 2px rgba(52,70,154,.14) !important; }
@@ -599,9 +603,9 @@ export function DraftForm() {
         </aside>
 
         <div className="flex-1 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
-          <div className="lg:col-span-2 mb-4">
+          <div className="lg:col-span-2 mb-3">
             <div
-              className="rounded-md border px-4 py-3 text-sm"
+              className="quick-start-banner rounded-md border px-4 py-3 text-sm"
               style={{
                 background: 'rgba(184,114,42,0.08)',
                 borderColor: 'rgba(184,114,42,0.35)',
@@ -609,21 +613,17 @@ export function DraftForm() {
                 fontFamily: "var(--font-work-sans), sans-serif",
               }}
             >
-              <div className="mb-2 font-semibold" style={{ color: '#F5EFE1' }}>
+              <div className="quick-start-title mb-2 font-semibold">
                 Quick start
               </div>
               <div className="flex flex-wrap gap-2">
                 {QUICK_START_STEPS.map((step, index) => (
                   <span
                     key={step}
-                    className="rounded-full border px-2.5 py-1 text-[11px]"
-                    style={{
-                      borderColor: 'rgba(255,255,255,0.12)',
-                      background: 'rgba(255,255,255,0.02)',
-                      color: '#E8E0D4',
-                    }}
+                    className="quick-start-step rounded-full border px-2.5 py-1 text-[11px]"
                   >
-                    {index + 1}. {step}
+                    <span className="quick-start-number">{index + 1}</span>
+                    <span>{step}</span>
                   </span>
                 ))}
               </div>
@@ -631,7 +631,7 @@ export function DraftForm() {
           </div>
 
           <div
-            className="relative rounded-md p-5 sm:p-6 shadow-2xl w-full max-h-[70vh] lg:max-h-[80vh] overflow-y-auto paper-scroll lg:sticky lg:top-6"
+            className="relative rounded-md p-4 sm:p-5 shadow-2xl w-full lg:sticky lg:top-4"
             style={{ background: '#F5EFE1', color: '#24303B', transform: 'rotate(-0.4deg)' }}
           >
             <div
@@ -646,11 +646,10 @@ export function DraftForm() {
               value={incomingMessage}
               onChange={(e) => setIncomingMessage(e.target.value)}
               placeholder={`Paste what the client actually said... e.g. "Hey, can you just knock the price down a bit?"`}
-              className="w-full min-h-[120px] sm:min-h-[150px] bg-transparent border-none outline-none resize-y"
-              style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.55, color: '#24303B' }}
-            />
+              className="message-input w-full min-h-[104px] sm:min-h-[112px] bg-transparent border-none outline-none resize-y"
+              style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.55, color: '#24303B' }}            />
 
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
               <label className="block">
                 <span className="block mb-1.5 text-xs font-semibold text-slate-600">What outcome do you want?</span>
                 <input
@@ -675,8 +674,8 @@ export function DraftForm() {
               </label>
             </div>
 
-            <div className="mt-5">
-              <div className="flex items-center gap-1.5 mb-3.5">
+            <div className="mt-3">
+              <div className="flex items-center gap-1.5 mb-2.5">
                 <span className="uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
                   Situation
                 </span>
@@ -729,7 +728,7 @@ export function DraftForm() {
               type="button"
               onClick={handleDraftReply}
               disabled={loading}
-              className="mt-6 w-full py-[15px] rounded-md font-semibold text-[15px] text-white transition-all active:scale-[0.99] disabled:cursor-not-allowed"
+              className="mt-4 w-full py-[12px] rounded-md font-semibold text-[15px] text-white transition-all active:scale-[0.99] disabled:cursor-not-allowed"
               style={{ background: loading ? '#8a8a8a' : '#B8722A', fontFamily: "var(--font-work-sans), sans-serif" }}
             >
               {loading ? 'Building your 3 response strategies...' : user ? 'Generate 3 response strategies' : 'Sign in to draft a reply'}
@@ -847,8 +846,7 @@ export function DraftForm() {
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ background: 'rgba(0,0,0,0.55)' }}>
           <div
             className="rounded-md shadow-2xl p-6 max-w-sm w-full relative"
-            style={{ background: '#F5EFE1', color: '#24303B' }}
-          >
+            style={{ background: '#F5EFE1', color: '#24303B' }}          >
             <button
               onClick={() => setShowAuthModal(false)}
               className="absolute top-4 right-4 font-bold text-lg"
