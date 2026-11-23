@@ -83,7 +83,7 @@ function DashboardPreview() {
               Option 2
             </span>
             <p className="text-[12.5px] leading-relaxed" style={{ fontFamily: "var(--font-work-sans), sans-serif" }}>
-              I appreciate you flagging that -- happy to walk through what's driving the price so it's clear where the value is...
+              I appreciate you flagging that -- happy to walk through what&apos;s driving the price so it&apos;s clear where the value is...
             </p>
           </div>
         </div>
