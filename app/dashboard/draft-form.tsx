@@ -412,7 +412,7 @@ export function DraftForm() {
   return (
     <div
       className="tactfully-workspace min-h-screen w-full"
-      style={{ background: '#F5F7FC', color: '#101828' }}
+      style={{ background: '#F4F0E7', color: '#302F29' }}
     >
       <style jsx global>{`
         @keyframes stamp {
@@ -471,7 +471,44 @@ export function DraftForm() {
         .tactfully-workspace .fixed.inset-0 input { color:#172033 !important; border-radius:9px !important; min-height:44px !important; }
         .tactfully-workspace .fixed.inset-0 button[type="submit"] { background:#34469a !important; color:#fff !important; border-radius:9px !important; min-height:46px !important; }
         @media(max-width:1023px) { .tactfully-workspace .relative.rounded-md.p-5, .tactfully-workspace .relative.rounded-md.p-6 { transform:none !important; } }
-      `}</style>
+      
+        /* Warm alabaster + forest green dashboard palette */
+        .tactfully-workspace { background:#F4F0E7 !important; color:#302F29 !important; }
+        .tactfully-workspace header { background:#FFFCF5 !important; border-color:#E5DDCE !important; }
+        .tactfully-workspace header > span { color:#244A3A !important; }
+        .tactfully-workspace header div span,
+        .tactfully-workspace .quick-start-banner { background:#E8EFE8 !important; border-color:#C8D8CB !important; color:#244A3A !important; }
+        .tactfully-workspace .quick-start-title,
+        .tactfully-workspace .quick-start-step { color:#244A3A !important; }
+        .tactfully-workspace .quick-start-number { background:#315D47 !important; color:#FFFCF5 !important; }
+        .tactfully-workspace aside,
+        .tactfully-workspace .relative.rounded-md.p-5,
+        .tactfully-workspace .relative.rounded-md.p-6,
+        .tactfully-workspace .rise-anim,
+        .tactfully-workspace .rounded-2xl.border { background:#FFFCF5 !important; border-color:#E5DDCE !important; color:#302F29 !important; }
+        .tactfully-workspace aside button[style] { background:#FFFCF5 !important; border-color:#E5DDCE !important; }
+        .tactfully-workspace aside button span:nth-child(2),
+        .tactfully-workspace .rise-anim p { color:#403D34 !important; }
+        .tactfully-workspace aside button span:first-child,
+        .tactfully-workspace .relative.rounded-md.p-5 > span,
+        .tactfully-workspace .relative.rounded-md.p-6 > span { color:#315D47 !important; }
+        .tactfully-workspace textarea,
+        .tactfully-workspace input { background:#FFFEFA !important; color:#302F29 !important; border-color:#D9D0C1 !important; }
+        .tactfully-workspace textarea::placeholder { color:#918A7D !important; }
+        .tactfully-workspace button.option-chip[aria-pressed="true"] { background:#315D47 !important; border-color:#315D47 !important; color:#FFFFFF !important; box-shadow:0 0 0 2px rgba(49,93,71,.16) !important; }
+        .tactfully-workspace button.option-chip[aria-pressed="false"] { background:#FFFCF5 !important; border-color:#D9D0C1 !important; color:#514D43 !important; }
+        .tactfully-workspace button.mt-6 { background:#244A3A !important; color:#FFFFFF !important; border:1px solid #244A3A !important; box-shadow:0 5px 12px rgba(36,74,58,.2) !important; font-weight:800 !important; }
+        .tactfully-workspace button.mt-6:hover:not(:disabled) { background:#193A2C !important; }
+        .tactfully-workspace button.mt-6:disabled { background:#A9B5A9 !important; border-color:#A9B5A9 !important; color:#FFFFFF !important; box-shadow:none !important; }
+        .tactfully-workspace .rise-anim button { background:#E8EFE8 !important; border-color:#C8D8CB !important; color:#244A3A !important; }
+        .tactfully-workspace button[style*="#B8722A"] { background:#244A3A !important; color:#FFFFFF !important; border-color:#244A3A !important; }
+        .tactfully-workspace .text-emerald-700 { color:#315D47 !important; }
+        .tactfully-workspace [style*="#B8722A"] { color:#A85F43 !important; }
+        .tactfully-workspace [style*="#1B2A3A"] { color:#302F29 !important; }
+        .tactfully-workspace .fixed.inset-0 > div { background:#FFFCF5 !important; color:#302F29 !important; }
+        .tactfully-workspace .fixed.inset-0 h2 { color:#244A3A !important; }
+        .tactfully-workspace .fixed.inset-0 button[type="submit"] { background:#244A3A !important; color:#FFFFFF !important; }
+`}</style>
 
 
       <header
