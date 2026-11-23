@@ -1,14 +1,18 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { assertServerEnv } from '@/lib/config';
 
-const FREE_DRAFT_LIMIT = 3;
 const NUM_OPTIONS = 2;
 
 export async function POST(req: Request) {
   try {
-    assertServerEnv(['GEMINI_API_KEY'], 'AI generation');
+    assertServerEnv(
+      ['GEMINI_API_KEY', 'SUPABASE_SERVICE_ROLE_KEY'],
+      'AI generation'
+    );
 
+    // Authenticate with the user's session before using the privileged client.
     const supabase = await createClient();
     const {
       data: { user },
@@ -22,53 +26,15 @@ export async function POST(req: Request) {
       );
     }
 
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('plan, draft_count, last_draft_date')
-      .eq('id', user.id)
-      .single();
-
-    if (profileError || !profile) {
-      console.error('❌ Could not load profile:', profileError);
-      return NextResponse.json(
-        { error: 'Could not load your account. Try again.' },
-        { status: 500 }
-      );
-    }
-
-    const today = new Date().toISOString().slice(0, 10);
-    const effectiveDraftCount =
-      profile.last_draft_date === today ? profile.draft_count : 0;
-
-    if (profile.plan === 'free' && effectiveDraftCount >= FREE_DRAFT_LIMIT) {
-      return NextResponse.json(
-        {
-          error: 'limit_reached',
-          message: `You've used all ${FREE_DRAFT_LIMIT} free drafts for today. They reset tomorrow, or upgrade to Pro for unlimited replies.`,
-          upgradeUrl: 'https://smartoolkit.gumroad.com/l/dzlkij',
-        },
-        { status: 403 }
-      );
-    }
-
     const body = await req.json();
     const message = body.incomingMessage || body.message || body.prompt || '';
     const tone = body.tone || 'Formal';
     const context = body.userContext || body.situation || '';
 
-    if (!message) {
+    if (typeof message !== 'string' || !message.trim()) {
       return NextResponse.json(
         { error: 'No message provided to generate a reply for.' },
         { status: 400 }
-      );
-    }
-
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      console.error('❌ Error: GEMINI_API_KEY is missing from environment variables.');
-      return NextResponse.json(
-        { error: 'GEMINI_API_KEY is not configured in your environment variables.' },
-        { status: 500 }
       );
     }
 
@@ -78,11 +44,24 @@ Additional context: ${context || 'None'}.
 
 Each reply must take a genuinely different approach -- a different opening, a different level of detail, or a different way of framing the same point -- while staying in the requested tone. Do not simply rewrite the user message. Keep each reply concise, polite, and ready to send. Write in the first person.`;
 
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      console.error('GEMINI_API_KEY is missing from environment variables.');
+      return NextResponse.json(
+        { error: 'AI generation is not configured.' },
+        { status: 503 }
+      );
+    }
+
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey,
+        },
+        signal: AbortSignal.timeout(15000),
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           systemInstruction: {
@@ -112,11 +91,14 @@ Each reply must take a genuinely different approach -- a different opening, a di
     );
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('❌ Gemini API returned an error:', errorData);
+      const errorData = await response.json().catch(() => null);
+      console.error('Gemini API returned an error:', {
+        status: response.status,
+        message: errorData?.error?.message,
+      });
       return NextResponse.json(
-        { error: errorData.error?.message || 'Failed to generate content' },
-        { status: response.status }
+        { error: 'AI generation is temporarily unavailable. Please try again shortly.' },
+        { status: response.status >= 500 ? 503 : response.status }
       );
     }
 
@@ -127,10 +109,12 @@ Each reply must take a genuinely different approach -- a different opening, a di
     try {
       const parsed = JSON.parse(rawText);
       if (Array.isArray(parsed.replies)) {
-        replies = parsed.replies.filter((r: unknown) => typeof r === 'string' && r.trim());
+        replies = parsed.replies
+          .filter((reply: unknown) => typeof reply === 'string' && reply.trim())
+          .slice(0, NUM_OPTIONS);
       }
-    } catch (parseErr) {
-      console.error('⚠️ Could not parse Gemini JSON response:', rawText);
+    } catch {
+      console.error('Could not parse Gemini JSON response.');
     }
 
     if (replies.length === 0 && rawText.trim()) {
@@ -138,19 +122,42 @@ Each reply must take a genuinely different approach -- a different opening, a di
     }
 
     if (replies.length === 0) {
-      return NextResponse.json({ error: 'Failed to generate a reply. Try again.' }, { status: 502 });
+      return NextResponse.json(
+        { error: 'Failed to generate a reply. Please try again.' },
+        { status: 502 }
+      );
     }
 
-    const { data: incrementResult, error: incrementError } = await supabase.rpc(
+    // This RPC is restricted to service_role and performs the quota check and
+    // increment atomically under a row lock. Never call it with the user's
+    // session client, and never treat an RPC failure as permission to proceed.
+    const admin = createAdminClient();
+    const { data: quotaRows, error: quotaError } = await admin.rpc(
       'increment_draft_count',
       { user_id: user.id }
     );
 
-    if (incrementError) {
-      console.error('⚠️ Failed to increment draft count:', incrementError);
+    if (quotaError || !Array.isArray(quotaRows) || quotaRows.length === 0) {
+      console.error('Atomic draft quota check failed:', quotaError);
+      return NextResponse.json(
+        { error: 'We could not verify your daily draft allowance. Please try again.' },
+        { status: 503 }
+      );
     }
 
-    const newCount = incrementResult?.[0]?.new_count ?? effectiveDraftCount + 1;
+    const quota = quotaRows[0];
+    if (quota.allowed !== true) {
+      return NextResponse.json(
+        {
+          error: 'limit_reached',
+          message: "You've used all 3 free drafts for today. Your allowance resets tomorrow.",
+        },
+        { status: 403 }
+      );
+    }
+
+    const newCount = Number(quota.new_count);
+    const isPro = quota.user_plan === 'pro';
 
     return NextResponse.json({
       replies,
@@ -158,11 +165,15 @@ Each reply must take a genuinely different approach -- a different opening, a di
       draft: replies[0],
       text: replies[0],
       draftsUsed: newCount,
-      draftsRemaining:
-        profile.plan === 'pro' ? null : Math.max(0, FREE_DRAFT_LIMIT - newCount),
+      draftsRemaining: isPro ? null : Math.max(0, 3 - newCount),
     });
-  } catch (error: any) {
-    console.error('❌ Server route crashed:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error('AI generation route failed:', error);
+    const message =
+      error instanceof Error ? error.message : 'Unexpected server error';
+    return NextResponse.json(
+      { error: message || 'Unable to generate a reply.' },
+      { status: 500 }
+    );
   }
 }
