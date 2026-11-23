@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server'
 // verified webhooks, cancellation, renewal, and entitlement expiry are tested.
 export async function POST() {
   return NextResponse.json(
-    { error: 'Pro billing is temporarily unavailable. No payment has been taken.' },
+    { error: 'Recurring Pro checkout is not available yet. No charge has been made.' },
     { status: 503 }
   )
 }
