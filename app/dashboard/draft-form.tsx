@@ -120,6 +120,8 @@ function InfoPopover({ text }: { text: string }) {
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-label="More information"
+        aria-expanded={open}
+        title={text}
         className="inline-flex items-center justify-center rounded-full"
         style={{ color: '#B8722A', opacity: 0.75 }}
       >
@@ -179,6 +181,7 @@ export function DraftForm() {
   const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null)
   const [savingDraft, setSavingDraft] = useState(false)
   const [saveNotice, setSaveNotice] = useState<string | null>(null)
+  const [showQuickStart, setShowQuickStart] = useState(true)
 
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authEmail, setAuthEmail] = useState('')
@@ -514,8 +517,8 @@ export function DraftForm() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 lg:flex lg:gap-6 lg:items-start">
-        <aside className="lg:w-56 lg:shrink-0 mb-5 lg:mb-0">
+      <div className="mx-auto grid w-full max-w-[1600px] grid-cols-1 gap-5 px-4 py-5 sm:px-6 lg:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[230px_minmax(0,1fr)_minmax(380px,1.05fr)] lg:items-start">
+        <aside className="min-w-0 mb-5 lg:mb-0">
           <div className="flex items-center justify-between mb-2.5">
             <span
               className="uppercase"
@@ -574,7 +577,8 @@ export function DraftForm() {
                     key={draft.id}
                     onClick={() => handleSelectDraft(draft)}
                     className="text-left rounded-md px-3 py-2.5 shrink-0 w-48 lg:w-full transition-colors"
-                    style={{ background: '#fff', border: '1px solid #E6E9F0', boxShadow: '0 1px 2px rgba(16,24,40,.04)' }}
+                    aria-current={selectedDraftId === draft.id ? "true" : undefined}
+                    style={{ background: selectedDraftId === draft.id ? "#EEF2FF" : "#fff", border: selectedDraftId === draft.id ? "1px solid #818CF8" : "1px solid #E6E9F0", boxShadow: selectedDraftId === draft.id ? "0 0 0 2px rgba(79,70,229,.10)" : "0 1px 2px rgba(16,24,40,.04)" }}
                   >
                     <span
                       className="block uppercase mb-0.5"
@@ -603,10 +607,11 @@ export function DraftForm() {
           )}
         </aside>
 
-        <div className="flex-1 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
-          <div className="lg:col-span-2 mb-3">
+        <div className="min-w-0 grid grid-cols-1 gap-4 lg:col-start-2 lg:grid-cols-2 lg:gap-5 xl:col-span-2 xl:col-start-2 xl:grid-cols-2 xl:gap-5">
+          {showQuickStart ? (
+          <div className="lg:col-span-2 mb-1">
             <div
-              className="quick-start-banner rounded-md border px-4 py-3 text-sm"
+              className="quick-start-banner rounded-md border px-4 py-2.5 text-sm"
               style={{
                 background: 'rgba(184,114,42,0.08)',
                 borderColor: 'rgba(184,114,42,0.35)',
@@ -614,22 +619,18 @@ export function DraftForm() {
                 fontFamily: "var(--font-work-sans), sans-serif",
               }}
             >
-              <div className="quick-start-title mb-2 font-semibold">
-                Quick start
+              <div className="flex items-center justify-between gap-3">
+                <div className="quick-start-title mb-0 font-semibold">Quick start</div>
+                <button type="button" onClick={() => setShowQuickStart(false)} aria-label="Dismiss quick start" className="rounded-md px-2 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600">Hide</button>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {QUICK_START_STEPS.map((step, index) => (
-                  <span
-                    key={step}
-                    className="quick-start-step rounded-full border px-2.5 py-1 text-[11px]"
-                  >
-                    <span className="quick-start-number">{index + 1}</span>
-                    <span>{step}</span>
-                  </span>
-                ))}
-              </div>
+              <p className="mt-1 text-xs text-indigo-800">Paste the client message, set the context, then generate three reply strategies.</p>
             </div>
           </div>
+          ) : (
+            <div className="lg:col-span-2 flex justify-end">
+              <button type="button" onClick={() => setShowQuickStart(true)} className="rounded-lg border border-indigo-200 bg-white px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-50">Show quick start</button>
+            </div>
+          )}
 
           <div
             className="relative rounded-md p-4 sm:p-5 shadow-2xl w-full lg:sticky lg:top-4"
@@ -650,7 +651,7 @@ export function DraftForm() {
               className="message-input w-full min-h-[104px] sm:min-h-[112px] bg-transparent border-none outline-none resize-y"
               style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.55, color: '#24303B' }}            />
 
-            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="mt-3 grid grid-cols-1 gap-3">
               <label className="block">
                 <span className="block mb-1.5 text-xs font-semibold text-slate-600">What outcome do you want?</span>
                 <input
@@ -728,9 +729,10 @@ export function DraftForm() {
             <button
               type="button"
               onClick={handleDraftReply}
-              disabled={loading}
+              disabled={loading || !incomingMessage.trim()}
+              aria-disabled={loading || !incomingMessage.trim()}
               className="mt-4 w-full py-[12px] rounded-md font-semibold text-[15px] text-white transition-all active:scale-[0.99] disabled:cursor-not-allowed"
-              style={{ background: loading ? '#8a8a8a' : '#B8722A', fontFamily: "var(--font-work-sans), sans-serif" }}
+              style={{ background: loading || !incomingMessage.trim() ? '#98A2B3' : '#B8722A', opacity: !incomingMessage.trim() && !loading ? 0.8 : 1, fontFamily: "var(--font-work-sans), sans-serif" }}
             >
               {loading ? 'Building your 3 response strategies...' : user ? 'Generate 3 response strategies' : 'Sign in to draft a reply'}
             </button>
@@ -748,8 +750,18 @@ export function DraftForm() {
             )}
           </div>
 
-          {(draftOptions.length > 0 || limitReached) && (
-            <div className="mt-5 lg:mt-0 flex flex-col gap-4">
+          <div className="min-w-0 mt-5 lg:mt-0 flex flex-col gap-4">
+            {draftOptions.length === 0 && !limitReached && (
+              <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 xl:sticky xl:top-5">
+                <div className="text-sm font-semibold text-slate-900">Your response strategies will appear here</div>
+                <p className="mt-2 text-sm leading-6 text-slate-500">Add the client’s message and context, then generate three distinct replies. You can edit and copy your preferred version here.</p>
+                <div className="mt-5 grid grid-cols-3 gap-2" aria-hidden="true">
+                  <div className="h-2 rounded-full bg-indigo-100" />
+                  <div className="h-2 rounded-full bg-slate-100" />
+                  <div className="h-2 rounded-full bg-slate-100" />
+                </div>
+              </div>
+            )}
               {limitReached && plan !== 'pro' && (
                 <div className="rise-anim relative rounded-md p-6 text-center lg:sticky lg:top-6" style={{ background: '#24303B', color: '#F5EFE1' }}>
                   <div className="mb-2 font-semibold" style={{ fontFamily: "var(--font-newsreader), serif", fontSize: 18 }}>
@@ -838,8 +850,7 @@ export function DraftForm() {
                   ))}
                 </div>
               )}
-            </div>
-          )}
+          </div>
         </div>
       </div>
 
