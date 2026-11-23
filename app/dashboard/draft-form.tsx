@@ -247,7 +247,8 @@ export function DraftForm() {
 
   const handleNewDraft = () => {
     setSelectedDraftId(null)
-    setSaveNotice(null)    setIncomingMessage('')
+    setSaveNotice(null)
+    setIncomingMessage('')
     setDesiredOutcome('')
     setAvoid('')
     setSituation(SITUATIONS[0])
