@@ -43,7 +43,7 @@ function SealIcon() {
     <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
       <path
         d="M12 2L14.5 8.5L21 9.5L16 14L17.5 21L12 17.5L6.5 21L8 14L3 9.5L9.5 8.5L12 2Z"
-        fill="#F5EFE1"
+        fill="#F4F0E7"
         opacity="0.9"
       />
     </svg>
@@ -62,13 +62,13 @@ function Postmark({ label }: { label: string }) {
     >
       <span
         className="uppercase leading-none"
-        style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 7, letterSpacing: '0.1em', color: '#B8722A' }}
+        style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 7, letterSpacing: '0.1em', color: '#315D47' }}
       >
         Tactfully
       </span>
       <span
         className="leading-none mt-0.5"
-        style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 9, color: '#1B2A3A' }}
+        style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 9, color: '#244A3A' }}
       >
         {label}
       </span>
@@ -107,14 +107,14 @@ function InfoPopover({ text }: { text: string }) {
         onClick={() => setOpen((o) => !o)}
         aria-label="More information"
         className="inline-flex items-center justify-center rounded-full"
-        style={{ color: '#B8722A', opacity: 0.75 }}
+        style={{ color: '#315D47', opacity: 0.75 }}
       >
         <InfoIcon />
       </button>
       {open && (
         <div
           className="absolute z-20 top-full left-0 mt-2 w-56 rounded-md p-3 text-[12px] leading-relaxed shadow-lg"
-          style={{ background: '#1B2A3A', color: '#F5EFE1', fontFamily: "var(--font-work-sans), sans-serif" }}
+          style={{ background: '#244A3A', color: '#F4F0E7', fontFamily: "var(--font-work-sans), sans-serif" }}
         >
           {text}
         </div>
@@ -325,7 +325,7 @@ export function DraftForm() {
   return (
     <div
       className="min-h-screen w-full"
-      style={{ background: '#1B2A3A', color: '#F5EFE1' }}
+      style={{ background: '#F4F0E7', color: '#302F29' }}
     >
       <style jsx global>{`
         @keyframes stamp {
@@ -344,11 +344,11 @@ export function DraftForm() {
 
       <header
         className="h-14 px-5 sm:px-6 flex items-center justify-between shrink-0 border-b"
-        style={{ borderColor: 'rgba(245,239,225,0.1)', background: 'rgba(0,0,0,0.15)' }}
+        style={{ borderColor: '#E5DDCE', background: 'rgba(255,252,245,0.94)' }}
       >
         <span
           className="font-bold tracking-widest"
-          style={{ fontFamily: "var(--font-plex-mono), monospace", color: '#B8722A', fontSize: 15, letterSpacing: '0.12em' }}
+          style={{ fontFamily: "var(--font-plex-mono), monospace", color: '#315D47', fontSize: 15, letterSpacing: '0.12em' }}
         >
           TACTFULLY
         </span>
@@ -359,8 +359,8 @@ export function DraftForm() {
               fontFamily: "var(--font-plex-mono), monospace",
               fontSize: 9,
               letterSpacing: '0.1em',
-              color: plan === 'pro' ? '#1B2A3A' : '#B8C2CE',
-              background: plan === 'pro' ? '#B8722A' : 'rgba(245,239,225,0.08)',
+              color: plan === 'pro' ? '#244A3A' : '#77756D',
+              background: plan === 'pro' ? '#315D47' : 'rgba(245,239,225,0.08)',
             }}
           >
             {plan === 'pro' ? 'Pro' : 'Free'}
@@ -369,7 +369,7 @@ export function DraftForm() {
             <button
               onClick={handleSignOut}
               className="text-[13px] hover:underline"
-              style={{ color: '#B8C2CE', fontFamily: "var(--font-work-sans), sans-serif" }}
+              style={{ color: '#77756D', fontFamily: "var(--font-work-sans), sans-serif" }}
             >
               Sign out
             </button>
@@ -377,7 +377,7 @@ export function DraftForm() {
             <button
               onClick={() => { setIsSignUpMode(false); setShowAuthModal(true) }}
               className="text-[13px] px-3 py-1.5 rounded-md font-semibold"
-              style={{ background: '#B8722A', color: '#fff', fontFamily: "var(--font-work-sans), sans-serif" }}
+              style={{ background: '#315D47', color: '#fff', fontFamily: "var(--font-work-sans), sans-serif" }}
             >
               Sign in
             </button>
@@ -385,12 +385,12 @@ export function DraftForm() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 lg:flex lg:gap-6 lg:items-start">
-        <aside className="lg:w-56 lg:shrink-0 mb-5 lg:mb-0">
+      <div className="mx-auto grid w-full max-w-[1540px] grid-cols-1 gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[248px_minmax(0,1fr)] lg:items-start">
+        <aside className="min-w-0 lg:sticky lg:top-6 lg:w-[248px] lg:shrink-0 mb-5 lg:mb-0">
           <div className="flex items-center justify-between mb-2.5">
             <span
               className="uppercase"
-              style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.12em', color: '#B8C2CE' }}
+              style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.12em', color: '#77756D' }}
             >
               Filed letters
             </span>
@@ -398,7 +398,7 @@ export function DraftForm() {
               <button
                 onClick={handleNewDraft}
                 className="text-[11px] font-semibold"
-                style={{ color: '#B8722A', fontFamily: "var(--font-work-sans), sans-serif" }}
+                style={{ color: '#315D47', fontFamily: "var(--font-work-sans), sans-serif" }}
               >
                 + New
               </button>
@@ -408,14 +408,14 @@ export function DraftForm() {
           {!user ? (
             <div
               className="rounded-md p-4 text-[12px]"
-              style={{ background: 'rgba(245,239,225,0.06)', color: '#B8C2CE', fontFamily: "var(--font-work-sans), sans-serif" }}
+              style={{ background: '#FFFCF5', color: '#55534C', fontFamily: "var(--font-work-sans), sans-serif" }}
             >
               Sign in to start drafting. Paste a client message, choose the situation, and Tactfully will suggest replies in seconds.
             </div>
           ) : draftsList.length === 0 ? (
             <div
               className="rounded-md p-4 text-[12px]"
-              style={{ background: 'rgba(245,239,225,0.06)', color: '#B8C2CE', fontFamily: "var(--font-work-sans), sans-serif" }}
+              style={{ background: '#FFFCF5', color: '#55534C', fontFamily: "var(--font-work-sans), sans-serif" }}
             >
               Your first draft will appear here. Paste the message, select the scenario, and click “Draft my reply.”
             </div>
@@ -425,19 +425,19 @@ export function DraftForm() {
                 <button
                   key={draft.id}
                   onClick={() => handleSelectDraft(draft)}
-                  className="text-left rounded-md px-3 py-2.5 shrink-0 w-48 lg:w-full transition-colors"
-                  style={{ background: 'rgba(245,239,225,0.06)' }}
+                  className="text-left rounded-xl border border-stone-200 px-3 py-3 shrink-0 w-48 lg:w-full transition-colors hover:border-forest-300"
+                  style={{ background: '#FFFCF5' }}
                 >
                   <span
                     className="block uppercase mb-0.5"
-                    style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 9, letterSpacing: '0.08em', color: '#B8722A' }}
+                    style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 9, letterSpacing: '0.08em', color: '#315D47' }}
                   >
                     {SITUATION_LABELS[draft.situation] || draft.situation}
                   </span>
-                  <span className="block text-[12px] truncate" style={{ color: '#F5EFE1', fontFamily: "var(--font-work-sans), sans-serif" }}>
+                  <span className="block text-[12px] truncate" style={{ color: '#302F29', fontFamily: "var(--font-work-sans), sans-serif" }}>
                     {draft.original_message}
                   </span>
-                  <span className="block text-[10px] mt-1" style={{ color: '#6B7A8C', fontFamily: "var(--font-plex-mono), monospace" }}>
+                  <span className="block text-[10px] mt-1" style={{ color: '#77756D', fontFamily: "var(--font-plex-mono), monospace" }}>
                     {new Date(draft.created_at).toLocaleDateString()}
                   </span>
                 </button>
@@ -446,18 +446,18 @@ export function DraftForm() {
           )}
         </aside>
 
-        <div className="flex-1 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
-          <div className="lg:col-span-2 mb-4">
+        <div className="min-w-0 grid grid-cols-1 gap-5 lg:grid-cols-1 lg:gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(360px,.92fr)] lg:items-start">
+          <div className="workspace-heading flex flex-wrap items-end justify-between gap-4 xl:col-span-2 mb-1">
             <div
               className="rounded-md border px-4 py-3 text-sm"
               style={{
-                background: 'rgba(184,114,42,0.08)',
-                borderColor: 'rgba(184,114,42,0.35)',
-                color: '#F5EFE1',
+                background: '#E8EFE8',
+                borderColor: '#C8D7C8',
+                color: '#244A3A',
                 fontFamily: "var(--font-work-sans), sans-serif",
               }}
             >
-              <div className="mb-2 font-semibold" style={{ color: '#F5EFE1' }}>
+              <div className="mb-2 font-semibold" style={{ color: '#244A3A' }}>
                 Quick start
               </div>
               <div className="flex flex-wrap gap-2">
@@ -466,9 +466,9 @@ export function DraftForm() {
                     key={step}
                     className="rounded-full border px-2.5 py-1 text-[11px]"
                     style={{
-                      borderColor: 'rgba(255,255,255,0.12)',
-                      background: 'rgba(255,255,255,0.02)',
-                      color: '#E8E0D4',
+                      borderColor: '#C8D7C8',
+                      background: '#FFFCF5',
+                      color: '#315D47',
                     }}
                   >
                     {index + 1}. {step}
@@ -479,28 +479,28 @@ export function DraftForm() {
           </div>
 
           <div
-            className="relative rounded-md p-5 sm:p-6 shadow-2xl w-full max-h-[70vh] lg:max-h-[80vh] overflow-y-auto paper-scroll lg:sticky lg:top-6"
-            style={{ background: '#F5EFE1', color: '#24303B', transform: 'rotate(-0.4deg)' }}
+            className="relative rounded-2xl border border-stone-200 p-5 sm:p-7 shadow-[0_16px_48px_-32px_rgba(35,50,40,.35)] w-full min-h-[520px] max-h-[80vh] overflow-y-auto paper-scroll lg:sticky lg:top-6"
+            style={{ background: '#F4F0E7', color: '#302F29', transform: 'none' }}
           >
             <div
               className="absolute -top-2.5 left-6 w-11 h-5 -rotate-3"
               style={{ background: 'rgba(184,114,42,0.35)', border: '1px solid rgba(184,114,42,0.5)' }}
             />
 
-            <span className="block mb-3.5 uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
+            <span className="block mb-3.5 uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#315D47' }}>
               The message
             </span>
             <textarea
               value={incomingMessage}
               onChange={(e) => setIncomingMessage(e.target.value)}
               placeholder={`Paste what the client actually said... e.g. "Hey, can you just knock the price down a bit?"`}
-              className="w-full min-h-[120px] sm:min-h-[150px] bg-transparent border-none outline-none resize-y"
-              style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.55, color: '#24303B' }}
+              className="w-full min-h-[190px] sm:min-h-[220px] bg-transparent border-none outline-none resize-y"
+              style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.55, color: '#302F29' }}
             />
 
             <div className="mt-5">
               <div className="flex items-center gap-1.5 mb-3.5">
-                <span className="uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
+                <span className="uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#315D47' }}>
                   Situation
                 </span>
                 <InfoPopover text="Situation tells the AI what kind of conversation this is -- a late payment, a lowball offer, and so on -- so it can shape the reply around the right context." />
@@ -513,8 +513,8 @@ export function DraftForm() {
                     onClick={() => setSituation(s)}
                     className="rounded-full px-3.5 py-1.5 text-[13px] transition-all"
                     style={situation === s
-                      ? { background: '#1B2A3A', color: '#F5EFE1', border: '1px solid #1B2A3A' }
-                      : { background: 'transparent', color: '#24303B', border: '1px solid rgba(36,48,59,0.18)' }}
+                      ? { background: '#244A3A', color: '#F4F0E7', border: '1px solid #244A3A' }
+                      : { background: 'transparent', color: '#302F29', border: '1px solid rgba(36,48,59,0.18)' }}
                   >
                     {SITUATION_LABELS[s]}
                   </button>
@@ -524,7 +524,7 @@ export function DraftForm() {
 
             <div className="mt-5">
               <div className="flex items-center gap-1.5 mb-3.5">
-                <span className="uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
+                <span className="uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#315D47' }}>
                   Tone
                 </span>
                 <InfoPopover text="Tone sets how the reply should sound -- Diplomatic keeps it warm, Firm is direct with no fluff, Formal keeps it strictly businesslike." />
@@ -537,8 +537,8 @@ export function DraftForm() {
                     onClick={() => setTone(t.value)}
                     className="rounded-full px-3.5 py-1.5 text-[13px] transition-all"
                     style={tone === t.value
-                      ? { background: '#1B2A3A', color: '#F5EFE1', border: '1px solid #1B2A3A' }
-                      : { background: 'transparent', color: '#24303B', border: '1px solid rgba(36,48,59,0.18)' }}
+                      ? { background: '#244A3A', color: '#F4F0E7', border: '1px solid #244A3A' }
+                      : { background: 'transparent', color: '#302F29', border: '1px solid rgba(36,48,59,0.18)' }}
                   >
                     {t.label}
                   </button>
@@ -550,20 +550,20 @@ export function DraftForm() {
               type="button"
               onClick={handleDraftReply}
               disabled={loading}
-              className="mt-6 w-full py-[15px] rounded-md font-semibold text-[15px] text-white transition-all active:scale-[0.99] disabled:cursor-not-allowed"
-              style={{ background: loading ? '#8a8a8a' : '#B8722A', fontFamily: "var(--font-work-sans), sans-serif" }}
+              className="mt-6 w-full py-[15px] rounded-xl font-semibold text-[15px] text-white shadow-sm transition-all active:scale-[0.99] disabled:cursor-not-allowed"
+              style={{ background: loading ? '#8a8a8a' : '#315D47', fontFamily: "var(--font-work-sans), sans-serif" }}
             >
               {loading ? 'Drafting...' : user ? 'Draft my reply' : 'Sign in to draft a reply'}
             </button>
 
             {error && (
-              <div className="text-center mt-4 text-[13px]" style={{ color: '#6B7A8C', fontFamily: "var(--font-work-sans), sans-serif" }}>
+              <div className="text-center mt-4 text-[13px]" style={{ color: '#77756D', fontFamily: "var(--font-work-sans), sans-serif" }}>
                 {error}
               </div>
             )}
 
             {draftsRemaining !== null && !limitReached && plan !== 'pro' && (
-              <div className="text-center mt-3 text-[12px]" style={{ color: '#6B7A8C', fontFamily: "var(--font-work-sans), sans-serif" }}>
+              <div className="text-center mt-3 text-[12px]" style={{ color: '#77756D', fontFamily: "var(--font-work-sans), sans-serif" }}>
                 {draftsRemaining} free {draftsRemaining === 1 ? 'draft' : 'drafts'} remaining
               </div>
             )}
@@ -572,18 +572,18 @@ export function DraftForm() {
           {(draftOptions.length > 0 || limitReached) && (
             <div className="mt-5 lg:mt-0 flex flex-col gap-4">
               {limitReached && plan !== 'pro' && (
-                <div className="rise-anim relative rounded-md p-6 text-center lg:sticky lg:top-6" style={{ background: '#24303B', color: '#F5EFE1' }}>
+                <div className="rise-anim relative rounded-2xl border border-forest-700 p-6 text-center lg:sticky lg:top-6" style={{ background: '#302F29', color: '#F4F0E7' }}>
                   <div className="mb-2 font-semibold" style={{ fontFamily: "var(--font-newsreader), serif", fontSize: 18 }}>
                     You've used your 3 free drafts
                   </div>
-                  <p className="mb-5 text-[14px]" style={{ fontFamily: "var(--font-work-sans), sans-serif", color: '#B8C2CE' }}>
+                  <p className="mb-5 text-[14px]" style={{ fontFamily: "var(--font-work-sans), sans-serif", color: '#77756D' }}>
                     Pro billing is being prepared. Paid upgrades are not available yet.
                   </p>
                   <div className="w-full max-w-xs mx-auto rounded-md border p-4 text-left" style={{ borderColor: 'rgba(245,239,225,0.18)', background: 'rgba(245,239,225,0.06)' }}>
-                    <p className="text-[13px] font-semibold" style={{ color: '#F5EFE1', fontFamily: "var(--font-work-sans), sans-serif" }}>
+                    <p className="text-[13px] font-semibold" style={{ color: '#F4F0E7', fontFamily: "var(--font-work-sans), sans-serif" }}>
                       Pro checkout is temporarily unavailable.
                     </p>
-                    <p className="mt-1 text-[12px]" style={{ color: '#B8C2CE', fontFamily: "var(--font-work-sans), sans-serif" }}>
+                    <p className="mt-1 text-[12px]" style={{ color: '#77756D', fontFamily: "var(--font-work-sans), sans-serif" }}>
                       We are preparing secure recurring billing. You will not be charged.
                     </p>
                   </div>
@@ -595,13 +595,13 @@ export function DraftForm() {
                   {draftOptions.map((option, index) => (
                     <div
                       key={index}
-                      className="rise-anim relative rounded-md p-5 sm:p-6"
-                      style={{ background: '#F5EFE1', color: '#24303B' }}
+                      className="rise-anim relative rounded-2xl border border-stone-200 p-5 sm:p-6 shadow-sm"
+                      style={{ background: '#F4F0E7', color: '#302F29' }}
                     >
                       {index === 0 && (
                         <div
                           className="seal-anim absolute -top-4 right-5 w-11 h-11 rounded-full flex items-center justify-center"
-                          style={{ background: 'radial-gradient(circle at 32% 30%, #D98A3B, #B8722A 60%, #8a541f 100%)', boxShadow: '0 6px 14px rgba(0,0,0,0.4)' }}
+                          style={{ background: 'radial-gradient(circle at 32% 30%, #A85F43, #315D47 60%, #193A2C 100%)', boxShadow: '0 6px 14px rgba(0,0,0,0.4)' }}
                         >
                           <SealIcon />
                         </div>
@@ -609,7 +609,7 @@ export function DraftForm() {
                       {index === 0 && <Postmark label={todayStamp} />}
 
                       <div className="flex items-center justify-between mb-3">
-                        <span style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 15, color: '#B8722A' }}>
+                        <span style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 15, color: '#315D47' }}>
                           {draftOptions.length > 1 ? `Option ${index + 1}` : 'Your reply'}
                         </span>
                       </div>
@@ -620,7 +620,7 @@ export function DraftForm() {
                         type="button"
                         onClick={() => handleCopy(option, index)}
                         className="mt-4 uppercase text-[11px] px-3.5 py-2 rounded"
-                        style={{ fontFamily: "var(--font-plex-mono), monospace", letterSpacing: '0.08em', border: '1px solid rgba(36,48,59,0.25)', color: '#24303B', background: '#F5EFE1' }}
+                        style={{ fontFamily: "var(--font-plex-mono), monospace", letterSpacing: '0.08em', border: '1px solid rgba(36,48,59,0.25)', color: '#302F29', background: '#F4F0E7' }}
                       >
                         {copiedIndex === index ? 'Copied!' : 'Copy reply'}
                       </button>
@@ -637,28 +637,28 @@ export function DraftForm() {
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ background: 'rgba(0,0,0,0.55)' }}>
           <div
             className="rounded-md shadow-2xl p-6 max-w-sm w-full relative"
-            style={{ background: '#F5EFE1', color: '#24303B' }}
+            style={{ background: '#F4F0E7', color: '#302F29' }}
           >
             <button
               onClick={() => setShowAuthModal(false)}
               className="absolute top-4 right-4 font-bold text-lg"
-              style={{ color: '#6B7A8C' }}
+              style={{ color: '#77756D' }}
             >
               ×
             </button>
 
             <div className="text-center mb-5">
-              <h2 style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 20, color: '#1B2A3A' }}>
+              <h2 style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 20, color: '#244A3A' }}>
                 {isSignUpMode ? 'Open an account' : 'Welcome back'}
               </h2>
-              <p className="text-[12px] mt-1" style={{ color: '#6B7A8C', fontFamily: "var(--font-work-sans), sans-serif" }}>
+              <p className="text-[12px] mt-1" style={{ color: '#77756D', fontFamily: "var(--font-work-sans), sans-serif" }}>
                 {isSignUpMode ? 'Save every letter you draft.' : 'Sign in to pick up where you left off.'}
               </p>
             </div>
 
             <form onSubmit={handleAuthAction} className="flex flex-col gap-3">
               <div>
-                <label className="block text-[11px] font-bold uppercase mb-1" style={{ color: '#6B7A8C', fontFamily: "var(--font-plex-mono), monospace" }}>Email</label>
+                <label className="block text-[11px] font-bold uppercase mb-1" style={{ color: '#77756D', fontFamily: "var(--font-plex-mono), monospace" }}>Email</label>
                 <input
                   type="email"
                   required
@@ -670,7 +670,7 @@ export function DraftForm() {
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase mb-1" style={{ color: '#6B7A8C', fontFamily: "var(--font-plex-mono), monospace" }}>Password</label>
+                <label className="block text-[11px] font-bold uppercase mb-1" style={{ color: '#77756D', fontFamily: "var(--font-plex-mono), monospace" }}>Password</label>
                 <div className="relative">
                   <input
                     type={showAuthPassword ? 'text' : 'password'}
@@ -686,7 +686,7 @@ export function DraftForm() {
                     onClick={() => setShowAuthPassword((v) => !v)}
                     aria-label={showAuthPassword ? 'Hide password' : 'Show password'}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2"
-                    style={{ color: '#6B7A8C' }}
+                    style={{ color: '#77756D' }}
                   >
                     <EyeIcon open={showAuthPassword} />
                   </button>
@@ -694,25 +694,25 @@ export function DraftForm() {
               </div>
 
               {authError && (
-                <div className="text-[11px] text-center" style={{ color: '#B8722A' }}>{authError}</div>
+                <div className="text-[11px] text-center" style={{ color: '#315D47' }}>{authError}</div>
               )}
 
               <button
                 type="submit"
                 disabled={authLoading}
                 className="w-full py-2.5 rounded-md font-bold text-sm mt-2"
-                style={{ background: '#1B2A3A', color: '#F5EFE1' }}
+                style={{ background: '#244A3A', color: '#F4F0E7' }}
               >
                 {authLoading ? 'One moment...' : isSignUpMode ? 'Create account' : 'Sign in'}
               </button>
             </form>
 
-            <div className="text-center mt-5 pt-3 text-[12px]" style={{ borderTop: '1px solid rgba(36,48,59,0.1)', color: '#6B7A8C' }}>
+            <div className="text-center mt-5 pt-3 text-[12px]" style={{ borderTop: '1px solid rgba(36,48,59,0.1)', color: '#77756D' }}>
               {isSignUpMode ? 'Already have an account?' : "Don't have an account?"}{' '}
               <button
                 onClick={() => { setIsSignUpMode(!isSignUpMode); setAuthError(null) }}
                 className="font-semibold"
-                style={{ color: '#B8722A' }}
+                style={{ color: '#315D47' }}
               >
                 {isSignUpMode ? 'Sign in' : 'Sign up free'}
               </button>
