@@ -59,7 +59,7 @@
 .usageTop { display: flex; justify-content: space-between; color: #626963; font-size: 9px; }
 .usageTop strong { color: #526258; font-size: 9px; }
 .usageTrack { height: 3px; margin: 8px 0 7px; overflow: hidden; border-radius: 3px; background: #dde4dc; }
-.usageTrack span { display: block; width: 68%; height: 100%; border-radius: inherit; background: #718d7b; }
+ .usageTrack span { display: block; width: 33%; height: 100%; border-radius: inherit; background: #718d7b; }
 .usageCard p { margin: 0; color: #9ba09b; font-size: 8px; }
 
 .workspace { width: calc(100% - 226px); min-height: 100vh; margin-left: 226px; }
