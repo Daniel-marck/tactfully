@@ -38,6 +38,38 @@ export async function POST(req: Request) {
       );
     }
 
+    // Fast preflight: reject users already at the daily limit before paying for
+    // a Gemini request. The service-role RPC below remains the authoritative,
+    // atomic quota check for concurrent requests.
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('plan, draft_count, last_draft_date')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile) {
+      console.error('Could not load account quota profile:', profileError);
+      return NextResponse.json(
+        { error: 'Could not verify your daily draft allowance. Please try again.' },
+        { status: 503 }
+      );
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    const usedToday = profile.last_draft_date === today
+      ? Number(profile.draft_count) || 0
+      : 0;
+
+    if (profile.plan !== 'pro' && usedToday >= 3) {
+      return NextResponse.json(
+        {
+          error: 'limit_reached',
+          message: "You've used all 3 free drafts for today. Your allowance resets tomorrow.",
+        },
+        { status: 403 }
+      );
+    }
+
     const prompt = `Draft ${NUM_OPTIONS} distinct professional business replies to this client message: "${message}".
 Desired tone: ${tone}.
 Additional context: ${context || 'None'}.
