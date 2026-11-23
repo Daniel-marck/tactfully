@@ -1,11 +1,9 @@
 import { Check, Sparkles } from "lucide-react"
-import { Button } from "@/components/ui/button"
-
 const bullets = [
-  "3 AI replies/day on Free",
-  "Unlimited replies on Pro",
-  "Basic sentiment detection included",
-  "Advanced negotiation support in Pro",
+  "3 generations per day on Free",
+  "3 distinct reply strategies per generation",
+  "3 writing tones",
+  "Saved, editable draft history",
 ]
 
 function SealIcon() {
@@ -141,16 +139,12 @@ export function Hero() {
             Client communication intelligence for support and revenue teams.
           </h1>
           <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground text-pretty">
-            Generate better replies, detect sentiment, and optimize negotiation workflows with AI that helps your team
-            respond faster and close more effectively.
+            Generate three distinct reply strategies from a client message, adjust the tone, and keep your drafts organized.
+            You review every suggestion and decide what to send.
           </p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <Button className="h-11 px-6 text-sm" nativeButton={false} render={<a href="/sign-up" />}>
-              Start Free
-            </Button>
-            <Button variant="outline" className="h-11 px-6 text-sm" nativeButton={false} render={<a href="/sign-up" />}>
-              Upgrade to Pro
-            </Button>
+            <a href="/sign-up" className="inline-flex h-11 items-center justify-center rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground hover:bg-primary/90">Start Free</a>
+            <a href="#pricing" className="inline-flex h-11 items-center justify-center rounded-lg border border-input bg-background px-6 text-sm font-semibold hover:bg-accent">View pricing</a>
           </div>
           <ul className="mt-8 grid gap-x-6 gap-y-2.5 sm:grid-cols-2">
             {bullets.map((b) => (
