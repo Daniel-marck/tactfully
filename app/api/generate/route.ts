@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/admin';
 import { assertServerEnv } from '@/lib/config';
 
 export const maxDuration = 50;
@@ -56,7 +55,7 @@ function isTactfullyTester(email: string | undefined) {
 export async function POST(req: Request) {
   const requestStartedAt = Date.now();
   try {
-    assertServerEnv(['GEMINI_API_KEY', 'SUPABASE_SERVICE_ROLE_KEY'], 'AI generation and secure quota recording');
+    assertServerEnv(['GEMINI_API_KEY'], 'AI reply generation');
 
     const supabase = await createClient();
     const {
@@ -346,10 +345,10 @@ Return exactly three reply strings in the required JSON structure, in the order 
     let newCount = effectiveDraftCount;
     let resultingPlan = profile.plan;
     if (!isTester) {
-      // Use the server-only service-role client. The quota RPC is not callable
-      // with browser/session credentials and enforces the free limit under a row lock.
-      const admin = createAdminClient();
-      const { data: incrementResult, error: incrementError } = await admin.rpc(
+      // Call the quota RPC with the authenticated user's session. The SECURITY
+      // DEFINER function verifies auth.uid() = user_id and updates protected
+      // profile counters without exposing service-role credentials to this route.
+      const { data: incrementResult, error: incrementError } = await supabase.rpc(
         'increment_draft_count',
         { user_id: user.id }
       );
@@ -362,7 +361,10 @@ Return exactly three reply strings in the required JSON structure, in the order 
         );
       }
 
-      if (!incrementResult[0].allowed) {
+      newCount = incrementResult[0].new_count;
+      resultingPlan = incrementResult[0].user_plan;
+
+      if (resultingPlan === 'free' && newCount > FREE_DRAFT_LIMIT) {
         return NextResponse.json(
           {
             error: 'limit_reached',
@@ -371,9 +373,6 @@ Return exactly three reply strings in the required JSON structure, in the order 
           { status: 403 }
         );
       }
-
-      newCount = incrementResult[0].new_count;
-      resultingPlan = incrementResult[0].user_plan;
     }
 
     console.info(
