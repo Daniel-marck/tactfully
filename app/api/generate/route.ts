@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { assertServerEnv } from '@/lib/config';
 
 export const maxDuration = 50;
@@ -346,8 +347,8 @@ Return exactly three reply strings in the required JSON structure, in the order 
     let newCount = effectiveDraftCount;
     let resultingPlan = profile.plan;
     if (!isTester) {
-      // Use the server-only service-role client. The RPC applies the quota
-      // under a row lock and cannot be called by browser/session credentials.
+      // Only the server-side client can call the quota mutation. The database
+      // row lock enforces the free limit atomically across concurrent requests.
       const admin = createAdminClient();
       const { data: incrementResult, error: incrementError } = await admin.rpc(
         'increment_draft_count',
