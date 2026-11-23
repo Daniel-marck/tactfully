@@ -48,10 +48,11 @@ cp .env.example .env.local
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 GEMINI_API_KEY=
 ```
 
-The legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY` is supported as a fallback. Never expose a Supabase service-role key or other server secret through a `NEXT_PUBLIC_*` variable.
+The legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY` is supported as a fallback. `SUPABASE_SERVICE_ROLE_KEY` is used only by the server-side atomic quota function. Never expose it or any other server secret through a `NEXT_PUBLIC_*` variable.
 
 4. Apply every SQL migration in `supabase/migrations/` in ascending filename order to the Supabase project. Do not apply only the original schema migration: later migrations add daily usage tracking, draft history, ownership restrictions, saved context fields, and delete permissions.
 
