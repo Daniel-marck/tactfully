@@ -18,7 +18,6 @@ import {
   Settings,
   Sparkles,
   WandSparkles,
-  WandSparkles,
 } from "lucide-react"
 import styles from "./product-preview.module.css"
 
