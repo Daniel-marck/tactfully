@@ -182,7 +182,8 @@ export function DraftForm() {
   const [draftSearch, setDraftSearch] = useState('')
   const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null)
   const [savingDraft, setSavingDraft] = useState(false)
-  const [saveNotice, setSaveNotice] = useState<string | null>(null)
+  const [deletingDraftId, setDeletingDraftId] = useState<string | null>(null)
+  const [saveNotice, setSaveNotice] = useState<string | null>(
   const [showQuickStart, setShowQuickStart] = useState(true)
   const [messageExpanded, setMessageExpanded] = useState(false)
   const messageInputRef = useRef<HTMLTextAreaElement>(null)
@@ -423,6 +424,26 @@ export function DraftForm() {
     }
   }
 
+  const handleDeleteDraft = async (draft: SavedDraft) => {
+    if (!user || !window.confirm('Delete this saved draft? This cannot be undone.')) return
+    setDeletingDraftId(draft.id)
+    setError(null)
+    try {
+      const { error: deleteError } = await supabase
+        .from('drafts')
+        .delete()
+        .eq('id', draft.id)
+        .eq('user_id', user.id)
+      if (deleteError) throw deleteError
+      setDraftsList((current) => current.filter((item) => item.id !== draft.id))
+      if (selectedDraftId === draft.id) handleNewDraft()
+    } catch {
+      setError('Could not delete that saved draft. Please try again.')
+    } finally {
+      setDeletingDraftId(null)
+    }
+  }
+
   const handleCopy = async (text: string, index: number) => {
     try {
       await navigator.clipboard.writeText(text)
@@ -608,26 +629,36 @@ export function DraftForm() {
                     draft.situation.toLowerCase().includes(query) ||
                     (SITUATION_LABELS[draft.situation] || '').toLowerCase().includes(query)
                 }).map((draft) => (
-                  <button
-                    key={draft.id}
-                    onClick={() => handleSelectDraft(draft)}
-                    className="text-left rounded-md px-3 py-2.5 shrink-0 w-48 lg:w-full transition-colors"
-                    aria-current={selectedDraftId === draft.id ? "true" : undefined}
-                    style={{ background: selectedDraftId === draft.id ? "#EEF2FF" : "#fff", border: selectedDraftId === draft.id ? "1px solid #818CF8" : "1px solid #E6E9F0", boxShadow: selectedDraftId === draft.id ? "0 0 0 2px rgba(79,70,229,.10)" : "0 1px 2px rgba(16,24,40,.04)" }}
-                  >
-                    <span
-                      className="block uppercase mb-0.5"
-                      style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 9, letterSpacing: '0.08em', color: '#34469A' }}
+                  <div key={draft.id} className="relative shrink-0 w-48 lg:w-full">
+                    <button
+                      type="button"
+                      onClick={() => handleSelectDraft(draft)}
+                      className="w-full text-left rounded-md px-3 py-2.5 pr-9 transition-colors"
+                      aria-current={selectedDraftId === draft.id ? "true" : undefined}
+                      style={{ background: selectedDraftId === draft.id ? "#E8EFE8" : "#FFFCF5", border: selectedDraftId === draft.id ? "1px solid #9BB5A1" : "1px solid #E5DDCE", boxShadow: selectedDraftId === draft.id ? "0 0 0 2px rgba(49,93,71,.10)" : "0 1px 2px rgba(48,47,41,.04)" }}
                     >
-                      {SITUATION_LABELS[draft.situation] || draft.situation}
-                    </span>
-                    <span className="block text-[12px] truncate" style={{ color: '#172033', fontFamily: "var(--font-work-sans), sans-serif" }}>
-                      {draft.original_message}
-                    </span>
-                    <span className="block text-[10px] mt-1" style={{ color: '#667085', fontFamily: "var(--font-plex-mono), monospace" }}>
-                      {new Date(draft.created_at).toLocaleDateString()}
-                    </span>
-                  </button>
+                      <span className="block uppercase mb-0.5" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 9, letterSpacing: '0.08em', color: '#315D47' }}>
+                        {SITUATION_LABELS[draft.situation] || draft.situation}
+                      </span>
+                      <span className="block text-[12px] truncate" style={{ color: '#302F29', fontFamily: "var(--font-work-sans), sans-serif" }}>
+                        {draft.original_message}
+                      </span>
+                      <span className="block text-[10px] mt-1" style={{ color: '#77756D', fontFamily: "var(--font-plex-mono), monospace" }}>
+                        {new Date(draft.created_at).toLocaleDateString()}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleDeleteDraft(draft)}
+                      disabled={deletingDraftId === draft.id}
+                      aria-label={`Delete saved draft from ${new Date(draft.created_at).toLocaleDateString()}`}
+                      title="Delete saved draft"
+                      className="absolute right-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-md text-sm font-semibold opacity-70 hover:opacity-100 disabled:opacity-40"
+                      style={{ color: '#A85F43', background: '#FFF8F3' }}
+                    >
+                      {deletingDraftId === draft.id ? '…' : '×'}
+                    </button>
+                  </div>
                 ))}
                 {draftSearch.trim() && !draftsList.some((draft) => {
                   const query = draftSearch.trim().toLowerCase()
