@@ -1,5 +1,5 @@
 "use client"
-import { useState, type FormEvent } from "react"
+import { useEffect, useState, type FormEvent } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { MessagesSquare } from "lucide-react"
@@ -35,20 +35,38 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [notice, setNotice] = useState<string | null>(null)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("error") === "auth_callback") {
+      setError("That link is invalid or has expired. Please request a new one.")
+    }
+    if (params.get("message") === "password_updated") {
+      setNotice("Your password has been updated. Sign in with your new password.")
+    }
+  }, [])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError(null)
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    setLoading(false)
-    if (error) {
-      setError(error.message)
-      return
+    setNotice(null)
+
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      })
+      if (error) throw error
+      router.push("/dashboard")
+      router.refresh()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to sign in. Please try again.")
+    } finally {
+      setLoading(false)
     }
-    router.push("/dashboard")
-    router.refresh()
   }
 
   return (
@@ -103,7 +121,13 @@ export default function SignInPage() {
               </button>
             </div>
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {notice && <p className="text-sm text-emerald-700" role="status">{notice}</p>}
+          {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
+          <div className="flex justify-end">
+            <Link href="/forgot-password" className="text-xs font-medium text-primary hover:underline">
+              Forgot password?
+            </Link>
+          </div>
           <Button type="submit" disabled={loading} className="mt-2 h-10 w-full">
             {loading ? "Signing in…" : "Sign in"}
           </Button>
