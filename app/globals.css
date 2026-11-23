@@ -186,8 +186,9 @@
 
 .tactfully-workspace > div[class*="max-w-6xl"] {
   max-width: 1280px;
-  gap: 24px;
-  padding-top: 32px;
+  gap: 20px;
+  padding-top: 16px;
+  padding-bottom: 16px;
 }
 .tactfully-workspace aside {
   border: 1px solid #E6EAF2;
