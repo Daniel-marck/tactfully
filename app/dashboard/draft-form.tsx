@@ -498,8 +498,9 @@ export function DraftForm() {
         .tactfully-workspace .fixed.inset-0 > div, .tactfully-workspace .fixed.inset-0 > section { background:#FFFCF5 !important; color:#302F29 !important; border-radius:16px !important; }
         .tactfully-workspace .fixed.inset-0 h2 { color:#244A3A !important; font-size:24px !important; font-style:normal !important; font-weight:750 !important; }
         .tactfully-workspace .fixed.inset-0 button[type="submit"] { background:#244A3A !important; color:#FFFFFF !important; border-radius:9px !important; min-height:46px !important; }
-        .tactfully-workspace [style*="#1B2A3A"] { background-color:#244A3A !important; color:#FFFFFF !important; border-color:#244A3A !important; }
+        .tactfully-workspace [style*="#1B2A3A"] { color:#244A3A !important; }
         .tactfully-workspace [style*="#F5EFE1"] { background-color:#FFFCF5 !important; color:#302F29 !important; }
+        .tactfully-workspace button[style*="#B8722A"] { background:#244A3A !important; color:#FFFFFF !important; border-color:#244A3A !important; }
         .tactfully-workspace [style*="#B8722A"] { color:#A85F43 !important; }
         .tactfully-workspace .paper-scroll::-webkit-scrollbar { width:6px; height:6px; }
         .tactfully-workspace .paper-scroll::-webkit-scrollbar-thumb { background:rgba(49,93,71,.25); border-radius:3px; }
