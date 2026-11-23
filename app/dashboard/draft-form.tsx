@@ -460,8 +460,8 @@ export function DraftForm() {
           to { transform: scale(1) rotate(8deg); }
         }
         @keyframes rise {
-          from { opacity: 0; transform: transtoneY(8px); }
-          to { opacity: 1; transform: transtoneY(0); }
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         .seal-anim { animation: stamp 0.5s cubic-bezier(.2,1.4,.4,1) forwards; }
         .rise-anim { animation: rise 0.4s ease forwards; }
@@ -1007,7 +1007,7 @@ export function DraftForm() {
                     type="button"
                     onClick={() => setShowAuthPassword((v) => !v)}
                     aria-label={showAuthPassword ? 'Hide password' : 'Show password'}
-                    className="absolute right-2.5 top-1/2 -transtone-y-1/2"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2"
                     style={{ color: '#6B7A8C' }}
                   >
                     <EyeIcon open={showAuthPassword} />
