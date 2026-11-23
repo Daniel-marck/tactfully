@@ -223,10 +223,10 @@ export function DraftForm() {
     const textarea = messageInputRef.current
     if (!textarea) return
     textarea.style.height = 'auto'
-    const maxHeight = messageExpanded ? 0 : 420
-    textarea.style.height = messageExpanded ? '100%' : `${Math.min(textarea.scrollHeight, maxHeight)}px`
-    textarea.style.overflowY = !messageExpanded && textarea.scrollHeight > maxHeight ? 'auto' : 'hidden'
-  }, [incomingMessage, messageExpanded])
+    const maxHeight = 420
+    textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`
+    textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden'
+  }, [incomingMessage])
 
   useEffect(() => {
     async function initUser() {
