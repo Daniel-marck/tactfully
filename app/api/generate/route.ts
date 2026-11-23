@@ -99,6 +99,14 @@ export async function POST(req: Request) {
       );
     }
 
+    const contentLength = Number(req.headers.get('content-length') ?? 0);
+    if (Number.isFinite(contentLength) && contentLength > 16_384) {
+      return NextResponse.json(
+        { error: 'This request is too large. Shorten the client message and try again.' },
+        { status: 413 }
+      );
+    }
+
     const body = await req.json().catch(() => null);
     if (!body || typeof body !== 'object' || Array.isArray(body)) {
       return NextResponse.json({ error: 'Invalid request. Please submit a client message.' }, { status: 400 });
@@ -383,12 +391,11 @@ Return exactly three reply strings in the required JSON structure, in the order 
   } catch (error: unknown) {
     console.error('❌ Server route crashed:', error);
     const isTimeout = error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError');
-    const errorMessage = error instanceof Error ? error.message : 'Something went wrong generating your reply.';
     return NextResponse.json(
       {
         error: isTimeout
           ? 'The AI service took too long to respond. Please try again.'
-          : errorMessage,
+          : 'We could not complete that request. Please try again.',
       },
       { status: isTimeout ? 504 : 500 }
     );
