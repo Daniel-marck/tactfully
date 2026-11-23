@@ -712,6 +712,21 @@ export function DraftForm() {
 
               {draftOptions.length > 0 && (!limitReached || plan === 'pro') && (
                 <div className="flex flex-col gap-4 lg:sticky lg:top-6 lg:max-h-[80vh] lg:overflow-y-auto paper-scroll pr-0.5">
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+                    <div>
+                      <div className="text-sm font-semibold text-slate-900">Your reply options</div>
+                      <div className="mt-0.5 text-xs text-slate-500">Edit any draft, then copy the version you want to send.</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleDraftReply}
+                      disabled={loading}
+                      className="shrink-0 rounded-lg border px-3 py-2 text-xs font-semibold disabled:opacity-50"
+                      style={{ borderColor: '#D0D5DD', color: '#34469A', background: '#fff' }}
+                    >
+                      {loading ? 'Regenerating...' : 'Regenerate'}
+                    </button>
+                  </div>
                   {draftOptions.map((option, index) => (
                     <div
                       key={index}
@@ -733,9 +748,16 @@ export function DraftForm() {
                           {STRATEGY_LABELS[index] || `Option ${index + 1}`}
                         </span>
                       </div>
-                      <p className="whitespace-pre-wrap" style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.6 }}>
-                        {option}
-                      </p>
+                      <label className="block">
+                        <span className="sr-only">Edit {STRATEGY_LABELS[index] || `option ${index + 1}`} reply</span>
+                        <textarea
+                          value={option}
+                          onChange={(event) => setDraftOptions((current) => current.map((value, optionIndex) => optionIndex === index ? event.target.value : value))}
+                          aria-label={`Edit ${STRATEGY_LABELS[index] || `option ${index + 1}`} reply`}
+                          className="reply-editor w-full resize-y rounded-lg border p-3 outline-none focus:ring-2 focus:ring-indigo-200"
+                          style={{ minHeight: 140, borderColor: '#E6E9F0', background: '#fff', color: '#344054', fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.7 }}
+                        />
+                      </label>
                       <button
                         type="button"
                         onClick={() => handleCopy(option, index)}
