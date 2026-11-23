@@ -408,14 +408,14 @@ export function DraftForm() {
           {!user ? (
             <div
               className="rounded-md p-4 text-[12px]"
-              style={{ background: 'rgba(245,239,225,0.06)', color: '#77756D', fontFamily: "var(--font-work-sans), sans-serif" }}
+              style={{ background: '#FFFCF5', color: '#55534C', fontFamily: "var(--font-work-sans), sans-serif" }}
             >
               Sign in to start drafting. Paste a client message, choose the situation, and Tactfully will suggest replies in seconds.
             </div>
           ) : draftsList.length === 0 ? (
             <div
               className="rounded-md p-4 text-[12px]"
-              style={{ background: 'rgba(245,239,225,0.06)', color: '#77756D', fontFamily: "var(--font-work-sans), sans-serif" }}
+              style={{ background: '#FFFCF5', color: '#55534C', fontFamily: "var(--font-work-sans), sans-serif" }}
             >
               Your first draft will appear here. Paste the message, select the scenario, and click “Draft my reply.”
             </div>
@@ -426,7 +426,7 @@ export function DraftForm() {
                   key={draft.id}
                   onClick={() => handleSelectDraft(draft)}
                   className="text-left rounded-xl border border-stone-200 px-3 py-3 shrink-0 w-48 lg:w-full transition-colors hover:border-forest-300"
-                  style={{ background: 'rgba(245,239,225,0.06)' }}
+                  style={{ background: '#FFFCF5' }}
                 >
                   <span
                     className="block uppercase mb-0.5"
@@ -434,7 +434,7 @@ export function DraftForm() {
                   >
                     {SITUATION_LABELS[draft.situation] || draft.situation}
                   </span>
-                  <span className="block text-[12px] truncate" style={{ color: '#F4F0E7', fontFamily: "var(--font-work-sans), sans-serif" }}>
+                  <span className="block text-[12px] truncate" style={{ color: '#302F29', fontFamily: "var(--font-work-sans), sans-serif" }}>
                     {draft.original_message}
                   </span>
                   <span className="block text-[10px] mt-1" style={{ color: '#77756D', fontFamily: "var(--font-plex-mono), monospace" }}>
@@ -451,13 +451,13 @@ export function DraftForm() {
             <div
               className="rounded-md border px-4 py-3 text-sm"
               style={{
-                background: 'rgba(184,114,42,0.08)',
-                borderColor: 'rgba(184,114,42,0.35)',
-                color: '#F4F0E7',
+                background: '#E8EFE8',
+                borderColor: '#C8D7C8',
+                color: '#244A3A',
                 fontFamily: "var(--font-work-sans), sans-serif",
               }}
             >
-              <div className="mb-2 font-semibold" style={{ color: '#F4F0E7' }}>
+              <div className="mb-2 font-semibold" style={{ color: '#244A3A' }}>
                 Quick start
               </div>
               <div className="flex flex-wrap gap-2">
@@ -466,9 +466,9 @@ export function DraftForm() {
                     key={step}
                     className="rounded-full border px-2.5 py-1 text-[11px]"
                     style={{
-                      borderColor: 'rgba(255,255,255,0.12)',
-                      background: 'rgba(255,255,255,0.02)',
-                      color: '#E8EFE8',
+                      borderColor: '#C8D7C8',
+                      background: '#FFFCF5',
+                      color: '#315D47',
                     }}
                   >
                     {index + 1}. {step}
