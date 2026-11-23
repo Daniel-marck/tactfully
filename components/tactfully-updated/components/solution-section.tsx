@@ -2,9 +2,9 @@ import Image from "next/image"
 import { ArrowRight, PenLine, ListChecks, RefreshCw } from "lucide-react"
 
 const flow = [
-  { icon: PenLine, label: "Write", note: "AI reply generation" },
-  { icon: ListChecks, label: "Review", note: "Tone + sentiment" },
-  { icon: RefreshCw, label: "Improve", note: "Repeatable process" },
+  { icon: PenLine, label: "Write", note: "Three reply strategies" },
+  { icon: ListChecks, label: "Review", note: "Situation + tone control" },
+  { icon: RefreshCw, label: "Reuse", note: "Saved draft history" },
 ]
 
 export function SolutionSection() {
@@ -17,9 +17,8 @@ export function SolutionSection() {
             Tactfully gives your team a better communication workflow.
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-pretty">
-            Tactfully combines AI reply generation, tone selection, sentiment detection, and negotiation support in one
-            workspace. Instead of moving between drafting tools and guesswork, your team gets a structured way to write,
-            review, and improve replies.
+            Tactfully uses the client message, situation, desired outcome, constraints, and preferred tone to generate
+            three tactically distinct reply strategies. You review each suggestion and decide what to send.
           </p>
           <p className="mt-4 rounded-lg border-l-2 border-primary bg-primary/[0.04] px-4 py-3 text-sm font-medium text-foreground">
             Replace fragmented drafting with a repeatable response process.
@@ -54,10 +53,10 @@ export function SolutionSection() {
       <div className="mx-auto max-w-6xl px-4 pb-16 pt-14 sm:px-6 lg:pb-24">
         <div className="mx-auto max-w-3xl text-center">
           <h3 className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-            See every client conversation at a glance.
+            Keep your saved drafts organized and ready to reuse.
           </h3>
           <p className="mt-3 text-base leading-relaxed text-muted-foreground text-pretty">
-            Track sentiment, response time, and at-risk threads across your whole team from one dashboard.
+            Search, reopen, edit, or delete past replies from your private draft history.
           </p>
         </div>
         <div className="relative mt-10">
@@ -69,8 +68,8 @@ export function SolutionSection() {
               <span className="ml-3 text-xs font-medium text-muted-foreground">app.tactfully.com/dashboard</span>
             </div>
             <Image
-              src="/images/product-sentiment.png"
-              alt="Tactfully dashboard showing conversation totals, sentiment breakdown, average response time trend, and recent client conversations"
+              src="/images/product-composer.png"
+              alt="Tactfully reply composer with a client message, situation and tone controls, and three response strategies"
               width={1024}
               height={1024}
               className="h-auto w-full"
