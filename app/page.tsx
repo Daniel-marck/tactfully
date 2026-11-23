@@ -1,33 +1,106 @@
-import { SiteHeader } from "@/components/site-header"
-import { Hero } from "@/components/hero"
-import { LogoCloud } from "@/components/logo-cloud"
-import { ProblemSection } from "@/components/problem-section"
-import { SolutionSection } from "@/components/solution-section"
-import { FeaturesSection } from "@/components/features-section"
-import { HowItWorks } from "@/components/how-it-works"
-import { PricingSection } from "@/components/pricing-section"
-import { UseCases } from "@/components/use-cases"
-import { FaqSection } from "@/components/faq-section"
-import { FinalCta } from "@/components/final-cta"
-import { SiteFooter } from "@/components/site-footer"
+import Link from "next/link"
+import {
+  ArrowRight, ArrowUpRight, Check, ChevronDown, Clock3, Copy, MessageSquareText,
+  ShieldCheck, Sparkles, HeartHandshake, FileText
+} from "lucide-react"
+
+const scenarios = [
+  { label: "Scope creep", quote: "Could you also add these items? It should be quick.", response: "Happy to help. Those additions sit outside our original scope, so I can send over an updated estimate before we proceed.", tone: "Clear · Professional" },
+  { label: "Late payment", quote: "I'll get the invoice sorted sometime next week.", response: "Thanks for the update. Could you confirm the exact payment date so I can plan the next project milestone?", tone: "Warm · Firm" },
+  { label: "Price negotiation", quote: "Your quote is a bit high. Can you do it for half?", response: "I understand the need to stay within budget. I can suggest a leaner scope that keeps the most important outcomes intact.", tone: "Confident · Diplomatic" },
+]
+
+const faqs = [
+  ["What is Tactfully?", "Tactfully helps freelancers and client-facing professionals turn difficult client messages into clear, professional replies. Paste the message, choose the situation and tone, then review and copy a draft."],
+  ["Do I need to connect my email or messaging account?", "No. You can paste the message directly into Tactfully. Nothing is sent to your client automatically; you review and copy the reply yourself."],
+  ["What can I do on the free plan?", "The free plan includes 3 AI generations per day. Each generation returns two reply options, with three tone choices and saved draft history."],
+  ["What does Pro cost?", "Pro is not available yet. Paid subscriptions will open only after recurring billing is ready and the plan details are published."],
+  ["Will Tactfully send messages for me?", "No. Tactfully drafts suggestions. You stay in control of the wording and decide what to send."],
+]
+
+function Brand({ light = false }: { light?: boolean }) {
+  return <Link href="/" className={`inline-flex items-center gap-2.5 font-semibold tracking-tight ${light ? "text-white" : "text-stone-950"}`}>
+    <span className="grid size-9 place-items-center rounded-xl bg-forest-600 text-white shadow-lg shadow-forest-600/20"><MessageSquareText className="size-[18px]" /></span>
+    <span className="text-[19px]">tactfully<span className="text-forest-600">.</span></span>
+  </Link>
+}
+
+function ProductWindow() {
+  return <div className="relative mx-auto w-full max-w-[570px]">
+    <div className="absolute -inset-5 rounded-[34px] bg-forest-400/20 blur-3xl" />
+    <div className="relative overflow-hidden rounded-[26px] border border-white/70 bg-white shadow-[0_32px_100px_-35px_rgba(30,41,99,.45)]">
+      <div className="flex items-center justify-between border-b border-stone-100 bg-white px-5 py-4">
+        <div className="flex items-center gap-2.5"><span className="grid size-8 place-items-center rounded-lg bg-forest-600 text-white"><MessageSquareText size={15}/></span><span className="text-sm font-semibold text-stone-900">Reply studio</span></div>
+        <div className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-forest-400"/><span className="text-[11px] font-medium text-stone-500">Ready to draft</span></div>
+      </div>
+      <div className="grid gap-0 md:grid-cols-[.9fr_1.1fr]">
+        <div className="border-b border-stone-100 bg-stone-50/80 p-5 md:border-b-0 md:border-r">
+          <div className="mb-3 flex items-center justify-between"><span className="text-[10px] font-bold uppercase tracking-[.16em] text-stone-400">Client message</span><span className="rounded-full bg-amber-100 px-2 py-1 text-[9px] font-semibold text-amber-800">Scope creep</span></div>
+          <div className="rounded-2xl rounded-tl-md border border-stone-200 bg-white p-4 text-[13px] leading-6 text-stone-700 shadow-sm">“Could you also add these items? It should be quick, right?”</div>
+          <div className="mt-5 text-[10px] font-bold uppercase tracking-[.16em] text-stone-400">Choose your tone</div>
+          <div className="mt-2 flex flex-wrap gap-2">{["Diplomatic","Firm","Formal"].map((t,i)=><span key={t} className={`rounded-full border px-3 py-1.5 text-[10px] font-semibold ${i===0?"border-forest-600 bg-forest-50 text-forest-700":"border-stone-200 bg-white text-stone-500"}`}>{t}</span>)}</div>
+          <div className="mt-5 rounded-xl bg-forest-600 px-4 py-3 text-center text-xs font-semibold text-white shadow-lg shadow-forest-600/20">Draft my reply <ArrowRight className="ml-1 inline" size={13}/></div>
+          <p className="mt-3 text-center text-[10px] text-stone-400">You review every reply before sending.</p>
+        </div>
+        <div className="p-5">
+          <div className="mb-3 flex items-center justify-between"><span className="text-[10px] font-bold uppercase tracking-[.16em] text-stone-400">Your response strategies</span><span className="rounded-full bg-forest-50 px-2 py-1 text-[9px] font-semibold text-forest-700" >2 reply options</span></div>
+          <div className="rounded-2xl border border-forest-100 bg-forest-50/60 p-4">
+            <div className="mb-2 flex items-center justify-between"><span className="text-[11px] font-bold text-forest-700">Diplomatic approach</span><Sparkles size={13} className="text-forest-500"/></div>
+            <p className="text-[12px] leading-[1.75] text-stone-700">“Happy to help with those additions. They sit outside our original scope, so I can send over an updated estimate before we proceed.”</p>
+            <div className="mt-3 flex items-center justify-between border-t border-forest-100 pt-3"><span className="text-[10px] text-stone-500">Clear · Professional</span><span className="flex items-center gap-1 text-[10px] font-semibold text-forest-700"><Copy size={11}/> Copy reply</span></div>
+          </div>
+          <div className="mt-3 rounded-2xl border border-stone-200 p-4">
+            <div className="mb-2 text-[11px] font-bold text-stone-600">Firm & professional</div>
+            <p className="text-[12px] leading-[1.75] text-stone-600">“I can take those on. Let me map out the extra work and send a revised timeline and price so we&apos;re aligned.”</p>
+            <div className="mt-3 border-t border-stone-100 pt-3 text-[10px] text-stone-400">Clear · Professional</div>
+          </div>
+          <div className="mt-3 rounded-2xl border border-stone-200 p-4">
+            <div className="mb-2 text-[11px] font-bold text-stone-600">Direct approach</div>
+            <p className="text-[12px] leading-[1.75] text-stone-600">“I can take on the additional work, but it will need a separate estimate and timeline. Let me know if you&apos;d like me to prepare that.”</p>
+            <div className="mt-3 border-t border-stone-100 pt-3 text-[10px] text-stone-400">Concise · Unambiguous</div>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center justify-between border-t border-stone-100 bg-white px-5 py-3"><span className="text-[10px] text-stone-400">A draft is a starting point. Your judgment comes first.</span><span className="text-[10px] font-semibold text-stone-500">TACTFULLY AI</span></div>
+    </div>
+    <div className="absolute -bottom-5 -left-5 hidden items-center gap-2 rounded-2xl border border-white bg-white px-4 py-3 shadow-xl sm:flex"><span className="grid size-8 place-items-center rounded-xl bg-forest-50 text-forest-600"><Check size={16}/></span><div><div className="text-[11px] font-bold text-stone-900">Your call, always</div><div className="text-[10px] text-stone-500">Review before you send</div></div></div>
+  </div>
+}
 
 export default function Page() {
-  return (
-    <div className="min-h-screen bg-background">
-      <SiteHeader />
-      <main>
-        <Hero />
-        <LogoCloud />
-        <ProblemSection />
-        <SolutionSection />
-        <FeaturesSection />
-        <HowItWorks />
-        <PricingSection />
-        <UseCases />
-        <FaqSection />
-        <FinalCta />
-      </main>
-      <SiteFooter />
-    </div>
-  )
+  return <div className="min-h-screen overflow-hidden bg-white text-stone-900">
+    <div className="bg-stone-950 px-4 py-2 text-center text-[11px] font-medium tracking-wide text-stone-200">Make the next client conversation your strongest one. <span className="ml-1 text-forest-300">Try Tactfully free →</span></div>
+    <header className="sticky top-0 z-40 border-b border-stone-100/90 bg-white/90 backdrop-blur-xl">
+      <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 sm:px-8">
+        <Brand/>
+        <nav className="hidden items-center gap-8 md:flex"><a href="#how-it-works" className="text-sm font-medium text-stone-600 hover:text-forest-700">How it works</a><a href="#situations" className="text-sm font-medium text-stone-600 hover:text-forest-700">Use cases</a><a href="#pricing" className="text-sm font-medium text-stone-600 hover:text-forest-700">Pricing</a><a href="#faq" className="text-sm font-medium text-stone-600 hover:text-forest-700">FAQ</a></nav>
+        <div className="flex items-center gap-2"><Link href="/sign-in" className="hidden rounded-xl px-4 py-2.5 text-sm font-semibold text-stone-600 hover:bg-stone-50 sm:inline-flex">Sign in</Link><Link href="/sign-up" className="inline-flex items-center gap-2 rounded-xl bg-forest-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-forest-600/20 transition hover:-translate-y-0.5 hover:bg-forest-700">Try it free <ArrowUpRight size={15}/></Link></div>
+      </div>
+    </header>
+    <main>
+      <section className="relative isolate bg-[#F4F0E7]">
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_78%_12%,rgba(129,140,248,.18),transparent_38%),radial-gradient(ellipse_at_5%_70%,rgba(196,181,253,.18),transparent_35%)]"/>
+        <div className="mx-auto grid max-w-7xl items-center gap-14 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[.95fr_1.05fr] lg:gap-12 lg:py-28">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-forest-100 bg-white/80 px-3.5 py-2 text-[11px] font-semibold text-forest-700 shadow-sm"><Sparkles size={13}/> A calmer way to handle client messages</div>
+            <h1 className="mt-7 max-w-[650px] text-[clamp(2.8rem,5.2vw,4.6rem)] font-semibold leading-[1.02] tracking-[-.055em] text-stone-950">Know what to say when the client message gets <span className="text-forest-600">difficult.</span></h1>
+            <p className="mt-6 max-w-xl text-[17px] leading-8 text-stone-600">Turn awkward requests, late payments and price pushback into clear, professional replies with a strategy that fits the conversation.</p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row"><Link href="/sign-up" className="inline-flex h-13 items-center justify-center gap-2 rounded-xl bg-forest-600 px-6 text-sm font-semibold text-white shadow-xl shadow-forest-600/20 transition hover:-translate-y-0.5 hover:bg-forest-700">Draft your first reply free <ArrowRight size={16}/></Link><a href="#how-it-works" className="inline-flex h-13 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white px-6 text-sm font-semibold text-stone-700 transition hover:border-stone-300 hover:bg-stone-50">See how it works</a></div>
+            <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-[12px] font-medium text-stone-500"><span className="inline-flex items-center gap-1.5"><Check size={14} className="text-forest-600"/> Free plan available</span><span className="inline-flex items-center gap-1.5"><Check size={14} className="text-forest-600"/> No card to try</span><span className="inline-flex items-center gap-1.5"><Check size={14} className="text-forest-600"/> You approve every reply</span></div>
+            <div className="mt-12 grid max-w-lg grid-cols-3 border-t border-forest-100 pt-6"><div><div className="text-2xl font-semibold tracking-tight text-stone-900">3/day</div><div className="mt-1 text-[10px] font-medium text-stone-500 sm:text-xs">Free generations</div></div><div className="border-x border-forest-100 px-4"><div className="text-2xl font-semibold tracking-tight text-stone-900">3</div><div className="mt-1 text-[10px] font-medium text-stone-500 sm:text-xs">Response strategies</div></div><div className="pl-4"><div className="text-2xl font-semibold tracking-tight text-stone-900">3</div><div className="mt-1 text-[10px] font-medium text-stone-500 sm:text-xs">Tone choices</div></div></div>
+          </div>
+          <ProductWindow/>
+        </div>
+      </section>
+      <section className="border-y border-stone-100 bg-white"><div className="mx-auto grid max-w-7xl gap-5 px-5 py-7 sm:grid-cols-3 sm:px-8"><div className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-xl bg-forest-50 text-forest-600"><Clock3 size={18}/></span><div><div className="text-sm font-semibold">Stop overthinking replies</div><div className="text-xs text-stone-500">Get a strong starting point fast.</div></div></div><div className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-xl bg-forest-50 text-forest-600"><ShieldCheck size={18}/></span><div><div className="text-sm font-semibold">Keep your boundaries clear</div><div className="text-xs text-stone-500">Say no without sounding harsh.</div></div></div><div className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-xl bg-amber-50 text-amber-600"><HeartHandshake size={18}/></span><div><div className="text-sm font-semibold">Protect the relationship</div><div className="text-xs text-stone-500">Be firm and still professional.</div></div></div></div></section>
+      <section id="situations" className="bg-white py-20 sm:py-28"><div className="mx-auto max-w-7xl px-5 sm:px-8"><div className="max-w-2xl"><div className="text-xs font-bold uppercase tracking-[.17em] text-forest-600">The moments that matter</div><h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-.04em] sm:text-5xl">The message is awkward.<br/><span className="text-stone-400">Your response doesn&apos;t have to be.</span></h2><p className="mt-5 text-base leading-7 text-stone-600">A few of the client situations Tactfully is built to help you navigate.</p></div>
+      <div className="mt-12 grid gap-5 lg:grid-cols-3">{scenarios.map((s,i)=><article key={s.label} className="group rounded-3xl border border-stone-200 bg-white p-6 shadow-[0_8px_30px_-24px_rgba(15,23,42,.3)] transition hover:-translate-y-1 hover:border-forest-200 hover:shadow-xl"><div className="flex items-center justify-between"><span className="rounded-full bg-stone-100 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-stone-600">{s.label}</span><span className="text-xs font-semibold text-stone-300">0{i+1}</span></div><div className="mt-6 text-[10px] font-bold uppercase tracking-widest text-stone-400">What they said</div><p className="mt-2 min-h-[62px] text-[15px] leading-6 text-stone-600">“{s.quote}”</p><div className="my-5 h-px bg-stone-100"/><div className="text-[10px] font-bold uppercase tracking-widest text-forest-600">A more confident reply</div><p className="mt-2 text-[14px] leading-7 text-stone-800">{s.response}</p><div className="mt-5 inline-flex rounded-full bg-forest-50 px-3 py-1.5 text-[10px] font-semibold text-forest-700">{s.tone}</div></article>)}</div></div></section>
+      <section id="how-it-works" className="bg-stone-950 py-20 text-white sm:py-28"><div className="mx-auto max-w-7xl px-5 sm:px-8"><div className="max-w-2xl"><div className="text-xs font-bold uppercase tracking-[.17em] text-forest-300">Simple by design</div><h2 className="mt-4 text-3xl font-semibold tracking-[-.04em] sm:text-5xl">From “what do I say?”<br/>to “send.”</h2><p className="mt-5 text-base leading-7 text-stone-300">No complicated setup. No automatic messages. Just a practical tool that helps you find the right words.</p></div><div className="mt-12 grid gap-4 md:grid-cols-5">{[{n:"01",t:"Paste the message",d:"Bring the client message you're unsure how to answer."},{n:"02",t:"Set your outcome",d:"Tell Tactfully what you want the reply to achieve."},{n:"03",t:"Add context",d:"Choose the situation and preferred writing tone."},{n:"04",t:"Compare strategies",d:"Review diplomatic, firm and direct approaches."},{n:"05",t:"Refine and copy",d:"Make the reply yours and send when ready."}].map((s)=><div key={s.n} className="rounded-2xl border border-white/10 bg-white/[.04] p-6"><div className="text-xs font-bold tracking-widest text-forest-300">{s.n}</div><h3 className="mt-5 text-lg font-semibold">{s.t}</h3><p className="mt-2 text-sm leading-6 text-stone-400">{s.d}</p></div>)}</div></div></section>
+      <section className="bg-[#F4F0E7] py-20 sm:py-28"><div className="mx-auto grid max-w-7xl items-center gap-12 px-5 sm:px-8 lg:grid-cols-2"><div><div className="text-xs font-bold uppercase tracking-[.17em] text-forest-600">Built for real client work</div><h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-.04em] sm:text-5xl">Be professional.<br/>Without sounding like a robot.</h2><p className="mt-5 text-base leading-8 text-stone-600">A useful reply isn&apos;t just polite. It should fit the situation, protect your time and make the next step clear. Tactfully gives you a draft to work from—not a script you have to obey.</p><div className="mt-8 space-y-4">{["Keep scope and payment boundaries clear","Choose a tone that fits the relationship","Compare two distinct reply options","Keep your previous drafts in one place"].map(t=><div key={t} className="flex items-start gap-3 text-sm font-medium text-stone-700"><span className="mt-0.5 grid size-5 place-items-center rounded-full bg-forest-100 text-forest-700"><Check size={12}/></span>{t}</div>)}</div><Link href="/sign-up" className="mt-9 inline-flex items-center gap-2 text-sm font-semibold text-forest-700 hover:gap-3">Try the reply studio <ArrowRight size={16}/></Link></div><div className="rounded-[28px] border border-forest-100 bg-white p-6 shadow-[0_30px_80px_-45px_rgba(49,93,71,.18)] sm:p-8"><div className="flex items-center justify-between border-b border-stone-100 pb-4"><div className="text-sm font-semibold">Your draft library</div><span className="rounded-full bg-forest-50 px-3 py-1 text-[10px] font-bold text-forest-700">Saved drafts</span></div><div className="mt-5 space-y-3">{[["Scope creep","Updated estimate for added deliverables","Today"],["Late payment","Invoice follow-up · second reminder","Yesterday"],["Price negotiation","Reframing project value","Oct 18"]].map(([a,b,c])=><div key={a} className="flex items-center gap-3 rounded-2xl border border-stone-100 p-4"><span className="grid size-10 place-items-center rounded-xl bg-forest-50 text-forest-600"><FileText size={17}/></span><div className="min-w-0 flex-1"><div className="text-xs font-semibold text-stone-900">{a}</div><div className="mt-1 truncate text-[11px] text-stone-500">{b}</div></div><span className="text-[10px] text-stone-400">{c}</span></div>)}</div><div className="mt-5 flex items-center gap-2 rounded-xl bg-stone-50 px-4 py-3 text-[11px] text-stone-500"><ShieldCheck size={14} className="text-forest-600"/> You choose what gets sent. Tactfully never sends on your behalf.</div></div></div></section>
+      <section id="pricing" className="bg-white py-20 sm:py-28"><div className="mx-auto max-w-7xl px-5 sm:px-8"><div className="mx-auto max-w-2xl text-center"><div className="text-xs font-bold uppercase tracking-[.17em] text-forest-600">Straightforward pricing</div><h2 className="mt-4 text-3xl font-semibold tracking-[-.04em] sm:text-5xl">Start free. Keep your options open.</h2><p className="mt-5 text-base leading-7 text-stone-600">Try the workflow first. Paid subscriptions are not available yet.</p></div><div className="mx-auto mt-12 grid max-w-4xl gap-5 md:grid-cols-2"><div className="rounded-3xl border border-stone-200 bg-white p-8"><div className="text-sm font-semibold">Free</div><div className="mt-5 flex items-end gap-1"><span className="text-5xl font-semibold tracking-tight">$0</span><span className="pb-1 text-sm text-stone-500">/ month</span></div><p className="mt-3 text-sm leading-6 text-stone-500">Get a feel for clearer client communication.</p><div className="my-7 h-px bg-stone-100"/><ul className="space-y-4 text-sm text-stone-700">{["3 AI generations per day","2 reply options per generation","3 reply tones","Review and edit before sending","Save and revisit drafts"].map(x=><li key={x} className="flex items-center gap-3"><Check size={15} className="text-forest-600"/>{x}</li>)}</ul><Link href="/sign-up" className="mt-9 flex h-12 items-center justify-center rounded-xl bg-forest-600 text-sm font-semibold text-white transition hover:bg-forest-700">Create a free account</Link></div><div className="relative overflow-hidden rounded-3xl border border-stone-200 bg-stone-50 p-8"><div className="text-sm font-semibold text-stone-900">Pro</div><div className="mt-5 text-2xl font-semibold tracking-tight text-stone-900">Not available yet</div><p className="mt-3 text-sm leading-6 text-stone-600">We are preparing recurring billing. The final price, features, renewal terms and cancellation details will be published before paid subscriptions open.</p><div className="my-7 h-px bg-stone-200"/><ul className="space-y-4 text-sm text-stone-600"><li>No payment details are requested</li><li>No subscription or recurring charge is active</li><li>Free access remains available</li></ul><div aria-disabled="true" className="mt-9 flex h-12 items-center justify-center rounded-xl border border-stone-200 bg-white text-sm font-semibold text-stone-500">Pro checkout unavailable</div></div></div></div></section>
+      <section className="bg-[#F4F0E7] py-20 sm:py-28"><div className="mx-auto grid max-w-7xl gap-12 px-5 sm:px-8 lg:grid-cols-[.8fr_1.2fr]"><div><div className="text-xs font-bold uppercase tracking-[.17em] text-forest-600">A better way to respond</div><h2 className="mt-4 text-3xl font-semibold tracking-[-.04em] sm:text-4xl">You don&apos;t have to figure out every reply alone.</h2><p className="mt-5 text-sm leading-7 text-stone-600">Keep the relationship professional while being clear about what you need.</p><Link href="/sign-up" className="mt-7 inline-flex items-center gap-2 rounded-xl bg-forest-600 px-5 py-3 text-sm font-semibold text-white hover:bg-forest-700">Start for free <ArrowRight size={15}/></Link></div><div id="faq" className="divide-y divide-stone-200 rounded-3xl border border-stone-200 bg-white px-6">{faqs.map(([q,a])=><details key={q} className="group py-5"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-semibold text-stone-900">{q}<ChevronDown size={17} className="shrink-0 text-stone-400 transition group-open:rotate-180"/></summary><p className="max-w-2xl pt-3 text-sm leading-7 text-stone-600">{a}</p></details>)}</div></div></section>
+      <section className="bg-forest-600 px-5 py-20 text-center text-white sm:py-24"><div className="mx-auto max-w-3xl"><span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider"><Sparkles size={12}/> Your next reply starts here</span><h2 className="mt-6 text-3xl font-semibold leading-tight tracking-[-.04em] sm:text-5xl">Keep the client relationship.<br/>Keep your boundaries, too.</h2><p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-forest-100">Get a thoughtful starting point for the message you&apos;ve been putting off.</p><Link href="/sign-up" className="mt-8 inline-flex h-13 items-center gap-2 rounded-xl bg-white px-6 text-sm font-semibold text-forest-700 shadow-xl transition hover:-translate-y-0.5 hover:bg-forest-50">Write a better reply <ArrowRight size={16}/></Link></div></section>
+    </main>
+    <footer className="bg-stone-950 text-white"><div className="mx-auto max-w-7xl px-5 py-12 sm:px-8"><div className="flex flex-col justify-between gap-8 sm:flex-row"><div><Brand light/><p className="mt-4 max-w-xs text-xs leading-6 text-stone-400">A clearer way to handle the conversations that come with client work.</p></div><div className="flex flex-wrap gap-6 text-xs text-stone-400"><a href="#how-it-works" className="hover:text-white">How it works</a><a href="#pricing" className="hover:text-white">Pricing</a><Link href="/privacy" className="hover:text-white">Privacy</Link><Link href="/terms" className="hover:text-white">Terms</Link><a href="mailto:daniellutagwa34@gmail.com" className="hover:text-white">Contact</a></div></div><div className="mt-10 border-t border-white/10 pt-5 text-[10px] text-stone-500">© {new Date().getFullYear()} Tactfully. Draft with care. Send with confidence.</div></div></footer>
+  </div>
 }
