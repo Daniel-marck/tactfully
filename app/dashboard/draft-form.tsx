@@ -676,7 +676,7 @@ export function DraftForm() {
           )}
         </aside>
 
-        <div className="min-w-0 grid grid-cols-1 gap-5 lg:col-start-2 lg:grid-cols-2 lg:gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(360px,.92fr)]">
+        <div className="min-w-0 grid grid-cols-1 gap-5 lg:col-start-2 lg:grid-cols-1 lg:gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(360px,.92fr)]">
           <div className="workspace-heading lg:col-span-2 flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="workspace-eyebrow">TACTFULLY / WORKSPACE</p>
