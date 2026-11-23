@@ -452,7 +452,7 @@ export function DraftForm() {
   return (
     <div
       className="tactfully-workspace min-h-screen w-full"
-      style={{ background: '#F4F0E7', color: '#302F29' }}
+      style={{ background: '#F5F7F4', color: '#1D2B23' }}
     >
       <style jsx global>{`
         @keyframes stamp {
@@ -522,7 +522,57 @@ export function DraftForm() {
       `}</style>
 
 
-      <header
+<style jsx global>{`
+.tactfully-workspace{background:#F5F7F4!important;color:#1D2B23!important;font-family:Inter,ui-sans-serif,system-ui,sans-serif!important}
+.tactfully-workspace *{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;letter-spacing:normal!important}
+.tactfully-workspace header{height:68px!important;position:sticky!important;top:0!important;z-index:40!important;padding:0 clamp(20px,4vw,56px)!important;background:rgba(255,255,255,.95)!important;border-color:#E4EAE4!important;box-shadow:0 1px 2px rgba(20,40,28,.04)!important;backdrop-filter:blur(14px)}
+.tactfully-workspace header>span{color:#183D2D!important;font-size:17px!important;font-weight:850!important;letter-spacing:.11em!important}
+.tactfully-workspace header div span{background:#EEF4EF!important;color:#315D47!important;border:1px solid #DCE8DE!important;border-radius:999px!important;font-size:11px!important;font-weight:750!important;padding:6px 10px!important}
+.tactfully-workspace header button{color:#315D47!important;font-size:13px!important;font-weight:700!important}
+.tactfully-workspace header button:last-child{background:#244A3A!important;color:white!important;padding:9px 15px!important;border-radius:9px!important}
+.tactfully-workspace>div.mx-auto{padding-top:30px!important;padding-bottom:48px!important;gap:24px!important}
+.tactfully-workspace aside{background:#FFF!important;border:1px solid #E3EAE4!important;border-radius:16px!important;padding:18px!important;box-shadow:0 5px 22px rgba(24,48,32,.045)!important}
+.tactfully-workspace aside>div:first-child>span{color:#718076!important;font-size:10px!important;font-weight:800!important;letter-spacing:.12em!important}
+.tactfully-workspace aside>div:first-child button{color:#244A3A!important;font-size:12px!important;font-weight:750!important}
+.tactfully-workspace aside input{border:1px solid #E0E7E1!important;border-radius:9px!important;background:#F8FAF8!important;color:#24352B!important;min-height:40px!important}
+.tactfully-workspace aside button[style]{background:#FFF!important;border:1px solid #E7ECE8!important;border-radius:10px!important}
+.tactfully-workspace aside button[aria-current=true]{background:#EDF4EE!important;border-color:#AFC6B4!important;box-shadow:inset 3px 0 #315D47!important}
+.tactfully-workspace aside button span:first-child{color:#477154!important;font-size:9px!important;font-weight:800!important}
+.tactfully-workspace aside button span:nth-child(2){color:#24352B!important;font-size:12px!important;line-height:1.5!important}
+.tactfully-workspace aside button span:last-child{color:#8A968D!important;font-size:10px!important}
+.workspace-heading{padding:2px 2px 8px}
+.workspace-eyebrow{margin:0 0 8px;color:#718076;font-size:10px;font-weight:800;letter-spacing:.14em!important}
+.workspace-title{margin:0;color:#1D3326;font-size:clamp(25px,3vw,34px);line-height:1.15;font-weight:800;letter-spacing:-.045em!important}
+.workspace-subtitle{margin:8px 0 0;color:#738077;font-size:14px}
+.workspace-status{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#FFF;border:1px solid #E3EAE4;border-radius:999px;color:#64766A;font-size:11px;font-weight:650}
+.workspace-status-dot{width:7px;height:7px;border-radius:50%;background:#4D8A60;box-shadow:0 0 0 3px #E7F2E9}
+.tactfully-workspace .quick-start-banner{display:none!important}
+.tactfully-workspace .relative.rounded-md.p-4,.tactfully-workspace .relative.rounded-md.p-5,.tactfully-workspace .relative.rounded-md.p-6,.tactfully-workspace .rise-anim,.tactfully-workspace .rounded-2xl.border{background:#FFF!important;color:#24352B!important;border:1px solid #E3EAE4!important;border-radius:16px!important;box-shadow:0 6px 24px rgba(24,48,32,.05)!important;transform:none!important}
+.tactfully-workspace .relative.rounded-md.p-4,.tactfully-workspace .relative.rounded-md.p-5,.tactfully-workspace .relative.rounded-md.p-6{padding:22px!important}
+.tactfully-workspace .relative.rounded-md.p-5>span,.tactfully-workspace .relative.rounded-md.p-6>span{color:#315D47!important;font-size:11px!important;font-weight:800!important}
+.tactfully-workspace textarea,.tactfully-workspace input{background:#FAFCFA!important;color:#26372D!important;border:1px solid #DCE5DE!important;border-radius:10px!important}
+.tactfully-workspace textarea{font-size:14px!important;line-height:1.7!important}
+.tactfully-workspace textarea.message-input{min-height:250px!important;max-height:440px!important;padding:16px!important;resize:vertical!important;background:#FAFCFA!important;border:1px solid #DCE5DE!important;border-radius:11px!important}
+.tactfully-workspace textarea::placeholder,.tactfully-workspace input::placeholder{color:#9AA69D!important}
+.tactfully-workspace label>span:not(.sr-only){color:#53645A!important;font-size:12px!important;font-weight:700!important}
+.tactfully-workspace .message-expand-button{border:1px solid #DCE5DE!important;background:#FFF!important;color:#315D47!important;border-radius:8px!important;padding:7px 11px!important;font-size:11px!important;font-weight:750!important}
+.tactfully-workspace button.rounded-full{font-size:12px!important;font-weight:650!important;padding:8px 12px!important;border-radius:8px!important;border:1px solid #DCE5DE!important;color:#526258!important;background:#FFF!important;cursor:pointer!important}
+.tactfully-workspace button.option-chip[aria-pressed=true]{background:#244A3A!important;color:#FFF!important;border-color:#244A3A!important;box-shadow:0 0 0 3px rgba(49,93,71,.10)!important}
+.tactfully-workspace button[aria-disabled=true]{background:#AAB8AE!important;color:#FFF!important}
+.tactfully-workspace button[aria-disabled=false]{background:#244A3A!important;color:#FFF!important}
+.tactfully-workspace .rounded-2xl.border-dashed{background:#FFF!important;border:1px dashed #C9D7CC!important;border-radius:16px!important;box-shadow:none!important}
+.tactfully-workspace .rounded-xl.border{border-color:#E3EAE4!important;border-radius:12px!important;background:#FFF!important}
+.tactfully-workspace .reply-editor{background:#FAFCFA!important;border:1px solid #DCE5DE!important;color:#26372D!important;border-radius:10px!important}
+.tactfully-workspace .rise-anim button{border-radius:9px!important;font-size:12px!important;font-weight:750!important}
+.tactfully-workspace .rise-anim button[style]{background:#244A3A!important;color:#FFF!important;border-color:#244A3A!important}
+.tactfully-workspace .seal-anim{display:none!important}
+.tactfully-workspace .paper-scroll::-webkit-scrollbar{width:6px;height:6px}
+.tactfully-workspace .paper-scroll::-webkit-scrollbar-thumb{background:#D5E0D7;border-radius:8px}
+@media(max-width:1023px){.tactfully-workspace>div.mx-auto{padding-top:22px!important}.tactfully-workspace aside{position:static!important}.workspace-heading{align-items:flex-start!important}.tactfully-workspace textarea.message-input{min-height:200px!important}}
+@media(max-width:640px){.tactfully-workspace header{height:60px!important;padding:0 16px!important}.tactfully-workspace>div.mx-auto{padding:18px 14px 32px!important;gap:16px!important}.tactfully-workspace .relative.rounded-md.p-4,.tactfully-workspace .relative.rounded-md.p-5,.tactfully-workspace .relative.rounded-md.p-6{padding:16px!important}.workspace-status{display:none!important}.workspace-title{font-size:26px!important}}
+`}</style>
+
+            <header
         className="h-14 px-5 sm:px-6 flex items-center justify-between shrink-0 border-b"
         style={{ borderColor: 'rgba(245,239,225,0.1)', background: 'rgba(0,0,0,0.15)' }}
       >
@@ -565,8 +615,8 @@ export function DraftForm() {
         </div>
       </header>
 
-      <div className="mx-auto grid w-full max-w-[1600px] grid-cols-1 gap-5 px-4 py-5 sm:px-6 lg:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[230px_minmax(0,1fr)_minmax(380px,1.05fr)] lg:items-start">
-        <aside className="min-w-0 mb-5 lg:mb-0">
+      <div className="mx-auto grid w-full max-w-[1540px] grid-cols-1 gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[248px_minmax(0,1fr)] xl:grid-cols-[248px_minmax(0,1fr)] lg:items-start">
+        <aside className="min-w-0 mb-5 lg:mb-0 lg:sticky lg:top-24 lg:self-start">
           <div className="flex items-center justify-between mb-2.5">
             <span
               className="uppercase"
@@ -665,7 +715,16 @@ export function DraftForm() {
           )}
         </aside>
 
-        <div className="min-w-0 grid grid-cols-1 gap-4 lg:col-start-2 lg:grid-cols-2 lg:gap-5 xl:col-span-2 xl:col-start-2 xl:grid-cols-2 xl:gap-5">
+        <div className="min-w-0 grid grid-cols-1 gap-5 lg:col-start-2 lg:grid-cols-2 lg:gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(360px,.92fr)]">
+          <div className="workspace-heading lg:col-span-2 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="workspace-eyebrow">TACTFULLY / WORKSPACE</p>
+              <h1 className="workspace-title">Your writing workspace</h1>
+              <p className="workspace-subtitle">Turn difficult client messages into clear, confident replies.</p>
+            </div>
+            <div className="workspace-status"><span className="workspace-status-dot" /> Private workspace</div>
+          </div>
+
           {showQuickStart ? (
           <div className="lg:col-span-2 mb-1">
             <div
@@ -694,12 +753,7 @@ export function DraftForm() {
             className="relative rounded-md p-4 sm:p-5 shadow-2xl w-full lg:sticky lg:top-4"
             style={{ background: '#F5EFE1', color: '#24303B', transform: 'rotate(-0.4deg)' }}
           >
-            <div
-              className="absolute -top-2.5 left-6 w-11 h-5 -rotate-3"
-              style={{ background: 'rgba(184,114,42,0.35)', border: '1px solid rgba(184,114,42,0.5)' }}
-            />
-
-            <div className="mb-2.5 flex items-center justify-between gap-3">
+<div className="mb-2.5 flex items-center justify-between gap-3">
               <span className="block uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
                 The message
               </span>
