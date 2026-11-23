@@ -60,6 +60,9 @@
 }
 
 :root {
+  --font-work-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-newsreader: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --font-plex-mono: ui-monospace, SFMono-Regular, monospace;
   color-scheme: light;
   --background: #F4F0E7;
   --foreground: #302F29;
@@ -150,12 +153,12 @@
    of the theme tokens above)
    ========================================== */
 .tactfully-theme {
-  background: #1B2A3A;
+  background: #F4F0E7;
   background-image:
-    radial-gradient(circle at 15% 10%, rgba(216,138,59,0.06), transparent 40%),
-    radial-gradient(circle at 85% 90%, rgba(216,138,59,0.05), transparent 45%);
-  color: #F5EFE1;
-  font-family: 'Work Sans', sans-serif;
+    radial-gradient(circle at 15% 10%, rgba(49,93,71,0.05), transparent 40%),
+    radial-gradient(circle at 85% 90%, rgba(168,95,67,0.04), transparent 45%);
+  color: #302F29;
+  font-family: 'DM Sans', sans-serif;
   min-height: 100vh;
   padding: 32px 16px 60px;
 }
