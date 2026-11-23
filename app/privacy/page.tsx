@@ -2,64 +2,72 @@ export default function PrivacyPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
       <h1 className="text-3xl font-semibold tracking-tight">Privacy Policy</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Last updated: November 22, 2026</p>
+      <p className="mt-2 text-sm text-muted-foreground">Last updated: November 24, 2026</p>
 
       <div className="mt-8 space-y-8 text-sm leading-relaxed text-muted-foreground">
         <section>
           <h2 className="text-base font-semibold text-foreground">What we collect</h2>
           <p className="mt-2">
-            When you create an account, we collect your email address and password
-            (stored securely by our authentication provider, Supabase -- we never see
-            your raw password). When you use Tactfully to draft a reply,
-            we store the client message you paste in, the situation and tone you
-            select, and the reply Tactfully generates, so you can find them again
-            later in your "Filed letters" history.
+            When you create an account, Supabase processes your email address and
+            password. We do not receive or store your raw password. When you draft a
+            reply, we store the client message you paste, the situation and tone you
+            select, your desired outcome, any constraints you ask us to avoid, and the
+            reply options generated. These details are saved in your private draft
+            history so you can review, edit, and delete them.
           </p>
         </section>
 
         <section>
-          <h2 className="text-base font-semibold text-foreground">How we use it</h2>
+          <h2 className="text-base font-semibold text-foreground">How we use your information</h2>
           <p className="mt-2">
-            Your pasted messages are sent to Google's Gemini API to generate reply
-            drafts. We use your account data to enforce our free-tier usage limit and
-            to know whether you've upgraded to Pro. We do not sell your data or train
-            our own AI model on your messages. Google's handling of prompts and
-            responses depends on the Gemini API account tier: Google states that
-            free-tier content may be used to improve its products, while paid-tier
-            content is not. Avoid pasting sensitive or confidential client information
-            unless paid-tier processing has been confirmed.
+            Your message and drafting context are sent to Google's Gemini API to
+            generate reply suggestions. We use account and usage information to
+            authenticate you, protect saved drafts, and enforce the free allowance of
+            three generations per day. Each successful generation returns three
+            response strategies. We do not sell your messages or use them to train a
+            Tactfully-owned AI model.
+          </p>
+          <p className="mt-2">
+            Google's handling of prompts and responses depends on the Gemini API
+            account tier and applicable terms. Google states that free-tier content
+            may be used to improve its products, while paid-tier content is not used
+            for that purpose. Do not paste confidential, regulated, or sensitive
+            client information unless you have confirmed that the provider terms and
+            account tier are appropriate for that information.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-base font-semibold text-foreground">Storage and security</h2>
+          <p className="mt-2">
+            Account and draft data are stored with Supabase. Row-level security
+            restricts profile and draft access to the signed-in account that owns the
+            records. We use Vercel to host the application. No security measure is
+            perfect, so avoid submitting information you are not authorized to share.
           </p>
         </section>
 
         <section>
           <h2 className="text-base font-semibold text-foreground">Payments</h2>
           <p className="mt-2">
-            When you upgrade to Pro, your payment is processed directly by PayPal. We
-            never see or store your card or PayPal account details -- our server only
-            receives confirmation from PayPal that a payment completed, which we use
-            to unlock Pro features on your account.
+            Tactfully is not currently accepting payments. Pro subscriptions are
+            planned but checkout is disabled. If paid subscriptions are introduced,
+            this policy will be updated to identify the payment provider and explain
+            the information processed for billing.
           </p>
         </section>
 
         <section>
-          <h2 className="text-base font-semibold text-foreground">Third parties we rely on</h2>
-          <ul className="mt-2 list-disc space-y-1 pl-5">
-            <li>Supabase -- authentication and database storage</li>
-            <li>Google (Gemini API) -- generating your draft replies</li>
-            <li>PayPal -- processing Pro payments</li>
-            <li>Vercel -- hosting this application</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 className="text-base font-semibold text-foreground">Your choices</h2>
+          <h2 className="text-base font-semibold text-foreground">Your choices and deletion</h2>
           <p className="mt-2">
-            You can delete your account and associated data at any time by contacting
+            You can delete individual saved drafts from your dashboard. To request
+            deletion of your account and associated profile and draft data, contact
             us at{" "}
             <a href="mailto:daniellutagwa34@gmail.com" className="text-foreground underline">
               daniellutagwa34@gmail.com
             </a>
-            . We'll remove your profile, drafts, and account within a reasonable time.
+            . We will process account-deletion requests within a reasonable period,
+            subject to any legal or operational retention requirements.
           </p>
         </section>
 
