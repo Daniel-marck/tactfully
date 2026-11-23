@@ -46,12 +46,14 @@ test('API keeps the three-option response contract and sufficient output budget'
 });
 
 
-test('AI generation retries transient provider overload across fallback models', () => {
+test('AI generation retries transient provider overload across distinct stable models', () => {
   assert.match(route, /export const maxDuration = 50/);
   assert.match(route, /gemini-3\.5-flash-lite/);
   assert.match(route, /gemini-3\.8-flash/);
+  assert.match(route, /gemini-3\.1-flash-lite/);
+  assert.match(route, /gemini-3\.5-flash/);
   assert.match(route, /new Set\(\[429, 500, 502, 503, 504\]\)/);
-  assert.match(route, /AbortSignal\.timeout\(10000\)/);
+  assert.match(route, /AbortSignal\.timeout\(8000\)/);
   assert.match(route, /Your draft allowance was not used/);
 });
 
@@ -88,10 +90,23 @@ test('generation endpoint validates and bounds untrusted request input', () => {
   assert.doesNotMatch(route, /smartoolkit\.gumroad\.com/);
 });
 
-test('draft quota enforcement fails closed and checks the atomic increment result', () => {
+test('draft quota enforcement uses the server-only atomic RPC and fails closed', () => {
+  assert.match(route, /createAdminClient/);
+  assert.match(route, /SUPABASE_SERVICE_ROLE_KEY/);
+  assert.match(route, /admin\.rpc\(/);
   assert.match(route, /incrementError \|\| !incrementResult\?\.\[0\]/);
-  assert.match(route, /newCount > FREE_DRAFT_LIMIT/);
+  assert.match(route, /!incrementResult\[0\]\.allowed/);
   assert.match(route, /We couldn't update your draft allowance/);
+});
+
+test('quota RPC cannot be called by browser roles and prevents concurrent overuse', async () => {
+  const migration = await readFile(new URL('../supabase/migrations/20261123212819_server_only_atomic_draft_quota.sql', import.meta.url), 'utf8');
+  assert.match(migration, /auth\.jwt\(\) ->> 'role'.*service_role/s);
+  assert.match(migration, /for update/i);
+  assert.match(migration, /result_count >= 3/);
+  assert.match(migration, /return query select result_count, result_plan, false/i);
+  assert.match(migration, /revoke all on function public\.increment_draft_count\(uuid\) from public, anon, authenticated/i);
+  assert.match(migration, /grant execute on function public\.increment_draft_count\(uuid\) to service_role/i);
 });
 
 
