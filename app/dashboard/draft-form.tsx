@@ -183,7 +183,7 @@ export function DraftForm() {
   const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null)
   const [savingDraft, setSavingDraft] = useState(false)
   const [deletingDraftId, setDeletingDraftId] = useState<string | null>(null)
-  const [saveNotice, setSaveNotice] = useState<string | null>(
+  const [saveNotice, setSaveNotice] = useState<string | null>(null)
   const [showQuickStart, setShowQuickStart] = useState(true)
   const [messageExpanded, setMessageExpanded] = useState(false)
   const messageInputRef = useRef<HTMLTextAreaElement>(null)
