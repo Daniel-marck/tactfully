@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { Menu, X, MessagesSquare } from "lucide-react"
-import { Button } from "@/components/ui/button"
 
 const navLinks = [
   { label: "Product", href: "#product" },
