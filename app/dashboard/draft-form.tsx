@@ -1,8 +1,8 @@
 "use client"
 
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
 import React, { useState, useEffect, useRef } from 'react'
 import { createClient } from "@/lib/supabase/client"
+import type { User } from "@supabase/supabase-js"
 
 const supabase = createClient()
 
@@ -30,14 +30,19 @@ const TONES = [
   { label: 'Formal', value: 'Formal and businesslike' },
 ]
 
-const OPTIONS_SEPARATOR = '\n\n---\n\n'
+type SavedDraft = {
+  id: string
+  original_message: string
+  situation: string | null
+  tone: string | null
+  generated_reply: string
+  created_at: string
+  desired_outcome: string
+  avoid: string
+}
 
-const QUICK_START_STEPS = [
-  'Paste the client message',
-  'Pick the situation and tone',
-  'Generate your draft',
-  'Copy and send',
-]
+const OPTIONS_SEPARATOR = '\n\n---\n\n'
+const STRATEGY_LABELS = ['Diplomatic', 'Firm & professional', 'Direct']
 
 function SealIcon() {
   return (
@@ -91,6 +96,8 @@ function InfoPopover({ text }: { text: string }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLSpanElement>(null)
 
+
+
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -107,6 +114,8 @@ function InfoPopover({ text }: { text: string }) {
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-label="More information"
+        aria-expanded={open}
+        title={text}
         className="inline-flex items-center justify-center rounded-full"
         style={{ color: '#B8722A', opacity: 0.75 }}
       >
@@ -148,6 +157,8 @@ function EyeIcon({ open }: { open: boolean }) {
 
 export function DraftForm() {
   const [incomingMessage, setIncomingMessage] = useState('')
+  const [desiredOutcome, setDesiredOutcome] = useState('')
+  const [avoid, setAvoid] = useState('')
   const [situation, setSituation] = useState(SITUATIONS[0])
   const [tone, setTone] = useState(TONES[0].value)
   const [draftOptions, setDraftOptions] = useState<string[]>([])
@@ -155,12 +166,20 @@ export function DraftForm() {
   const [error, setError] = useState<string | null>(null)
   const [limitReached, setLimitReached] = useState(false)
   const [draftsRemaining, setDraftsRemaining] = useState<number | null>(null)
-  const [paypalError, setPaypalError] = useState<string | null>(null)
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
 
-  const [user, setUser] = useState<any | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [plan, setPlan] = useState<'free' | 'pro'>('free')
-  const [draftsList, setDraftsList] = useState<any[]>([])
+  const [draftsList, setDraftsList] = useState<SavedDraft[]>([])
+  const [draftSearch, setDraftSearch] = useState('')
+  const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null)
+  const [savingDraft, setSavingDraft] = useState(false)
+  const [deletingDraftId, setDeletingDraftId] = useState<string | null>(null)
+  const [saveNotice, setSaveNotice] = useState<string | null>(null)
+  const [showQuickStart, setShowQuickStart] = useState(true)
+  const [messageExpanded, setMessageExpanded] = useState(false)
+  const messageInputRef = useRef<HTMLTextAreaElement>(null)
+  const userLoadSequence = useRef(0)
 
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authEmail, setAuthEmail] = useState('')
@@ -169,6 +188,45 @@ export function DraftForm() {
   const [isSignUpMode, setIsSignUpMode] = useState(false)
   const [authError, setAuthError] = useState<string | null>(null)
   const [authLoading, setAuthLoading] = useState(false)
+  const [authNotice, setAuthNotice] = useState<string | null>(null)
+
+  async function handleUserChange(currentUser: User | null) {
+    const requestId = ++userLoadSequence.current
+    setUser(currentUser)
+    if (currentUser) {
+      const [profileResult, draftsResult] = await Promise.all([
+        supabase.from('profiles').select('plan').eq('id', currentUser.id).single(),
+        supabase.from('drafts').select('*').order('created_at', { ascending: false }).limit(20),
+      ])
+      if (requestId !== userLoadSequence.current) return
+      setPlan(profileResult.data?.plan === 'pro' ? 'pro' : 'free')
+      setDraftsList(draftsResult.data || [])
+    } else {
+      setPlan('free')
+      setDraftsList([])
+      setDraftsRemaining(null)
+      setLimitReached(false)
+    }
+  }
+
+
+  useEffect(() => {
+    const textarea = messageInputRef.current
+    if (!textarea) return
+    textarea.style.height = 'auto'
+    const maxHeight = 420
+    textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`
+    textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden'
+  }, [incomingMessage])
+
+  useEffect(() => {
+    if (!messageExpanded) return
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMessageExpanded(false)
+    }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [messageExpanded])
 
   useEffect(() => {
     async function initUser() {
@@ -184,34 +242,14 @@ export function DraftForm() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const handleUserChange = async (currentUser: any) => {
-    setUser(currentUser)
-    if (currentUser) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('plan')
-        .eq('id', currentUser.id)
-        .single()
-      setPlan(profile?.plan === 'pro' ? 'pro' : 'free')
-
-      const { data: drafts } = await supabase
-        .from('drafts')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20)
-      setDraftsList(drafts || [])
-    } else {
-      setPlan('free')
-      setDraftsList([])
-      setDraftsRemaining(null)
-      setLimitReached(false)
-    }
-  }
-
-  const handleSelectDraft = (draft: any) => {
+  const handleSelectDraft = (draft: SavedDraft) => {
+    setSelectedDraftId(draft.id)
+    setSaveNotice(null)
     setIncomingMessage(draft.original_message)
-    setSituation(draft.situation)
-    setTone(draft.tone)
+    setDesiredOutcome(draft.desired_outcome || '')
+    setAvoid(draft.avoid || '')
+    setSituation(draft.situation || SITUATIONS[SITUATIONS.length - 1])
+    setTone(draft.tone || TONES[0].value)
     setDraftOptions(
       draft.generated_reply.includes(OPTIONS_SEPARATOR)
         ? draft.generated_reply.split(OPTIONS_SEPARATOR)
@@ -222,7 +260,11 @@ export function DraftForm() {
   }
 
   const handleNewDraft = () => {
+    setSelectedDraftId(null)
+    setSaveNotice(null)
     setIncomingMessage('')
+    setDesiredOutcome('')
+    setAvoid('')
     setSituation(SITUATIONS[0])
     setTone(TONES[0].value)
     setDraftOptions([])
@@ -236,9 +278,19 @@ export function DraftForm() {
     setAuthLoading(true)
     try {
       if (isSignUpMode) {
-        const { error } = await supabase.auth.signUp({ email: authEmail, password: authPassword })
+        const { data, error } = await supabase.auth.signUp({
+          email: authEmail,
+          password: authPassword,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          },
+        })
         if (error) throw error
-        alert('Check your inbox to verify your email.')
+
+        if (!data.session) {
+          setAuthNotice('Account created. Check your inbox and confirm your email before signing in.')
+          return
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email: authEmail, password: authPassword })
         if (error) throw error
@@ -247,8 +299,9 @@ export function DraftForm() {
       setAuthEmail('')
       setAuthPassword('')
       setShowAuthPassword(false)
-    } catch (err: any) {
-      setAuthError(err.message || 'Authentication failed.')
+      setAuthNotice(null)
+    } catch (err: unknown) {
+      setAuthError(err instanceof Error ? err.message : 'Authentication failed.')
     } finally {
       setAuthLoading(false)
     }
@@ -278,7 +331,8 @@ export function DraftForm() {
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: incomingMessage, tone, situation }),
+        body: JSON.stringify({ message: incomingMessage, tone, situation, desiredOutcome, avoid }),
+        signal: AbortSignal.timeout(45000),
       })
       const data = await response.json()
 
@@ -295,13 +349,18 @@ export function DraftForm() {
       setDraftOptions(replies)
       setDraftsRemaining(typeof data.draftsRemaining === 'number' ? data.draftsRemaining : null)
 
-      await supabase.from('drafts').insert({
+      const { data: savedDraft, error: saveError } = await supabase.from('drafts').insert({
         user_id: user.id,
         original_message: incomingMessage,
         situation,
         tone,
+        desired_outcome: desiredOutcome,
+        avoid,
         generated_reply: replies.join(OPTIONS_SEPARATOR),
-      })
+      }).select().single()
+      if (saveError) throw new Error("Your replies were generated, but could not be saved to history. Please try saving again.")
+      if (savedDraft) setSelectedDraftId(savedDraft.id)
+      setSaveNotice(null)
 
       const { data: updatedDrafts } = await supabase
         .from('drafts')
@@ -310,24 +369,90 @@ export function DraftForm() {
         .limit(20)
       setDraftsList(updatedDrafts || [])
     } catch (err) {
-      setError('Something went wrong drafting that. Try again.')
+      if (err instanceof DOMException && err.name === 'TimeoutError') {
+        setError('The AI service is taking too long to respond. Please try again in a moment.')
+      } else if (err instanceof Error && err.message) {
+        setError(err.message)
+      } else {
+        setError('Something went wrong drafting that. Please try again.')
+      }
     } finally {
       setLoading(false)
     }
   }
 
-  const handleCopy = (text: string, index: number) => {
-    navigator.clipboard.writeText(text)
-    setCopiedIndex(index)
-    setTimeout(() => setCopiedIndex((current) => (current === index ? null : current)), 1800)
+  const handleSaveDraft = async () => {
+    if (!user || !selectedDraftId || draftOptions.length === 0) return
+
+    setSavingDraft(true)
+    setSaveNotice(null)
+    setError(null)
+    try {
+      const { data, error: saveError } = await supabase
+        .from('drafts')
+        .update({
+          original_message: incomingMessage,
+          situation,
+          tone,
+          desired_outcome: desiredOutcome,
+          avoid,
+          generated_reply: draftOptions.join(OPTIONS_SEPARATOR),
+        })
+        .eq('id', selectedDraftId)
+        .eq('user_id', user.id)
+        .select()
+        .single()
+
+      if (saveError || !data) {
+        throw new Error("Couldn't save these edits. Please try again.")
+      }
+
+      setDraftsList((current) => current.map((draft) => draft.id === data.id ? data : draft))
+      setSaveNotice('Changes saved to your draft history.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't save these edits. Please try again.")
+    } finally {
+      setSavingDraft(false)
+    }
+  }
+
+  const handleDeleteDraft = async (draft: SavedDraft) => {
+    if (!user || !window.confirm('Delete this saved draft? This cannot be undone.')) return
+    setDeletingDraftId(draft.id)
+    setError(null)
+    try {
+      const { error: deleteError } = await supabase
+        .from('drafts')
+        .delete()
+        .eq('id', draft.id)
+        .eq('user_id', user.id)
+      if (deleteError) throw deleteError
+      setDraftsList((current) => current.filter((item) => item.id !== draft.id))
+      if (selectedDraftId === draft.id) handleNewDraft()
+    } catch {
+      setError('Could not delete that saved draft. Please try again.')
+    } finally {
+      setDeletingDraftId(null)
+    }
+  }
+
+  const handleCopy = async (text: string, index: number) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setError(null)
+      setCopiedIndex(index)
+      setTimeout(() => setCopiedIndex((current) => (current === index ? null : current)), 1800)
+    } catch {
+      setError('Clipboard access was blocked. Select the reply text and copy it manually.')
+    }
   }
 
   const todayStamp = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit' })
 
   return (
     <div
-      className="min-h-screen w-full"
-      style={{ background: '#1B2A3A', color: '#F5EFE1' }}
+      className="tactfully-workspace min-h-screen w-full"
+      style={{ background: '#F4F0E7', color: '#302F29' }}
     >
       <style jsx global>{`
         @keyframes stamp {
@@ -343,6 +468,59 @@ export function DraftForm() {
         .paper-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .paper-scroll::-webkit-scrollbar-thumb { background: rgba(36,48,59,0.25); border-radius: 3px; }
       `}</style>
+
+      <style jsx global>{`
+        .tactfully-workspace, .tactfully-workspace * { font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important; letter-spacing:normal !important; }
+        .tactfully-workspace { background:#F4F0E7 !important; color:#302F29 !important; font-size:15px; line-height:1.55; }
+        .tactfully-workspace header { background:#FFFCF5 !important; border-color:#E5DDCE !important; box-shadow:0 1px 3px rgba(48,47,41,.05); }
+        .tactfully-workspace header > span { color:#244A3A !important; font-size:18px !important; font-weight:800 !important; }
+        .tactfully-workspace header div span { background:#E8EFE8 !important; color:#244A3A !important; border-radius:999px !important; font-size:12px !important; font-weight:700 !important; }
+        .tactfully-workspace header button { color:#315D47 !important; font-size:13px !important; font-weight:650 !important; }
+        .tactfully-workspace aside { background:#FFFCF5 !important; border:1px solid #E5DDCE !important; border-radius:14px !important; padding:14px !important; box-shadow:0 5px 18px rgba(48,47,41,.04) !important; }
+        .tactfully-workspace aside > div:first-child > span { color:#77756D !important; font-size:11px !important; font-weight:750 !important; }
+        .tactfully-workspace aside > div:first-child button { color:#315D47 !important; font-size:13px !important; font-weight:750 !important; }
+        .tactfully-workspace aside button[style] { background:#FFFCF5 !important; border:1px solid #E5DDCE !important; border-radius:10px !important; }
+        .tactfully-workspace aside button[aria-current="true"] { background:#E8EFE8 !important; border-color:#9BB5A1 !important; box-shadow:0 0 0 2px rgba(49,93,71,.12) !important; }
+        .tactfully-workspace aside button span:first-child { color:#315D47 !important; }
+        .tactfully-workspace aside button span:nth-child(2) { color:#302F29 !important; }
+        .tactfully-workspace aside button span:last-child { color:#918A7D !important; }
+        .tactfully-workspace .quick-start-banner { background:#E8EFE8 !important; border:1px solid #C8D8CB !important; border-radius:12px !important; color:#244A3A !important; }
+        .tactfully-workspace .quick-start-title { color:#244A3A !important; font-size:14px !important; font-weight:800 !important; }
+        .tactfully-workspace .quick-start-banner p { color:#496552 !important; }
+        .tactfully-workspace .relative.rounded-md.p-5, .tactfully-workspace .relative.rounded-md.p-6, .tactfully-workspace .rise-anim, .tactfully-workspace .rounded-2xl.border { background:#FFFCF5 !important; color:#302F29 !important; border-color:#E5DDCE !important; box-shadow:0 6px 22px rgba(48,47,41,.06) !important; }
+        .tactfully-workspace .relative.rounded-md.p-5 > span, .tactfully-workspace .relative.rounded-md.p-6 > span { color:#315D47 !important; font-size:13px !important; font-weight:750 !important; }
+        .tactfully-workspace textarea, .tactfully-workspace input { background:#FFFEFA !important; color:#302F29 !important; border-color:#D9D0C1 !important; }
+        .tactfully-workspace textarea { font-size:15px !important; line-height:1.65 !important; }
+        .tactfully-workspace textarea::placeholder, .tactfully-workspace input::placeholder { color:#918A7D !important; }
+        .tactfully-workspace textarea.message-input { min-height:220px !important; max-height:420px; height:auto; overflow-y:hidden; padding:14px 15px !important; line-height:1.6 !important; resize:vertical; }
+        .tactfully-workspace .message-expand-button { border:1px solid #D8D2C6 !important; background:#FFFCF5 !important; color:#315D47 !important; border-radius:8px !important; padding:6px 10px !important; font-size:12px !important; font-weight:750 !important; }
+        .tactfully-workspace .message-expand-button:hover { background:#E8EFE8 !important; }
+        .tactfully-workspace button.rounded-full { font-size:13px !important; font-weight:650 !important; padding:8px 13px !important; border-radius:8px !important; border:1px solid #D9D0C1 !important; color:#514D43 !important; background:#FFFCF5 !important; cursor:pointer !important; }
+        .tactfully-workspace button.option-chip[aria-pressed="true"] { background:#315D47 !important; color:#FFFFFF !important; border-color:#315D47 !important; box-shadow:0 0 0 2px rgba(49,93,71,.14) !important; }
+        .tactfully-workspace button.option-chip[aria-pressed="false"] { background:#FFFCF5 !important; color:#514D43 !important; border-color:#D9D0C1 !important; }
+        .tactfully-workspace button.mt-4.w-full { background:#244A3A !important; color:#FFFFFF !important; border:1px solid #244A3A !important; border-radius:10px !important; min-height:52px !important; font-size:15px !important; font-weight:800 !important; box-shadow:0 5px 12px rgba(36,74,58,.2) !important; }
+        .tactfully-workspace button.mt-4.w-full:hover:not(:disabled) { background:#193A2C !important; }
+        .tactfully-workspace button.mt-4.w-full:disabled { background:#A9B5A9 !important; border-color:#A9B5A9 !important; color:#FFFFFF !important; box-shadow:none !important; }
+        .tactfully-workspace .rise-anim p { color:#403D34 !important; font-size:15px !important; line-height:1.7 !important; }
+        .tactfully-workspace .rise-anim button, .tactfully-workspace .bg-forest-600 { background:#E8EFE8 !important; border:1px solid #C8D8CB !important; color:#244A3A !important; border-radius:8px !important; font-size:13px !important; font-weight:750 !important; padding:9px 13px !important; }
+        .tactfully-workspace .bg-forest-100 { background:#E8EFE8 !important; }
+        .tactfully-workspace .text-forest-700, .tactfully-workspace .text-forest-800 { color:#315D47 !important; }
+        .tactfully-workspace .text-stone-900 { color:#302F29 !important; }
+        .tactfully-workspace .text-stone-500, .tactfully-workspace .text-stone-600 { color:#77756D !important; }
+        .tactfully-workspace .border-stone-200 { border-color:#E5DDCE !important; }
+        .tactfully-workspace .fixed.inset-0 > div, .tactfully-workspace .fixed.inset-0 > section { background:#FFFCF5 !important; color:#302F29 !important; border-radius:16px !important; }
+        .tactfully-workspace .fixed.inset-0 h2 { color:#244A3A !important; font-size:24px !important; font-style:normal !important; font-weight:750 !important; }
+        .tactfully-workspace .fixed.inset-0 button[type="submit"] { background:#244A3A !important; color:#FFFFFF !important; border-radius:9px !important; min-height:46px !important; }
+        .tactfully-workspace [style*="#1B2A3A"] { color:#244A3A !important; }
+        .tactfully-workspace [style*="#F5EFE1"] { background-color:#FFFCF5 !important; color:#302F29 !important; }
+        .tactfully-workspace button[style*="#B8722A"] { background:#244A3A !important; color:#FFFFFF !important; border-color:#244A3A !important; }
+        .tactfully-workspace [style*="#B8722A"] { color:#A85F43 !important; }
+        .tactfully-workspace .paper-scroll::-webkit-scrollbar { width:6px; height:6px; }
+        .tactfully-workspace .paper-scroll::-webkit-scrollbar-thumb { background:rgba(49,93,71,.25); border-radius:3px; }
+        @media(min-width:1024px) { .tactfully-workspace textarea.message-input { min-height:240px !important; } .tactfully-workspace .relative.rounded-md.p-5, .tactfully-workspace .relative.rounded-md.p-6 { padding:16px !important; } }
+        @media(max-width:1023px) { .tactfully-workspace aside { padding:12px !important; } .tactfully-workspace .relative.rounded-md.p-5, .tactfully-workspace .relative.rounded-md.p-6 { transform:none !important; } }
+      `}</style>
+
 
       <header
         className="h-14 px-5 sm:px-6 flex items-center justify-between shrink-0 border-b"
@@ -387,8 +565,8 @@ export function DraftForm() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 lg:flex lg:gap-6 lg:items-start">
-        <aside className="lg:w-56 lg:shrink-0 mb-5 lg:mb-0">
+      <div className="mx-auto grid w-full max-w-[1600px] grid-cols-1 gap-5 px-4 py-5 sm:px-6 lg:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[230px_minmax(0,1fr)_minmax(380px,1.05fr)] lg:items-start">
+        <aside className="min-w-0 mb-5 lg:mb-0">
           <div className="flex items-center justify-between mb-2.5">
             <span
               className="uppercase"
@@ -422,36 +600,76 @@ export function DraftForm() {
               Your first draft will appear here. Paste the message, select the scenario, and click “Draft my reply.”
             </div>
           ) : (
-            <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible lg:max-h-[70vh] lg:overflow-y-auto paper-scroll pb-1">
-              {draftsList.map((draft) => (
-                <button
-                  key={draft.id}
-                  onClick={() => handleSelectDraft(draft)}
-                  className="text-left rounded-md px-3 py-2.5 shrink-0 w-48 lg:w-full transition-colors"
-                  style={{ background: 'rgba(245,239,225,0.06)' }}
-                >
-                  <span
-                    className="block uppercase mb-0.5"
-                    style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 9, letterSpacing: '0.08em', color: '#B8722A' }}
-                  >
-                    {SITUATION_LABELS[draft.situation] || draft.situation}
-                  </span>
-                  <span className="block text-[12px] truncate" style={{ color: '#F5EFE1', fontFamily: "var(--font-work-sans), sans-serif" }}>
-                    {draft.original_message}
-                  </span>
-                  <span className="block text-[10px] mt-1" style={{ color: '#6B7A8C', fontFamily: "var(--font-plex-mono), monospace" }}>
-                    {new Date(draft.created_at).toLocaleDateString()}
-                  </span>
-                </button>
-              ))}
+            <div className="space-y-2">
+              <label className="block">
+                <span className="sr-only">Search saved drafts</span>
+                <input
+                  type="search"
+                  value={draftSearch}
+                  onChange={(event) => setDraftSearch(event.target.value)}
+                  placeholder="Search saved drafts..."
+                  aria-label="Search saved drafts"
+                  className="w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-forest-200"
+                  style={{ borderColor: '#D0D5DD', background: '#fff', color: '#172033' }}
+                />
+              </label>
+              <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible lg:max-h-[65vh] lg:overflow-y-auto paper-scroll pb-1">
+                {draftsList.filter((draft) => {
+                  const query = draftSearch.trim().toLowerCase()
+                  return !query ||
+                    draft.original_message.toLowerCase().includes(query) ||
+                    (draft.situation || '').toLowerCase().includes(query) ||
+                    (SITUATION_LABELS[draft.situation || ''] || '').toLowerCase().includes(query)
+                }).map((draft) => (
+                  <div key={draft.id} className="relative shrink-0 w-48 lg:w-full">
+                    <button
+                      type="button"
+                      onClick={() => handleSelectDraft(draft)}
+                      className="w-full text-left rounded-md px-3 py-2.5 pr-9 transition-colors"
+                      aria-current={selectedDraftId === draft.id ? "true" : undefined}
+                      style={{ background: selectedDraftId === draft.id ? "#E8EFE8" : "#FFFCF5", border: selectedDraftId === draft.id ? "1px solid #9BB5A1" : "1px solid #E5DDCE", boxShadow: selectedDraftId === draft.id ? "0 0 0 2px rgba(49,93,71,.10)" : "0 1px 2px rgba(48,47,41,.04)" }}
+                    >
+                      <span className="block uppercase mb-0.5" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 9, letterSpacing: '0.08em', color: '#315D47' }}>
+                        {SITUATION_LABELS[draft.situation || ''] || draft.situation || 'Uncategorized'}
+                      </span>
+                      <span className="block text-[12px] truncate" style={{ color: '#302F29', fontFamily: "var(--font-work-sans), sans-serif" }}>
+                        {draft.original_message}
+                      </span>
+                      <span className="block text-[10px] mt-1" style={{ color: '#77756D', fontFamily: "var(--font-plex-mono), monospace" }}>
+                        {new Date(draft.created_at).toLocaleDateString()}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleDeleteDraft(draft)}
+                      disabled={deletingDraftId === draft.id}
+                      aria-label={`Delete saved draft from ${new Date(draft.created_at).toLocaleDateString()}`}
+                      title="Delete saved draft"
+                      className="absolute right-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-md text-sm font-semibold opacity-70 hover:opacity-100 disabled:opacity-40"
+                      style={{ color: '#A85F43', background: '#FFF8F3' }}
+                    >
+                      {deletingDraftId === draft.id ? '…' : '×'}
+                    </button>
+                  </div>
+                ))}
+                {draftSearch.trim() && !draftsList.some((draft) => {
+                  const query = draftSearch.trim().toLowerCase()
+                  return draft.original_message.toLowerCase().includes(query) ||
+                    (draft.situation || '').toLowerCase().includes(query) ||
+                    (SITUATION_LABELS[draft.situation || ''] || '').toLowerCase().includes(query)
+                }) && (
+                  <p className="px-2 py-3 text-xs text-stone-500">No saved drafts match that search.</p>
+                )}
+              </div>
             </div>
           )}
         </aside>
 
-        <div className="flex-1 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
-          <div className="lg:col-span-2 mb-4">
+        <div className="min-w-0 grid grid-cols-1 gap-4 lg:col-start-2 lg:grid-cols-2 lg:gap-5 xl:col-span-2 xl:col-start-2 xl:grid-cols-2 xl:gap-5">
+          {showQuickStart ? (
+          <div className="lg:col-span-2 mb-1">
             <div
-              className="rounded-md border px-4 py-3 text-sm"
+              className="quick-start-banner rounded-md border px-4 py-2.5 text-sm"
               style={{
                 background: 'rgba(184,114,42,0.08)',
                 borderColor: 'rgba(184,114,42,0.35)',
@@ -459,29 +677,21 @@ export function DraftForm() {
                 fontFamily: "var(--font-work-sans), sans-serif",
               }}
             >
-              <div className="mb-2 font-semibold" style={{ color: '#F5EFE1' }}>
-                Quick start
+              <div className="flex items-center justify-between gap-3">
+                <div className="quick-start-title mb-0 font-semibold">Quick start</div>
+                <button type="button" onClick={() => setShowQuickStart(false)} aria-label="Dismiss quick start" className="rounded-md px-2 py-1 text-xs font-semibold text-forest-700 hover:bg-forest-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest-600">Hide</button>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {QUICK_START_STEPS.map((step, index) => (
-                  <span
-                    key={step}
-                    className="rounded-full border px-2.5 py-1 text-[11px]"
-                    style={{
-                      borderColor: 'rgba(255,255,255,0.12)',
-                      background: 'rgba(255,255,255,0.02)',
-                      color: '#E8E0D4',
-                    }}
-                  >
-                    {index + 1}. {step}
-                  </span>
-                ))}
-              </div>
+              <p className="mt-1 text-xs text-forest-800">Paste the client message, set the context, then generate three reply strategies.</p>
             </div>
           </div>
+          ) : (
+            <div className="lg:col-span-2 flex justify-end">
+              <button type="button" onClick={() => setShowQuickStart(true)} className="rounded-lg border border-forest-200 bg-white px-3 py-1.5 text-xs font-semibold text-forest-700 hover:bg-forest-50">Show quick start</button>
+            </div>
+          )}
 
           <div
-            className="relative rounded-md p-5 sm:p-6 shadow-2xl w-full max-h-[70vh] lg:max-h-[80vh] overflow-y-auto paper-scroll lg:sticky lg:top-6"
+            className="relative rounded-md p-4 sm:p-5 shadow-2xl w-full lg:sticky lg:top-4"
             style={{ background: '#F5EFE1', color: '#24303B', transform: 'rotate(-0.4deg)' }}
           >
             <div
@@ -489,31 +699,64 @@ export function DraftForm() {
               style={{ background: 'rgba(184,114,42,0.35)', border: '1px solid rgba(184,114,42,0.5)' }}
             />
 
-            <span className="block mb-3.5 uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
-              The message
-            </span>
+            <div className="mb-2.5 flex items-center justify-between gap-3">
+              <span className="block uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
+                The message
+              </span>
+              <button type="button" className="message-expand-button" onClick={() => setMessageExpanded(true)} aria-haspopup="dialog" aria-label="Expand client message editor">
+                Expand editor
+              </button>
+            </div>
             <textarea
+              ref={messageInputRef}
               value={incomingMessage}
               onChange={(e) => setIncomingMessage(e.target.value)}
               placeholder={`Paste what the client actually said... e.g. "Hey, can you just knock the price down a bit?"`}
-              className="w-full min-h-[120px] sm:min-h-[150px] bg-transparent border-none outline-none resize-y"
-              style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.55, color: '#24303B' }}
+              className="message-input w-full bg-transparent border-none outline-none"
+              aria-label="The message from the client"
+              style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.6, color: '#24303B' }}
             />
 
-            <div className="mt-5">
-              <div className="flex items-center gap-1.5 mb-3.5">
+            <div className="mt-3 grid grid-cols-1 gap-3">
+              <label className="block">
+                <span className="block mb-1.5 text-xs font-semibold text-stone-600">What outcome do you want?</span>
+                <input
+                  type="text"
+                  value={desiredOutcome}
+                  onChange={(e) => setDesiredOutcome(e.target.value)}
+                  placeholder="e.g. Get the overdue invoice paid"
+                  className="w-full rounded-lg border px-3 py-2.5 text-sm"
+                  style={{ borderColor: '#D0D5DD', background: '#fff', color: '#172033' }}
+                />
+              </label>
+              <label className="block">
+                <span className="block mb-1.5 text-xs font-semibold text-stone-600">Anything the reply should avoid?</span>
+                <input
+                  type="text"
+                  value={avoid}
+                  onChange={(e) => setAvoid(e.target.value)}
+                  placeholder="e.g. Don't offer a discount"
+                  className="w-full rounded-lg border px-3 py-2.5 text-sm"
+                  style={{ borderColor: '#D0D5DD', background: '#fff', color: '#172033' }}
+                />
+              </label>
+            </div>
+
+            <div className="mt-3">
+              <div className="flex items-center gap-1.5 mb-2.5">
                 <span className="uppercase" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 10, letterSpacing: '0.14em', color: '#B8722A' }}>
                   Situation
                 </span>
                 <InfoPopover text="Situation tells the AI what kind of conversation this is -- a late payment, a lowball offer, and so on -- so it can shape the reply around the right context." />
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="option-group flex flex-wrap gap-2">
                 {SITUATIONS.map((s) => (
                   <button
                     key={s}
                     type="button"
+                    aria-pressed={situation === s}
                     onClick={() => setSituation(s)}
-                    className="rounded-full px-3.5 py-1.5 text-[13px] transition-all"
+                    className="option-chip rounded-full px-3.5 py-1.5 text-[13px] transition-all"
                     style={situation === s
                       ? { background: '#1B2A3A', color: '#F5EFE1', border: '1px solid #1B2A3A' }
                       : { background: 'transparent', color: '#24303B', border: '1px solid rgba(36,48,59,0.18)' }}
@@ -531,13 +774,14 @@ export function DraftForm() {
                 </span>
                 <InfoPopover text="Tone sets how the reply should sound -- Diplomatic keeps it warm, Firm is direct with no fluff, Formal keeps it strictly businesslike." />
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="option-group flex flex-wrap gap-2">
                 {TONES.map((t) => (
                   <button
                     key={t.value}
                     type="button"
+                    aria-pressed={tone === t.value}
                     onClick={() => setTone(t.value)}
-                    className="rounded-full px-3.5 py-1.5 text-[13px] transition-all"
+                    className="option-chip rounded-full px-3.5 py-1.5 text-[13px] transition-all"
                     style={tone === t.value
                       ? { background: '#1B2A3A', color: '#F5EFE1', border: '1px solid #1B2A3A' }
                       : { background: 'transparent', color: '#24303B', border: '1px solid rgba(36,48,59,0.18)' }}
@@ -551,11 +795,12 @@ export function DraftForm() {
             <button
               type="button"
               onClick={handleDraftReply}
-              disabled={loading}
-              className="mt-6 w-full py-[15px] rounded-md font-semibold text-[15px] text-white transition-all active:scale-[0.99] disabled:cursor-not-allowed"
-              style={{ background: loading ? '#8a8a8a' : '#B8722A', fontFamily: "var(--font-work-sans), sans-serif" }}
+              disabled={loading || !incomingMessage.trim()}
+              aria-disabled={loading || !incomingMessage.trim()}
+              className="mt-4 w-full py-[12px] rounded-md font-semibold text-[15px] text-white transition-all active:scale-[0.99] disabled:cursor-not-allowed"
+              style={{ background: loading || !incomingMessage.trim() ? '#98A2B3' : '#B8722A', opacity: !incomingMessage.trim() && !loading ? 0.8 : 1, fontFamily: "var(--font-work-sans), sans-serif" }}
             >
-              {loading ? 'Drafting...' : user ? 'Draft my reply' : 'Sign in to draft a reply'}
+              {loading ? 'Building your 3 response strategies...' : user ? 'Generate 3 response strategies' : 'Sign in to draft a reply'}
             </button>
 
             {error && (
@@ -571,61 +816,63 @@ export function DraftForm() {
             )}
           </div>
 
-          {(draftOptions.length > 0 || limitReached) && (
-            <div className="mt-5 lg:mt-0 flex flex-col gap-4">
+          <div className="min-w-0 mt-5 lg:mt-0 flex flex-col gap-4">
+            {draftOptions.length === 0 && !limitReached && (
+              <div className="rounded-2xl border border-dashed border-stone-300 bg-white p-6 xl:sticky xl:top-5">
+                <div className="text-sm font-semibold text-stone-900">Your response strategies will appear here</div>
+                <p className="mt-2 text-sm leading-6 text-stone-500">Add the client’s message and context, then generate three distinct replies. You can edit and copy your preferred version here.</p>
+                <div className="mt-5 grid grid-cols-3 gap-2" aria-hidden="true">
+                  <div className="h-2 rounded-full bg-forest-100" />
+                  <div className="h-2 rounded-full bg-stone-100" />
+                  <div className="h-2 rounded-full bg-stone-100" />
+                </div>
+              </div>
+            )}
               {limitReached && plan !== 'pro' && (
                 <div className="rise-anim relative rounded-md p-6 text-center lg:sticky lg:top-6" style={{ background: '#24303B', color: '#F5EFE1' }}>
                   <div className="mb-2 font-semibold" style={{ fontFamily: "var(--font-newsreader), serif", fontSize: 18 }}>
-                    You've used your 3 free drafts
+                    You&apos;ve used your 3 free drafts
                   </div>
                   <p className="mb-5 text-[14px]" style={{ fontFamily: "var(--font-work-sans), sans-serif", color: '#B8C2CE' }}>
-                    Upgrade to Pro for unlimited replies, every tone, every situation.
+                    Pro subscriptions are not open yet. Your free drafts reset tomorrow.
                   </p>
 
-                  {paypalError && (
-                    <p className="mb-3 text-[12px]" style={{ color: '#E08A6B' }}>{paypalError}</p>
-                  )}
-
-                  <div className="w-full max-w-xs mx-auto">
-                    <PayPalScriptProvider options={{ clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "", currency: "USD" }}>
-                      <PayPalButtons
-                        style={{ layout: "vertical", color: "gold", shape: "rect", tagline: false }}
-                        createOrder={async () => {
-                          setPaypalError(null)
-                          const res = await fetch('/api/paypal/create-order', { method: 'POST' })
-                          const data = await res.json()
-                          if (!res.ok) {
-                            setPaypalError(data.error || 'Could not start checkout.')
-                            throw new Error(data.error)
-                          }
-                          return data.id
-                        }}
-                        onApprove={async (data) => {
-                          const res = await fetch('/api/paypal/capture-order', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ orderID: data.orderID }),
-                          })
-                          const result = await res.json()
-                          if (!res.ok) {
-                            setPaypalError(result.error || 'Payment could not be verified.')
-                            return
-                          }
-                          setPlan('pro')
-                          setLimitReached(false)
-                        }}
-                        onError={(err) => {
-                          console.error('PayPal error:', err)
-                          setPaypalError('Something went wrong with checkout. Try again.')
-                        }}
-                      />
-                    </PayPalScriptProvider>
-                  </div>
+                  <p className="mx-auto max-w-sm text-[13px] leading-6" style={{ color: '#B8C2CE', fontFamily: "var(--font-work-sans), sans-serif" }}>
+                    The planned Pro price is <strong style={{ color: '#F5EFE1' }}>$12 USD per month</strong>. Checkout will open only after recurring billing has been verified.
+                  </p>
                 </div>
               )}
 
               {draftOptions.length > 0 && (!limitReached || plan === 'pro') && (
                 <div className="flex flex-col gap-4 lg:sticky lg:top-6 lg:max-h-[80vh] lg:overflow-y-auto paper-scroll pr-0.5">
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-stone-200 bg-white px-4 py-3">
+                    <div>
+                      <div className="text-sm font-semibold text-stone-900">Your reply options</div>
+                      <div className="mt-0.5 text-xs text-stone-500">Edit any draft, save your changes, then copy the version you want to send.</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {selectedDraftId && (
+                        <button
+                          type="button"
+                          onClick={handleSaveDraft}
+                          disabled={savingDraft || loading}
+                          className="shrink-0 rounded-lg bg-forest-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                        >
+                          {savingDraft ? 'Saving...' : 'Save changes'}
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleDraftReply}
+                        disabled={loading || savingDraft}
+                        className="shrink-0 rounded-lg border px-3 py-2 text-xs font-semibold disabled:opacity-50"
+                        style={{ borderColor: '#D0D5DD', color: '#34469A', background: '#fff' }}
+                      >
+                        {loading ? 'Regenerating...' : 'Regenerate'}
+                      </button>
+                    </div>
+                    {saveNotice && <p role="status" className="w-full text-xs text-emerald-700">{saveNotice}</p>}
+                  </div>
                   {draftOptions.map((option, index) => (
                     <div
                       key={index}
@@ -644,12 +891,19 @@ export function DraftForm() {
 
                       <div className="flex items-center justify-between mb-3">
                         <span style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 15, color: '#B8722A' }}>
-                          {draftOptions.length > 1 ? `Option ${index + 1}` : 'Your reply'}
+                          {STRATEGY_LABELS[index] || `Option ${index + 1}`}
                         </span>
                       </div>
-                      <p className="whitespace-pre-wrap" style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.6 }}>
-                        {option}
-                      </p>
+                      <label className="block">
+                        <span className="sr-only">Edit {STRATEGY_LABELS[index] || `option ${index + 1}`} reply</span>
+                        <textarea
+                          value={option}
+                          onChange={(event) => setDraftOptions((current) => current.map((value, optionIndex) => optionIndex === index ? event.target.value : value))}
+                          aria-label={`Edit ${STRATEGY_LABELS[index] || `option ${index + 1}`} reply`}
+                          className="reply-editor w-full resize-y rounded-lg border p-3 outline-none focus:ring-2 focus:ring-forest-200"
+                          style={{ minHeight: 140, borderColor: '#E6E9F0', background: '#fff', color: '#344054', fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.7 }}
+                        />
+                      </label>
                       <button
                         type="button"
                         onClick={() => handleCopy(option, index)}
@@ -662,19 +916,53 @@ export function DraftForm() {
                   ))}
                 </div>
               )}
-            </div>
-          )}
+          </div>
         </div>
       </div>
+
+      {messageExpanded && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6"
+          style={{ background: 'rgba(28,35,30,0.68)' }}
+          onMouseDown={(event) => { if (event.target === event.currentTarget) setMessageExpanded(false) }}
+        >
+          <section role="dialog" aria-modal="true" aria-labelledby="expanded-message-title" className="flex h-[92vh] w-full max-w-5xl flex-col rounded-2xl p-4 sm:p-6 shadow-2xl" style={{ background: '#FFFCF5', color: '#302F29' }}>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <h2 id="expanded-message-title" className="text-lg font-semibold" style={{ color: '#244A3A' }}>Review client message</h2>
+                <p className="mt-1 text-xs" style={{ color: '#77756D' }}>Edit the message here. Your dashboard form and generated replies will be preserved.</p>
+              </div>
+              <button type="button" onClick={() => setMessageExpanded(false)} className="rounded-lg border px-3 py-2 text-sm font-semibold" style={{ borderColor: '#D8D2C6', color: '#315D47' }} aria-label="Close expanded message editor">Done</button>
+            </div>
+            <textarea
+              autoFocus
+              value={incomingMessage}
+              onChange={(e) => setIncomingMessage(e.target.value)}
+              aria-label="Expanded client message editor"
+              placeholder="Paste or edit the full client message..."
+              className="min-h-0 flex-1 resize-none rounded-xl border p-4 text-sm leading-7 outline-none focus:ring-2"
+              style={{ borderColor: '#D8D2C6', background: '#fff', color: '#302F29', fontFamily: "var(--font-work-sans), sans-serif" }}
+            />
+            <div className="mt-3 flex justify-end">
+              <button type="button" onClick={() => setMessageExpanded(false)} className="rounded-lg px-5 py-2.5 text-sm font-bold text-white" style={{ background: '#244A3A' }}>Done editing</button>
+            </div>
+          </section>
+        </div>
+      )}
 
       {showAuthModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ background: 'rgba(0,0,0,0.55)' }}>
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="auth-dialog-title"
             className="rounded-md shadow-2xl p-6 max-w-sm w-full relative"
             style={{ background: '#F5EFE1', color: '#24303B' }}
           >
             <button
+              type="button"
               onClick={() => setShowAuthModal(false)}
+              aria-label="Close sign-in dialog"
               className="absolute top-4 right-4 font-bold text-lg"
               style={{ color: '#6B7A8C' }}
             >
@@ -682,7 +970,7 @@ export function DraftForm() {
             </button>
 
             <div className="text-center mb-5">
-              <h2 style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 20, color: '#1B2A3A' }}>
+              <h2 id="auth-dialog-title" style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 20, color: '#1B2A3A' }}>
                 {isSignUpMode ? 'Open an account' : 'Welcome back'}
               </h2>
               <p className="text-[12px] mt-1" style={{ color: '#6B7A8C', fontFamily: "var(--font-work-sans), sans-serif" }}>
@@ -728,7 +1016,12 @@ export function DraftForm() {
               </div>
 
               {authError && (
-                <div className="text-[11px] text-center" style={{ color: '#B8722A' }}>{authError}</div>
+                <div role="alert" className="text-[11px] text-center" style={{ color: '#B8722A' }}>{authError}</div>
+              )}
+              {authNotice && (
+                <div role="status" className="rounded-md border px-3 py-2 text-[11px] text-center" style={{ borderColor: 'rgba(52,70,154,0.2)', background: 'rgba(52,70,154,0.06)', color: '#34469A' }}>
+                  {authNotice}
+                </div>
               )}
 
               <button
@@ -744,7 +1037,7 @@ export function DraftForm() {
             <div className="text-center mt-5 pt-3 text-[12px]" style={{ borderTop: '1px solid rgba(36,48,59,0.1)', color: '#6B7A8C' }}>
               {isSignUpMode ? 'Already have an account?' : "Don't have an account?"}{' '}
               <button
-                onClick={() => { setIsSignUpMode(!isSignUpMode); setAuthError(null) }}
+                onClick={() => { setIsSignUpMode(!isSignUpMode); setAuthError(null); setAuthNotice(null) }}
                 className="font-semibold"
                 style={{ color: '#B8722A' }}
               >

@@ -3,10 +3,10 @@ import { Check, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 const bullets = [
-  "3 AI replies/day on Free",
-  "Unlimited replies on Pro",
-  "Basic sentiment detection included",
-  "Advanced negotiation support in Pro",
+  "3 generations per day on Free",
+  "3 distinct reply strategies per generation",
+  "3 writing tones",
+  "Saved, editable draft history",
 ]
 
 export function Hero() {
@@ -25,8 +25,8 @@ export function Hero() {
           </h1>
 
           <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground text-pretty">
-            Generate better replies, detect sentiment, and optimize negotiation workflows with AI that helps your team
-            respond faster and close more effectively.
+            Generate three distinct reply strategies from a client message, adjust the tone, and keep your drafts organized.
+            You review every suggestion and decide what to send.
           </p>
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
@@ -34,7 +34,7 @@ export function Hero() {
               Start Free
             </Button>
             <Button variant="outline" className="h-11 px-6 text-sm" nativeButton={false} render={<a href="#pricing" />}>
-              Upgrade to Pro
+              View pricing
             </Button>
           </div>
 

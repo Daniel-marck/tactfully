@@ -1,5 +1,4 @@
 import { Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
 
 const plans = [
   {
@@ -8,11 +7,11 @@ const plans = [
     period: "/month",
     description: "Everything you need to try Tactfully in real conversations.",
     features: [
-      "3 AI replies/day",
+      "3 generations per day · 3 strategies each",
       "3 reply tones",
-      "2 reply options",
+      "3 distinct reply strategies",
       "Copy response",
-      "Basic client sentiment detection",
+      "Saved and editable draft history",
     ],
     cta: "Start Free",
     href: "/sign-up",
@@ -22,15 +21,15 @@ const plans = [
     name: "Pro",
     price: "$12",
     period: "/month",
-    description: "Unlimited scale plus advanced negotiation and coaching.",
+    description: "Planned at $12/month. Subscriptions are not open yet.",
     features: [
-      "Unlimited AI replies",
-      "No daily limits",
+      "Unlimited generations (planned)",
+      "Everything in Free",
       "Advanced negotiation",
       "Personal AI communication coach",
     ],
-    cta: "Upgrade to Pro",
-    href: "/sign-up",
+    cta: "Coming soon",
+    href: "",
     featured: true,
   },
 ]
@@ -65,7 +64,7 @@ export function PricingSection() {
                   <h3 className="text-lg font-semibold">{plan.name}</h3>
                   {plan.featured && (
                     <span className="rounded-full bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground">
-                      Most popular
+                      Coming soon
                     </span>
                   )}
                 </div>
@@ -84,7 +83,11 @@ export function PricingSection() {
                     </li>
                   ))}
                 </ul>
-                <a href={plan.href} className={linkClassName}>{plan.cta}</a>
+                {plan.featured ? (
+                  <div aria-disabled="true" className={linkClassName + " cursor-not-allowed opacity-60"}>Pro subscriptions coming soon</div>
+                ) : (
+                  <a href={plan.href} className={linkClassName}>{plan.cta}</a>
+                )}
               </div>
             )
           })}

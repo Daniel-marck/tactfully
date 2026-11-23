@@ -1,7 +1,7 @@
 import { ArrowRight, PenLine, ListChecks, RefreshCw } from "lucide-react"
 
 const flow = [
-  { icon: PenLine, label: "Write", note: "Two AI-drafted options" },
+  { icon: PenLine, label: "Write", note: "Three AI-generated strategies" },
   { icon: ListChecks, label: "Review", note: "Tone + situation control" },
   { icon: RefreshCw, label: "Reuse", note: "Every letter filed for later" },
 ]
@@ -102,7 +102,7 @@ export function SolutionSection() {
             Tactfully gives your team a better communication workflow.
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-pretty">
-            Paste in the client message, pick a situation and a tone, and Tactfully drafts two distinct reply options --
+            Paste in the client message, pick a situation and a tone, and Tactfully drafts three distinct reply strategies --
             each taking a genuinely different approach. Every letter you draft is automatically filed, so you can
             revisit and reuse it later.
           </p>

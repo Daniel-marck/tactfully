@@ -18,6 +18,7 @@ import {
   Settings,
   Sparkles,
   WandSparkles,
+  WandSparkles,
 } from "lucide-react"
 import styles from "./product-preview.module.css"
 
@@ -38,7 +39,6 @@ export function ProductPreview() {
   const [copied, setCopied] = useState(false)
   const [mobileDraft, setMobileDraft] = useState(false)
 
-  const draft = drafts[selectedDraft]
   const reply = useMemo(() => {
     const openings: Record<string, string> = {
       Warm: "Hi Alex,\n\nThanks for sharing this. I’d be happy to include the landing page, and I want to make sure we have the space to do it properly.",
@@ -87,14 +87,17 @@ export function ProductPreview() {
           <button className={styles.navItem}><Settings size={16} /><span>Settings</span></button>
           <button className={styles.navItem}><CircleHelp size={16} /><span>Help & feedback</span></button>
           <div className={styles.usageCard}>
-            <div className={styles.usageTop}><span>Starter</span><strong>68%</strong></div>
+            <div className={styles.usageTop}><span>Free</span><strong>33%</strong></div>
             <div className={styles.usageTrack}><span /></div>
-            <p>34 of 50 replies used</p>
+            <p>1 of 3 generations used today</p>
           </div>
         </div>
       </aside>
 
       <main className={styles.workspace}>
+        <div role="note" style={{ padding: "7px 18px", background: "#F5E9D9", color: "#795A39", borderBottom: "1px solid #E8D8C4", fontSize: 11, textAlign: "center" }}>
+          Design preview · Sample data only · Not connected to your account
+        </div>
         <header className={styles.topbar}>
           <div className={styles.mobileBrand}><span>T</span><strong>Tactfully</strong></div>
           <div className={styles.pageTitle}><span>Workspace</span><ChevronRight size={13} /><strong>Overview</strong></div>

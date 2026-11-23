@@ -1,10 +1,4 @@
 import { Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
-
-// Drop your Gumroad product checkout link in here once it's live.
-// e.g. "https://gumroad.com/l/tactfully-pro"
-const GUMROAD_PRO_CHECKOUT_URL = "https://smartoolkit.gumroad.com/l/dzlkij"
-
 const plans = [
   {
     name: "Free",
@@ -12,11 +6,11 @@ const plans = [
     period: "/month",
     description: "Everything you need to try Tactfully in real conversations.",
     features: [
-      "3 AI replies/day",
+      "3 generations per day · 3 strategies each",
       "3 reply tones",
-      "2 reply options",
+      "3 distinct reply strategies",
       "Copy response",
-      "Basic client sentiment detection",
+      "Saved and editable draft history",
     ],
     cta: "Start Free",
     href: "/sign-up",
@@ -26,15 +20,15 @@ const plans = [
     name: "Pro",
     price: "$12",
     period: "/month",
-    description: "Unlimited scale plus advanced negotiation and coaching.",
+    description: "Planned at $12/month. Subscriptions are not open yet.",
     features: [
-      "Unlimited AI replies",
-      "No daily limits",
+      "Unlimited generations (planned)",
+      "Everything in Free",
       "Advanced negotiation",
       "Personal AI communication coach",
     ],
-    cta: "Upgrade to Pro",
-    href: GUMROAD_PRO_CHECKOUT_URL,
+    cta: "Coming soon",
+    href: "",
     featured: true,
   },
 ]
@@ -65,7 +59,7 @@ export function PricingSection() {
                 <h3 className="text-lg font-semibold">{plan.name}</h3>
                 {plan.featured && (
                   <span className="rounded-full bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground">
-                    Most popular
+                    Coming soon
                   </span>
                 )}
               </div>
@@ -87,18 +81,15 @@ export function PricingSection() {
                 ))}
               </ul>
 
-              <a
-                href={plan.href}
-                target={plan.featured ? "_blank" : undefined}
-                rel={plan.featured ? "noopener noreferrer" : undefined}
-                className={`mt-8 h-11 w-full inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors ${
-                  plan.featured
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                    : "border border-input bg-background hover:bg-accent hover:text-accent-foreground"
-                }`}
-              >
-                {plan.cta}
-              </a>
+              {plan.featured ? (
+                <div aria-disabled="true" className="mt-8 h-11 w-full inline-flex items-center justify-center rounded-lg bg-primary/50 text-sm font-medium text-primary-foreground">
+                  Pro subscriptions coming soon
+                </div>
+              ) : (
+                <a href={plan.href} className="mt-8 h-11 w-full inline-flex items-center justify-center rounded-lg border border-input bg-background text-sm font-medium hover:bg-accent hover:text-accent-foreground">
+                  {plan.cta}
+                </a>
+              )}
             </div>
           ))}
         </div>
