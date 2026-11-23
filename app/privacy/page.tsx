@@ -20,7 +20,7 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-base font-semibold text-foreground">How we use your information</h2>
           <p className="mt-2">
-            Your message and drafting context are sent to Google's Gemini API to
+            Your message and drafting context are sent to Google&apos;s Gemini API to
             generate reply suggestions. We use account and usage information to
             authenticate you, protect saved drafts, and enforce the free allowance of
             three generations per day. Each successful generation returns three
@@ -28,7 +28,7 @@ export default function PrivacyPage() {
             Tactfully-owned AI model.
           </p>
           <p className="mt-2">
-            Google's handling of prompts and responses depends on the Gemini API
+            Google&apos;s handling of prompts and responses depends on the Gemini API
             account tier and applicable terms. Google states that free-tier content may be used to improve its products, while paid-tier content is not used for that purpose. Do not paste confidential, regulated, or sensitive
             client information unless you have confirmed that the provider terms and
             account tier are appropriate for that information.
