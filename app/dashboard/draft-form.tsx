@@ -184,6 +184,7 @@ export function DraftForm() {
   const [isSignUpMode, setIsSignUpMode] = useState(false)
   const [authError, setAuthError] = useState<string | null>(null)
   const [authLoading, setAuthLoading] = useState(false)
+  const [authNotice, setAuthNotice] = useState<string | null>(null)
 
   async function handleUserChange(currentUser: User | null) {
     setUser(currentUser)
@@ -256,9 +257,19 @@ export function DraftForm() {
     setAuthLoading(true)
     try {
       if (isSignUpMode) {
-        const { error } = await supabase.auth.signUp({ email: authEmail, password: authPassword })
+        const { data, error } = await supabase.auth.signUp({
+          email: authEmail,
+          password: authPassword,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          },
+        })
         if (error) throw error
-        alert('Check your inbox to verify your email.')
+
+        if (!data.session) {
+          setAuthNotice('Account created. Check your inbox and confirm your email before signing in.')
+          return
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email: authEmail, password: authPassword })
         if (error) throw error
@@ -267,6 +278,7 @@ export function DraftForm() {
       setAuthEmail('')
       setAuthPassword('')
       setShowAuthPassword(false)
+      setAuthNotice(null)
     } catch (err: unknown) {
       setAuthError(err instanceof Error ? err.message : 'Authentication failed.')
     } finally {
@@ -836,7 +848,12 @@ export function DraftForm() {
               </div>
 
               {authError && (
-                <div className="text-[11px] text-center" style={{ color: '#B8722A' }}>{authError}</div>
+                <div role="alert" className="text-[11px] text-center" style={{ color: '#B8722A' }}>{authError}</div>
+              )}
+              {authNotice && (
+                <div role="status" className="rounded-md border px-3 py-2 text-[11px] text-center" style={{ borderColor: 'rgba(52,70,154,0.2)', background: 'rgba(52,70,154,0.06)', color: '#34469A' }}>
+                  {authNotice}
+                </div>
               )}
 
               <button
@@ -852,7 +869,7 @@ export function DraftForm() {
             <div className="text-center mt-5 pt-3 text-[12px]" style={{ borderTop: '1px solid rgba(36,48,59,0.1)', color: '#6B7A8C' }}>
               {isSignUpMode ? 'Already have an account?' : "Don't have an account?"}{' '}
               <button
-                onClick={() => { setIsSignUpMode(!isSignUpMode); setAuthError(null) }}
+                onClick={() => { setIsSignUpMode(!isSignUpMode); setAuthError(null); setAuthNotice(null) }}
                 className="font-semibold"
                 style={{ color: '#B8722A' }}
               >
