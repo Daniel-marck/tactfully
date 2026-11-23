@@ -33,8 +33,8 @@ const TONES = [
 type SavedDraft = {
   id: string
   original_message: string
-  situation: string
-  tone: string
+  situation: string | null
+  tone: string | null
   generated_reply: string
   created_at: string
   desired_outcome: string
@@ -43,14 +43,6 @@ type SavedDraft = {
 
 const OPTIONS_SEPARATOR = '\n\n---\n\n'
 const STRATEGY_LABELS = ['Diplomatic', 'Firm & professional', 'Direct']
-
-const QUICK_START_STEPS = [
-  'Paste the client message',
-  'Add your desired outcome',
-  'Choose the situation and tone',
-  'Generate 3 response strategies',
-  'Refine, copy and send',
-]
 
 function SealIcon() {
   return (
@@ -256,8 +248,8 @@ export function DraftForm() {
     setIncomingMessage(draft.original_message)
     setDesiredOutcome(draft.desired_outcome || '')
     setAvoid(draft.avoid || '')
-    setSituation(draft.situation)
-    setTone(draft.tone)
+    setSituation(draft.situation || SITUATIONS[SITUATIONS.length - 1])
+    setTone(draft.tone || TONES[0].value)
     setDraftOptions(
       draft.generated_reply.includes(OPTIONS_SEPARATOR)
         ? draft.generated_reply.split(OPTIONS_SEPARATOR)
@@ -626,8 +618,8 @@ export function DraftForm() {
                   const query = draftSearch.trim().toLowerCase()
                   return !query ||
                     draft.original_message.toLowerCase().includes(query) ||
-                    draft.situation.toLowerCase().includes(query) ||
-                    (SITUATION_LABELS[draft.situation] || '').toLowerCase().includes(query)
+                    (draft.situation || '').toLowerCase().includes(query) ||
+                    (SITUATION_LABELS[draft.situation || ''] || '').toLowerCase().includes(query)
                 }).map((draft) => (
                   <div key={draft.id} className="relative shrink-0 w-48 lg:w-full">
                     <button
@@ -638,7 +630,7 @@ export function DraftForm() {
                       style={{ background: selectedDraftId === draft.id ? "#E8EFE8" : "#FFFCF5", border: selectedDraftId === draft.id ? "1px solid #9BB5A1" : "1px solid #E5DDCE", boxShadow: selectedDraftId === draft.id ? "0 0 0 2px rgba(49,93,71,.10)" : "0 1px 2px rgba(48,47,41,.04)" }}
                     >
                       <span className="block uppercase mb-0.5" style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 9, letterSpacing: '0.08em', color: '#315D47' }}>
-                        {SITUATION_LABELS[draft.situation] || draft.situation}
+                        {SITUATION_LABELS[draft.situation || ''] || draft.situation || 'Uncategorized'}
                       </span>
                       <span className="block text-[12px] truncate" style={{ color: '#302F29', fontFamily: "var(--font-work-sans), sans-serif" }}>
                         {draft.original_message}
@@ -663,8 +655,8 @@ export function DraftForm() {
                 {draftSearch.trim() && !draftsList.some((draft) => {
                   const query = draftSearch.trim().toLowerCase()
                   return draft.original_message.toLowerCase().includes(query) ||
-                    draft.situation.toLowerCase().includes(query) ||
-                    (SITUATION_LABELS[draft.situation] || '').toLowerCase().includes(query)
+                    (draft.situation || '').toLowerCase().includes(query) ||
+                    (SITUATION_LABELS[draft.situation || ''] || '').toLowerCase().includes(query)
                 }) && (
                   <p className="px-2 py-3 text-xs text-stone-500">No saved drafts match that search.</p>
                 )}
