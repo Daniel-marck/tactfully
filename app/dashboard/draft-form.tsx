@@ -44,44 +44,6 @@ type SavedDraft = {
 const OPTIONS_SEPARATOR = '\n\n---\n\n'
 const STRATEGY_LABELS = ['Diplomatic', 'Firm & professional', 'Direct']
 
-function SealIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
-      <path
-        d="M12 2L14.5 8.5L21 9.5L16 14L17.5 21L12 17.5L6.5 21L8 14L3 9.5L9.5 8.5L12 2Z"
-        fill="#F5EFE1"
-        opacity="0.9"
-      />
-    </svg>
-  )
-}
-
-function Postmark({ label }: { label: string }) {
-  return (
-    <div
-      className="absolute -top-4 -right-3 w-16 h-16 rounded-full flex flex-col items-center justify-center rotate-[8deg] select-none"
-      style={{
-        border: '1.5px solid rgba(184,114,42,0.55)',
-        background: 'rgba(245,239,225,0.9)',
-        boxShadow: '0 4px 10px rgba(27,42,58,0.15)',
-      }}
-    >
-      <span
-        className="uppercase leading-none"
-        style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 7, letterSpacing: '0.1em', color: '#B8722A' }}
-      >
-        Tactfully
-      </span>
-      <span
-        className="leading-none mt-0.5"
-        style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 9, color: '#1B2A3A' }}
-      >
-        {label}
-      </span>
-    </div>
-  )
-}
-
 function InfoIcon() {
   return (
     <svg viewBox="0 0 20 20" fill="none" className="w-3.5 h-3.5">
@@ -447,7 +409,6 @@ export function DraftForm() {
     }
   }
 
-  const todayStamp = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit' })
 
   return (
     <div
@@ -933,16 +894,6 @@ export function DraftForm() {
                       className="rise-anim relative rounded-md p-5 sm:p-6"
                       style={{ background: '#F5EFE1', color: '#24303B' }}
                     >
-                      {index === 0 && (
-                        <div
-                          className="seal-anim absolute -top-4 right-5 w-11 h-11 rounded-full flex items-center justify-center"
-                          style={{ background: 'radial-gradient(circle at 32% 30%, #D98A3B, #B8722A 60%, #8a541f 100%)', boxShadow: '0 6px 14px rgba(0,0,0,0.4)' }}
-                        >
-                          <SealIcon />
-                        </div>
-                      )}
-                      {index === 0 && <Postmark label={todayStamp} />}
-
                       <div className="flex items-center justify-between mb-3">
                         <span style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 15, color: '#B8722A' }}>
                           {STRATEGY_LABELS[index] || `Option ${index + 1}`}
