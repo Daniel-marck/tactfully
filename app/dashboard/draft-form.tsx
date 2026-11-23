@@ -37,6 +37,8 @@ type SavedDraft = {
   tone: string
   generated_reply: string
   created_at: string
+  desired_outcome: string
+  avoid: string
 }
 
 const OPTIONS_SEPARATOR = '\n\n---\n\n'
@@ -184,6 +186,7 @@ export function DraftForm() {
   const [showQuickStart, setShowQuickStart] = useState(true)
   const [messageExpanded, setMessageExpanded] = useState(false)
   const messageInputRef = useRef<HTMLTextAreaElement>(null)
+  const userLoadSequence = useRef(0)
 
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authEmail, setAuthEmail] = useState('')
@@ -195,21 +198,16 @@ export function DraftForm() {
   const [authNotice, setAuthNotice] = useState<string | null>(null)
 
   async function handleUserChange(currentUser: User | null) {
+    const requestId = ++userLoadSequence.current
     setUser(currentUser)
     if (currentUser) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('plan')
-        .eq('id', currentUser.id)
-        .single()
-      setPlan(profile?.plan === 'pro' ? 'pro' : 'free')
-
-      const { data: drafts } = await supabase
-        .from('drafts')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20)
-      setDraftsList(drafts || [])
+      const [profileResult, draftsResult] = await Promise.all([
+        supabase.from('profiles').select('plan').eq('id', currentUser.id).single(),
+        supabase.from('drafts').select('*').order('created_at', { ascending: false }).limit(20),
+      ])
+      if (requestId !== userLoadSequence.current) return
+      setPlan(profileResult.data?.plan === 'pro' ? 'pro' : 'free')
+      setDraftsList(draftsResult.data || [])
     } else {
       setPlan('free')
       setDraftsList([])
@@ -229,6 +227,15 @@ export function DraftForm() {
   }, [incomingMessage])
 
   useEffect(() => {
+    if (!messageExpanded) return
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMessageExpanded(false)
+    }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [messageExpanded])
+
+  useEffect(() => {
     async function initUser() {
       const { data: { session } } = await supabase.auth.getSession()
       handleUserChange(session?.user || null)
@@ -246,8 +253,8 @@ export function DraftForm() {
     setSelectedDraftId(draft.id)
     setSaveNotice(null)
     setIncomingMessage(draft.original_message)
-    setDesiredOutcome('')
-    setAvoid('')
+    setDesiredOutcome(draft.desired_outcome || '')
+    setAvoid(draft.avoid || '')
     setSituation(draft.situation)
     setTone(draft.tone)
     setDraftOptions(
@@ -354,6 +361,8 @@ export function DraftForm() {
         original_message: incomingMessage,
         situation,
         tone,
+        desired_outcome: desiredOutcome,
+        avoid,
         generated_reply: replies.join(OPTIONS_SEPARATOR),
       }).select().single()
       if (saveError) throw new Error("Your replies were generated, but could not be saved to history. Please try saving again.")
@@ -392,6 +401,8 @@ export function DraftForm() {
           original_message: incomingMessage,
           situation,
           tone,
+          desired_outcome: desiredOutcome,
+          avoid,
           generated_reply: draftOptions.join(OPTIONS_SEPARATOR),
         })
         .eq('id', selectedDraftId)
@@ -412,10 +423,15 @@ export function DraftForm() {
     }
   }
 
-  const handleCopy = (text: string, index: number) => {
-    navigator.clipboard.writeText(text)
-    setCopiedIndex(index)
-    setTimeout(() => setCopiedIndex((current) => (current === index ? null : current)), 1800)
+  const handleCopy = async (text: string, index: number) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setError(null)
+      setCopiedIndex(index)
+      setTimeout(() => setCopiedIndex((current) => (current === index ? null : current)), 1800)
+    } catch {
+      setError('Clipboard access was blocked. Select the reply text and copy it manually.')
+    }
   }
 
   const todayStamp = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit' })
@@ -441,87 +457,55 @@ export function DraftForm() {
       `}</style>
 
       <style jsx global>{`
-        /* Clean, typography-led workspace */
-        .tactfully-workspace, .tactfully-workspace * {
-          font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
-          letter-spacing: normal !important;
-        }
-        .tactfully-workspace { background:#f7f8fc !important; color:#172033 !important; font-size:15px; line-height:1.55; }
-        .tactfully-workspace header { background:#fff !important; border-color:#e6eaf0 !important; height:68px; }
-        .tactfully-workspace header > span { color:#263b83 !important; font-size:18px !important; font-weight:800 !important; letter-spacing:-.04em !important; }
-        .tactfully-workspace header div span { background:#eef2ff !important; color:#34469a !important; border-radius:999px !important; font-size:12px !important; font-weight:700 !important; padding:5px 11px !important; }
-        .tactfully-workspace header button { color:#475467 !important; font-size:13px !important; font-weight:600 !important; }
-        .tactfully-workspace aside > div:first-child > span { color:#667085 !important; font-size:12px !important; font-weight:700 !important; text-transform:none !important; }
-        .tactfully-workspace aside > div:first-child button { color:#34469a !important; font-size:13px !important; font-weight:700 !important; }
-        .tactfully-workspace aside button[style] { background:#fff !important; border:1px solid #e6e9f0 !important; border-radius:10px !important; box-shadow:0 1px 2px rgba(16,24,40,.04); }
-        .tactfully-workspace aside button span:first-child { color:#475467 !important; font-size:12px !important; font-weight:700 !important; }
-        .tactfully-workspace aside button span:nth-child(2) { color:#172033 !important; font-size:13px !important; line-height:1.45 !important; }
-        .tactfully-workspace aside button span:last-child { color:#98a2b3 !important; font-size:11px !important; }
-        .tactfully-workspace .quick-start-banner { background:#eef2ff !important; border:1px solid #c7d2fe !important; border-radius:12px !important; color:#263b83 !important; padding:13px 16px !important; }
-        .tactfully-workspace .quick-start-title { color:#1e2f78 !important; font-size:14px !important; font-weight:800 !important; margin-bottom:9px !important; }
-        .tactfully-workspace .quick-start-step { display:inline-flex !important; align-items:center !important; gap:7px !important; color:#263b83 !important; background:#fff !important; border:1px solid #c7d2fe !important; border-radius:999px !important; font-size:12px !important; font-weight:650 !important; padding:5px 10px 5px 6px !important; }
-        .tactfully-workspace .quick-start-number { display:inline-flex !important; align-items:center !important; justify-content:center !important; width:21px !important; height:21px !important; flex:0 0 21px !important; border-radius:999px !important; background:#34469a !important; color:#fff !important; font-size:11px !important; font-weight:800 !important; }
-        .tactfully-workspace .relative.rounded-md.p-5, .tactfully-workspace .relative.rounded-md.p-6 { background:#fff !important; color:#172033 !important; border:1px solid #e6e9f0 !important; border-radius:16px !important; box-shadow:0 8px 24px rgba(16,24,40,.06) !important; transform:none !important; }
-        .tactfully-workspace textarea { color:#172033 !important; font-size:16px !important; line-height:1.65 !important; min-height:180px !important; padding:14px 15px !important; border:1px solid #d0d5dd !important; border-radius:10px !important; background:#fff !important; }        .tactfully-workspace textarea::placeholder { color:#98a2b3 !important; }
+        .tactfully-workspace, .tactfully-workspace * { font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important; letter-spacing:normal !important; }
+        .tactfully-workspace { background:#F4F0E7 !important; color:#302F29 !important; font-size:15px; line-height:1.55; }
+        .tactfully-workspace header { background:#FFFCF5 !important; border-color:#E5DDCE !important; box-shadow:0 1px 3px rgba(48,47,41,.05); }
+        .tactfully-workspace header > span { color:#244A3A !important; font-size:18px !important; font-weight:800 !important; }
+        .tactfully-workspace header div span { background:#E8EFE8 !important; color:#244A3A !important; border-radius:999px !important; font-size:12px !important; font-weight:700 !important; }
+        .tactfully-workspace header button { color:#315D47 !important; font-size:13px !important; font-weight:650 !important; }
+        .tactfully-workspace aside { background:#FFFCF5 !important; border:1px solid #E5DDCE !important; border-radius:14px !important; padding:14px !important; box-shadow:0 5px 18px rgba(48,47,41,.04) !important; }
+        .tactfully-workspace aside > div:first-child > span { color:#77756D !important; font-size:11px !important; font-weight:750 !important; }
+        .tactfully-workspace aside > div:first-child button { color:#315D47 !important; font-size:13px !important; font-weight:750 !important; }
+        .tactfully-workspace aside button[style] { background:#FFFCF5 !important; border:1px solid #E5DDCE !important; border-radius:10px !important; }
+        .tactfully-workspace aside button[aria-current="true"] { background:#E8EFE8 !important; border-color:#9BB5A1 !important; box-shadow:0 0 0 2px rgba(49,93,71,.12) !important; }
+        .tactfully-workspace aside button span:first-child { color:#315D47 !important; }
+        .tactfully-workspace aside button span:nth-child(2) { color:#302F29 !important; }
+        .tactfully-workspace aside button span:last-child { color:#918A7D !important; }
+        .tactfully-workspace .quick-start-banner { background:#E8EFE8 !important; border:1px solid #C8D8CB !important; border-radius:12px !important; color:#244A3A !important; }
+        .tactfully-workspace .quick-start-title { color:#244A3A !important; font-size:14px !important; font-weight:800 !important; }
+        .tactfully-workspace .quick-start-banner p { color:#496552 !important; }
+        .tactfully-workspace .relative.rounded-md.p-5, .tactfully-workspace .relative.rounded-md.p-6, .tactfully-workspace .rise-anim, .tactfully-workspace .rounded-2xl.border { background:#FFFCF5 !important; color:#302F29 !important; border-color:#E5DDCE !important; box-shadow:0 6px 22px rgba(48,47,41,.06) !important; }
+        .tactfully-workspace .relative.rounded-md.p-5 > span, .tactfully-workspace .relative.rounded-md.p-6 > span { color:#315D47 !important; font-size:13px !important; font-weight:750 !important; }
+        .tactfully-workspace textarea, .tactfully-workspace input { background:#FFFEFA !important; color:#302F29 !important; border-color:#D9D0C1 !important; }
+        .tactfully-workspace textarea { font-size:15px !important; line-height:1.65 !important; }
+        .tactfully-workspace textarea::placeholder, .tactfully-workspace input::placeholder { color:#918A7D !important; }
         .tactfully-workspace textarea.message-input { min-height:220px !important; max-height:420px; height:auto; overflow-y:hidden; padding:14px 15px !important; line-height:1.6 !important; resize:vertical; }
-        .tactfully-workspace .message-expand-button { border:1px solid #D8D2C6; background:#FFFCF5; color:#315D47; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700; }
-        .tactfully-workspace .message-expand-button:hover { background:#E8EFE8; }
-        @media(min-width:1024px) {
-          .tactfully-workspace textarea.message-input { min-height:240px !important; }
-          .tactfully-workspace .relative.rounded-md.p-5, .tactfully-workspace .relative.rounded-md.p-6 { padding:16px !important; }
-        }
-        .tactfully-workspace .relative.rounded-md.p-5 > span, .tactfully-workspace .relative.rounded-md.p-6 > span { color:#34469a !important; font-size:13px !important; font-weight:700 !important; }
-        .tactfully-workspace button.rounded-full { font-size:13px !important; font-weight:600 !important; padding:8px 13px !important; border-radius:8px !important; border:1px solid #d0d5dd !important; color:#344054 !important; background:#fff !important; cursor:pointer !important; pointer-events:auto !important; position:relative; z-index:2; }
-        .tactfully-workspace button.option-chip[aria-pressed="true"] { background:#34469a !important; color:#fff !important; border-color:#34469a !important; box-shadow:0 0 0 2px rgba(52,70,154,.14) !important; }
-        .tactfully-workspace button.option-chip[aria-pressed="false"] { background:#fff !important; color:#344054 !important; border-color:#d0d5dd !important; }
-        .tactfully-workspace .option-group { position:relative; z-index:1; pointer-events:auto; }
-        .tactfully-workspace button.mt-6 { background:#34469a !important; color:#fff !important; border-radius:10px !important; min-height:52px !important; font-size:15px !important; font-weight:700 !important; }
-        .tactfully-workspace .rise-anim { background:#fff !important; color:#172033 !important; border:1px solid #e6e9f0 !important; border-radius:14px !important; box-shadow:0 8px 24px rgba(16,24,40,.06) !important; }
-        .tactfully-workspace .rise-anim p { color:#344054 !important; font-size:15px !important; line-height:1.7 !important; }
-        .tactfully-workspace .rise-anim button { background:#eef2ff !important; color:#34469a !important; border:1px solid #dbe3ff !important; border-radius:8px !important; font-size:13px !important; font-weight:700 !important; padding:9px 13px !important; }
-        .tactfully-workspace .fixed.inset-0 > div { background:#fff !important; color:#172033 !important; border-radius:16px !important; }
-        .tactfully-workspace .fixed.inset-0 h2 { color:#172033 !important; font-size:24px !important; font-style:normal !important; font-weight:750 !important; letter-spacing:-.03em !important; }
-        .tactfully-workspace .fixed.inset-0 input { color:#172033 !important; border-radius:9px !important; min-height:44px !important; }
-        .tactfully-workspace .fixed.inset-0 button[type="submit"] { background:#34469a !important; color:#fff !important; border-radius:9px !important; min-height:46px !important; }
-        @media(max-width:1023px) { .tactfully-workspace .relative.rounded-md.p-5, .tactfully-workspace .relative.rounded-md.p-6 { transform:none !important; } }
-      
-        /* Warm alabaster + forest green dashboard palette */
-        .tactfully-workspace { background:#F4F0E7 !important; color:#302F29 !important; }
-        .tactfully-workspace header { background:#FFFCF5 !important; border-color:#E5DDCE !important; }
-        .tactfully-workspace header > span { color:#244A3A !important; }
-        .tactfully-workspace header div span,
-        .tactfully-workspace .quick-start-banner { background:#E8EFE8 !important; border-color:#C8D8CB !important; color:#244A3A !important; }
-        .tactfully-workspace .quick-start-title,
-        .tactfully-workspace .quick-start-step { color:#244A3A !important; }
-        .tactfully-workspace .quick-start-number { background:#315D47 !important; color:#FFFCF5 !important; }
-        .tactfully-workspace aside,
-        .tactfully-workspace .relative.rounded-md.p-5,
-        .tactfully-workspace .relative.rounded-md.p-6,
-        .tactfully-workspace .rise-anim,
-        .tactfully-workspace .rounded-2xl.border { background:#FFFCF5 !important; border-color:#E5DDCE !important; color:#302F29 !important; }
-        .tactfully-workspace aside button[style] { background:#FFFCF5 !important; border-color:#E5DDCE !important; }
-        .tactfully-workspace aside button span:nth-child(2),
-        .tactfully-workspace .rise-anim p { color:#403D34 !important; }
-        .tactfully-workspace aside button span:first-child,
-        .tactfully-workspace .relative.rounded-md.p-5 > span,
-        .tactfully-workspace .relative.rounded-md.p-6 > span { color:#315D47 !important; }
-        .tactfully-workspace textarea,
-        .tactfully-workspace input { background:#FFFEFA !important; color:#302F29 !important; border-color:#D9D0C1 !important; }
-        .tactfully-workspace textarea::placeholder { color:#918A7D !important; }
-        .tactfully-workspace button.option-chip[aria-pressed="true"] { background:#315D47 !important; border-color:#315D47 !important; color:#FFFFFF !important; box-shadow:0 0 0 2px rgba(49,93,71,.16) !important; }
-        .tactfully-workspace button.option-chip[aria-pressed="false"] { background:#FFFCF5 !important; border-color:#D9D0C1 !important; color:#514D43 !important; }
-        .tactfully-workspace button.mt-6 { background:#244A3A !important; color:#FFFFFF !important; border:1px solid #244A3A !important; box-shadow:0 5px 12px rgba(36,74,58,.2) !important; font-weight:800 !important; }
-        .tactfully-workspace button.mt-6:hover:not(:disabled) { background:#193A2C !important; }
-        .tactfully-workspace button.mt-6:disabled { background:#A9B5A9 !important; border-color:#A9B5A9 !important; color:#FFFFFF !important; box-shadow:none !important; }
-        .tactfully-workspace .rise-anim button { background:#E8EFE8 !important; border-color:#C8D8CB !important; color:#244A3A !important; }
-        .tactfully-workspace button[style*="#B8722A"] { background:#244A3A !important; color:#FFFFFF !important; border-color:#244A3A !important; }
-        .tactfully-workspace .text-emerald-700 { color:#315D47 !important; }
+        .tactfully-workspace .message-expand-button { border:1px solid #D8D2C6 !important; background:#FFFCF5 !important; color:#315D47 !important; border-radius:8px !important; padding:6px 10px !important; font-size:12px !important; font-weight:750 !important; }
+        .tactfully-workspace .message-expand-button:hover { background:#E8EFE8 !important; }
+        .tactfully-workspace button.rounded-full { font-size:13px !important; font-weight:650 !important; padding:8px 13px !important; border-radius:8px !important; border:1px solid #D9D0C1 !important; color:#514D43 !important; background:#FFFCF5 !important; cursor:pointer !important; }
+        .tactfully-workspace button.option-chip[aria-pressed="true"] { background:#315D47 !important; color:#FFFFFF !important; border-color:#315D47 !important; box-shadow:0 0 0 2px rgba(49,93,71,.14) !important; }
+        .tactfully-workspace button.option-chip[aria-pressed="false"] { background:#FFFCF5 !important; color:#514D43 !important; border-color:#D9D0C1 !important; }
+        .tactfully-workspace button.mt-4.w-full { background:#244A3A !important; color:#FFFFFF !important; border:1px solid #244A3A !important; border-radius:10px !important; min-height:52px !important; font-size:15px !important; font-weight:800 !important; box-shadow:0 5px 12px rgba(36,74,58,.2) !important; }
+        .tactfully-workspace button.mt-4.w-full:hover:not(:disabled) { background:#193A2C !important; }
+        .tactfully-workspace button.mt-4.w-full:disabled { background:#A9B5A9 !important; border-color:#A9B5A9 !important; color:#FFFFFF !important; box-shadow:none !important; }
+        .tactfully-workspace .rise-anim p { color:#403D34 !important; font-size:15px !important; line-height:1.7 !important; }
+        .tactfully-workspace .rise-anim button, .tactfully-workspace .bg-indigo-600 { background:#E8EFE8 !important; border:1px solid #C8D8CB !important; color:#244A3A !important; border-radius:8px !important; font-size:13px !important; font-weight:750 !important; padding:9px 13px !important; }
+        .tactfully-workspace .bg-indigo-100 { background:#E8EFE8 !important; }
+        .tactfully-workspace .text-indigo-700, .tactfully-workspace .text-indigo-800 { color:#315D47 !important; }
+        .tactfully-workspace .text-slate-900 { color:#302F29 !important; }
+        .tactfully-workspace .text-slate-500, .tactfully-workspace .text-slate-600 { color:#77756D !important; }
+        .tactfully-workspace .border-slate-200 { border-color:#E5DDCE !important; }
+        .tactfully-workspace .fixed.inset-0 > div, .tactfully-workspace .fixed.inset-0 > section { background:#FFFCF5 !important; color:#302F29 !important; border-radius:16px !important; }
+        .tactfully-workspace .fixed.inset-0 h2 { color:#244A3A !important; font-size:24px !important; font-style:normal !important; font-weight:750 !important; }
+        .tactfully-workspace .fixed.inset-0 button[type="submit"] { background:#244A3A !important; color:#FFFFFF !important; border-radius:9px !important; min-height:46px !important; }
+        .tactfully-workspace [style*="#1B2A3A"] { background-color:#244A3A !important; color:#FFFFFF !important; border-color:#244A3A !important; }
+        .tactfully-workspace [style*="#F5EFE1"] { background-color:#FFFCF5 !important; color:#302F29 !important; }
         .tactfully-workspace [style*="#B8722A"] { color:#A85F43 !important; }
-        .tactfully-workspace [style*="#1B2A3A"] { color:#302F29 !important; }
-        .tactfully-workspace .fixed.inset-0 > div { background:#FFFCF5 !important; color:#302F29 !important; }
-        .tactfully-workspace .fixed.inset-0 h2 { color:#244A3A !important; }
-        .tactfully-workspace .fixed.inset-0 button[type="submit"] { background:#244A3A !important; color:#FFFFFF !important; }
-`}</style>
+        .tactfully-workspace .paper-scroll::-webkit-scrollbar { width:6px; height:6px; }
+        .tactfully-workspace .paper-scroll::-webkit-scrollbar-thumb { background:rgba(49,93,71,.25); border-radius:3px; }
+        @media(min-width:1024px) { .tactfully-workspace textarea.message-input { min-height:240px !important; } .tactfully-workspace .relative.rounded-md.p-5, .tactfully-workspace .relative.rounded-md.p-6 { padding:16px !important; } }
+        @media(max-width:1023px) { .tactfully-workspace aside { padding:12px !important; } .tactfully-workspace .relative.rounded-md.p-5, .tactfully-workspace .relative.rounded-md.p-6 { transform:none !important; } }
+      `}</style>
 
 
       <header
@@ -913,7 +897,11 @@ export function DraftForm() {
       </div>
 
       {messageExpanded && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6" style={{ background: 'rgba(28,35,30,0.68)' }}>
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6"
+          style={{ background: 'rgba(28,35,30,0.68)' }}
+          onMouseDown={(event) => { if (event.target === event.currentTarget) setMessageExpanded(false) }}
+        >
           <section role="dialog" aria-modal="true" aria-labelledby="expanded-message-title" className="flex h-[92vh] w-full max-w-5xl flex-col rounded-2xl p-4 sm:p-6 shadow-2xl" style={{ background: '#FFFCF5', color: '#302F29' }}>
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
@@ -941,10 +929,16 @@ export function DraftForm() {
       {showAuthModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ background: 'rgba(0,0,0,0.55)' }}>
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="auth-dialog-title"
             className="rounded-md shadow-2xl p-6 max-w-sm w-full relative"
-            style={{ background: '#F5EFE1', color: '#24303B' }}          >
+            style={{ background: '#F5EFE1', color: '#24303B' }}
+          >
             <button
+              type="button"
               onClick={() => setShowAuthModal(false)}
+              aria-label="Close sign-in dialog"
               className="absolute top-4 right-4 font-bold text-lg"
               style={{ color: '#6B7A8C' }}
             >
@@ -952,7 +946,7 @@ export function DraftForm() {
             </button>
 
             <div className="text-center mb-5">
-              <h2 style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 20, color: '#1B2A3A' }}>
+              <h2 id="auth-dialog-title" style={{ fontFamily: "var(--font-newsreader), serif", fontStyle: 'italic', fontSize: 20, color: '#1B2A3A' }}>
                 {isSignUpMode ? 'Open an account' : 'Welcome back'}
               </h2>
               <p className="text-[12px] mt-1" style={{ color: '#6B7A8C', fontFamily: "var(--font-work-sans), sans-serif" }}>
