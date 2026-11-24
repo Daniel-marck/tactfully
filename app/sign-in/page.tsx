@@ -35,6 +35,7 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
 
   useEffect(() => {
@@ -46,6 +47,35 @@ export default function SignInPage() {
       setNotice("Your password has been updated. Sign in with your new password.")
     }
   }, [])
+
+  async function handleResendConfirmation() {
+    const trimmedEmail = email.trim()
+    if (!trimmedEmail) {
+      setError("Enter your email address first, then request a new confirmation email.")
+      return
+    }
+
+    setResendLoading(true)
+    setError(null)
+    setNotice(null)
+
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: trimmedEmail,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        },
+      })
+      if (error) throw error
+      setNotice("If this account still needs confirmation, a new email has been sent. Check your inbox and spam folder.")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to resend the confirmation email. Please wait a moment and try again.")
+    } finally {
+      setResendLoading(false)
+    }
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -129,6 +159,14 @@ export default function SignInPage() {
           <Button type="submit" disabled={loading} className="mt-2 h-10 w-full">
             {loading ? "Signing in…" : "Sign in"}
           </Button>
+          <button
+            type="button"
+            onClick={handleResendConfirmation}
+            disabled={resendLoading || loading}
+            className="text-sm font-medium text-primary underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {resendLoading ? "Sending confirmation email…" : "Resend confirmation email"}
+          </button>
         </form>
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
