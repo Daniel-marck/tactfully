@@ -293,7 +293,7 @@ export function DraftForm() {
       setDraftOptions(replies)
       setDraftsRemaining(typeof data.draftsRemaining === 'number' ? data.draftsRemaining : null)
 
-      await supabase.from('drafts').insert({
+      const { error: saveError } = await supabase.from('drafts').insert({
         user_id: user.id,
         original_message: incomingMessage,
         situation,
@@ -301,12 +301,21 @@ export function DraftForm() {
         generated_reply: replies.join(OPTIONS_SEPARATOR),
       })
 
-      const { data: updatedDrafts } = await supabase
-        .from('drafts')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20)
-      setDraftsList(updatedDrafts || [])
+      if (saveError) {
+        console.error('Draft generated but could not be saved:', saveError)
+        setError('Your replies were generated, but draft history could not be saved. You can still copy your reply.')
+      } else {
+        const { data: updatedDrafts, error: historyError } = await supabase
+          .from('drafts')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(20)
+        if (historyError) {
+          setError('Your replies were generated, but draft history could not be refreshed.')
+        } else {
+          setDraftsList(updatedDrafts || [])
+        }
+      }
     } catch (err) {
       setError('Something went wrong drafting that. Try again.')
     } finally {
@@ -314,10 +323,31 @@ export function DraftForm() {
     }
   }
 
-  const handleCopy = (text: string, index: number) => {
-    navigator.clipboard.writeText(text)
-    setCopiedIndex(index)
-    setTimeout(() => setCopiedIndex((current) => (current === index ? null : current)), 1800)
+  const handleCopy = async (text: string, index: number) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedIndex(index)
+      setError(null)
+      setTimeout(() => setCopiedIndex((current) => (current === index ? null : current)), 1800)
+    } catch {
+      setError('Clipboard access was blocked. Select and copy the reply manually.')
+    }
+  }
+
+  const handleDeleteDraft = async (draftId: string) => {
+    if (!user || !window.confirm('Delete this saved draft? This cannot be undone.')) return
+    const { error: deleteError } = await supabase
+      .from('drafts')
+      .delete()
+      .eq('id', draftId)
+      .eq('user_id', user.id)
+
+    if (deleteError) {
+      setError('Could not delete that draft. Please try again.')
+      return
+    }
+    setDraftsList((current) => current.filter((draft) => draft.id !== draftId))
+    setError(null)
   }
 
   const todayStamp = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit' })
@@ -422,25 +452,40 @@ export function DraftForm() {
           ) : (
             <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible lg:max-h-[70vh] lg:overflow-y-auto paper-scroll pb-1">
               {draftsList.map((draft) => (
-                <button
+                <div
                   key={draft.id}
-                  onClick={() => handleSelectDraft(draft)}
-                  className="text-left rounded-xl border border-stone-200 px-3 py-3 shrink-0 w-48 lg:w-full transition-colors hover:border-forest-300"
-                  style={{ background: '#FFFCF5' }}
+                  className="flex items-stretch gap-1 shrink-0 w-52 lg:w-full"
                 >
-                  <span
-                    className="block uppercase mb-0.5"
-                    style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 9, letterSpacing: '0.08em', color: '#315D47' }}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectDraft(draft)}
+                    className="min-w-0 flex-1 text-left rounded-xl border border-stone-200 px-3 py-3 transition-colors hover:border-forest-300"
+                    style={{ background: '#FFFCF5' }}
                   >
-                    {SITUATION_LABELS[draft.situation] || draft.situation}
-                  </span>
-                  <span className="block text-[12px] truncate" style={{ color: '#302F29', fontFamily: "var(--font-work-sans), sans-serif" }}>
-                    {draft.original_message}
-                  </span>
-                  <span className="block text-[10px] mt-1" style={{ color: '#77756D', fontFamily: "var(--font-plex-mono), monospace" }}>
-                    {new Date(draft.created_at).toLocaleDateString()}
-                  </span>
-                </button>
+                    <span
+                      className="block uppercase mb-0.5"
+                      style={{ fontFamily: "var(--font-plex-mono), monospace", fontSize: 9, letterSpacing: '0.08em', color: '#315D47' }}
+                    >
+                      {SITUATION_LABELS[draft.situation] || draft.situation}
+                    </span>
+                    <span className="block text-[12px] truncate" style={{ color: '#302F29', fontFamily: "var(--font-work-sans), sans-serif" }}>
+                      {draft.original_message}
+                    </span>
+                    <span className="block text-[10px] mt-1" style={{ color: '#77756D', fontFamily: "var(--font-plex-mono), monospace" }}>
+                      {new Date(draft.created_at).toLocaleDateString()}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteDraft(draft.id)}
+                    aria-label="Delete saved draft"
+                    title="Delete draft"
+                    className="shrink-0 self-center rounded-lg border border-stone-200 px-2 py-2 text-xs text-stone-600 hover:border-red-300 hover:text-red-700"
+                    style={{ background: '#FFFCF5' }}
+                  >
+                    Delete
+                  </button>
+                </div>
               ))}
             </div>
           )}
@@ -493,10 +538,12 @@ export function DraftForm() {
             <textarea
               value={incomingMessage}
               onChange={(e) => setIncomingMessage(e.target.value)}
+              maxLength={12000}
               placeholder={`Paste what the client actually said... e.g. "Hey, can you just knock the price down a bit?"`}
               className="w-full min-h-[190px] sm:min-h-[220px] bg-transparent border-none outline-none resize-y"
               style={{ fontFamily: "var(--font-work-sans), sans-serif", fontSize: 15, lineHeight: 1.55, color: '#302F29' }}
             />
+            <p className="mt-1 text-right text-[11px] text-stone-500">{incomingMessage.length.toLocaleString()} / 12,000 characters</p>
 
             <div className="mt-5">
               <div className="flex items-center gap-1.5 mb-3.5">

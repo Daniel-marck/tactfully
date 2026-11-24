@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react"
 import Link from "next/link"
-import { MessagesSquare } from "lucide-react"
+import { BrandMark } from "@/components/brand-mark"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client"
 
@@ -41,31 +41,29 @@ export default function SignUpPage() {
     setLoading(true)
     setError(null)
 
-    const supabase = createClient()
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
-      },
-    })
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        },
+      })
 
-    setLoading(false)
-
-    if (error) {
-      setError(error.message)
-      return
+      if (error) throw error
+      setSubmitted(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to create your account. Please try again.")
+    } finally {
+      setLoading(false)
     }
-
-    setSubmitted(true)
   }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
       <Link href="/" className="mb-8 flex items-center gap-2" aria-label="Tactfully home">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <MessagesSquare className="size-4" />
-        </span>
+        <BrandMark size={32} />
         <span className="text-lg font-semibold tracking-tight">Tactfully</span>
       </Link>
 
@@ -75,7 +73,7 @@ export default function SignUpPage() {
             <h1 className="text-xl font-semibold tracking-tight">Check your email</h1>
             <p className="mt-2 text-sm text-muted-foreground">
               We sent a confirmation link to <span className="font-medium">{email}</span>.
-              Click it to activate your account, then sign in.
+              Click it to confirm your email and open your dashboard.
             </p>
             <Link href="/sign-in">
               <Button className="mt-6 h-10 w-full">Back to sign in</Button>
@@ -113,11 +111,11 @@ export default function SignUpPage() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     required
-                    minLength={6}
+                    minLength={8}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="h-10 w-full rounded-lg border border-border bg-background px-3 pr-10 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                    placeholder="At least 6 characters"
+                    placeholder="At least 8 characters"
                   />
                   <button
                     type="button"

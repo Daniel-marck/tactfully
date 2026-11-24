@@ -1,6 +1,7 @@
 import Link from "next/link"
+import { BrandMark } from "@/components/brand-mark"
 import {
-  ArrowRight, ArrowUpRight, Check, ChevronDown, Clock3, Copy, MessageSquareText,
+  ArrowRight, ArrowUpRight, Check, ChevronDown, Clock3, Copy,
   ShieldCheck, Sparkles, HeartHandshake, FileText
 } from "lucide-react"
 
@@ -20,7 +21,7 @@ const faqs = [
 
 function Brand({ light = false }: { light?: boolean }) {
   return <Link href="/" className={`inline-flex items-center gap-2.5 font-semibold tracking-tight ${light ? "text-white" : "text-stone-950"}`}>
-    <span className="grid size-9 place-items-center rounded-xl bg-forest-600 text-white shadow-lg shadow-forest-600/20"><MessageSquareText className="size-[18px]" /></span>
+    <BrandMark size={36} />
     <span className="text-[19px]">tactfully<span className="text-forest-600">.</span></span>
   </Link>
 }
@@ -30,7 +31,7 @@ function ProductWindow() {
     <div className="absolute -inset-5 rounded-[34px] bg-forest-400/20 blur-3xl" />
     <div className="relative overflow-hidden rounded-[26px] border border-white/70 bg-white shadow-[0_32px_100px_-35px_rgba(49,93,71,.22)]">
       <div className="flex items-center justify-between border-b border-stone-100 bg-white px-5 py-4">
-        <div className="flex items-center gap-2.5"><span className="grid size-8 place-items-center rounded-lg bg-forest-600 text-white"><MessageSquareText size={15}/></span><span className="text-sm font-semibold text-stone-900">Reply studio</span></div>
+        <div className="flex items-center gap-2.5"><BrandMark size={32} /><span className="text-sm font-semibold text-stone-900">Reply studio</span></div>
         <div className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-forest-400"/><span className="text-[11px] font-medium text-stone-500">Ready to draft</span></div>
       </div>
       <div className="grid gap-0 md:grid-cols-[.9fr_1.1fr]">

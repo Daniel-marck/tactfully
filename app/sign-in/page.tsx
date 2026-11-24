@@ -1,8 +1,8 @@
 "use client"
-import { useState, type FormEvent } from "react"
+import { useEffect, useState, type FormEvent } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { MessagesSquare } from "lucide-react"
+import { BrandMark } from "@/components/brand-mark"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client"
 
@@ -35,28 +35,74 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [notice, setNotice] = useState<string | null>(null)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("error") === "auth_callback") {
+      setError("That link is invalid or has expired. Please request a new one.")
+    }
+    if (params.get("message") === "password_updated") {
+      setNotice("Your password has been updated. Sign in with your new password.")
+    }
+  }, [])
+
+  async function handleResendConfirmation() {
+    const trimmedEmail = email.trim()
+    if (!trimmedEmail) {
+      setError("Enter your email address first, then request a new confirmation email.")
+      return
+    }
+
+    setResendLoading(true)
+    setError(null)
+    setNotice(null)
+
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: trimmedEmail,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        },
+      })
+      if (error) throw error
+      setNotice("If this account still needs confirmation, a new email has been sent. Check your inbox and spam folder.")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to resend the confirmation email. Please wait a moment and try again.")
+    } finally {
+      setResendLoading(false)
+    }
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError(null)
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    setLoading(false)
-    if (error) {
-      setError(error.message)
-      return
+    setNotice(null)
+
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      })
+      if (error) throw error
+      router.push("/dashboard")
+      router.refresh()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to sign in. Please try again.")
+    } finally {
+      setLoading(false)
     }
-    router.push("/dashboard")
-    router.refresh()
   }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
       <Link href="/" className="mb-8 flex items-center gap-2" aria-label="Tactfully home">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <MessagesSquare className="size-4" />
-        </span>
+        <BrandMark size={32} />
         <span className="text-lg font-semibold tracking-tight">Tactfully</span>
       </Link>
       <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-8">
@@ -103,10 +149,24 @@ export default function SignInPage() {
               </button>
             </div>
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {notice && <p className="text-sm text-emerald-700" role="status">{notice}</p>}
+          {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
+          <div className="flex justify-end">
+            <Link href="/forgot-password" className="text-xs font-medium text-primary hover:underline">
+              Forgot password?
+            </Link>
+          </div>
           <Button type="submit" disabled={loading} className="mt-2 h-10 w-full">
             {loading ? "Signing in…" : "Sign in"}
           </Button>
+          <button
+            type="button"
+            onClick={handleResendConfirmation}
+            disabled={resendLoading || loading}
+            className="text-sm font-medium text-primary underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {resendLoading ? "Sending confirmation email…" : "Resend confirmation email"}
+          </button>
         </form>
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
