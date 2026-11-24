@@ -7,60 +7,12 @@ export const contentType = 'image/png'
 export default function AppleIcon() {
   return new ImageResponse(
     (
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: '#234B3B',
-          borderRadius: 42,
-          position: 'relative',
-        }}
-      >
-        <div
-          style={{
-            width: 95,
-            height: 84,
-            background: '#F5F0E6',
-            borderRadius: 19,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#234B3B',
-            fontSize: 78,
-            fontWeight: 700,
-            lineHeight: 1,
-            position: 'relative',
-          }}
-        >
-          T
-        </div>
-        <div
-          style={{
-            position: 'absolute',
-            left: 49,
-            bottom: 31,
-            width: 29,
-            height: 24,
-            background: '#F5F0E6',
-            transform: 'skewY(-38deg)',
-            borderBottomLeftRadius: 5,
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            right: 43,
-            bottom: 34,
-            width: 14,
-            height: 14,
-            borderRadius: 7,
-            background: '#C58A61',
-          }}
-        />
-      </div>
+      <svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
+        <rect width="180" height="180" rx="42" fill="#234B3B" />
+        <path d="M42 38C42 27.954 50.954 20 61 20H119C129.046 20 137 27.954 137 38V105C137 115.046 129.046 123 119 123H83L54 148V123H61C50.954 123 42 115.046 42 105V38Z" fill="#F5F0E6" />
+        <path d="M68 55H112V68H96.5V105H83.5V68H68V55Z" fill="#234B3B" />
+        <circle cx="120" cy="139" r="7" fill="#C58A61" />
+      </svg>
     ),
     { ...size },
   )
