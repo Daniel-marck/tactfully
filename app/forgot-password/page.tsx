@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react"
 import Link from "next/link"
-import { MessagesSquare } from "lucide-react"
+import { BrandMark } from "@/components/brand-mark"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client"
 
@@ -34,9 +34,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
       <Link href="/" className="mb-8 flex items-center gap-2" aria-label="Tactfully home">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <MessagesSquare className="size-4" />
-        </span>
+        <BrandMark size={32} />
         <span className="text-lg font-semibold tracking-tight">Tactfully</span>
       </Link>
       <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-8">
