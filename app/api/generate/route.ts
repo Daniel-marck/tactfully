@@ -18,6 +18,50 @@ const ALLOWED_TONES = new Set([
 
 export const maxDuration = 30;
 
+async function readBoundedJson(
+  request: Request
+): Promise<
+  | { kind: 'ok'; value: unknown }
+  | { kind: 'too_large' }
+  | { kind: 'invalid' }
+> {
+  const reader = request.body?.getReader();
+  if (!reader) return { kind: 'invalid' };
+
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+
+      totalBytes += value.byteLength;
+      if (totalBytes > MAX_REQUEST_BYTES) {
+        await reader.cancel().catch(() => undefined);
+        return { kind: 'too_large' };
+      }
+      chunks.push(value);
+    }
+  } catch {
+    return { kind: 'invalid' };
+  }
+
+  const bytes = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  try {
+    return { kind: 'ok', value: JSON.parse(new TextDecoder().decode(bytes)) };
+  } catch {
+    return { kind: 'invalid' };
+  }
+}
+
 async function requestGemini(apiKey: string, prompt: string): Promise<Response> {
   const endpoint =
     'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent';
@@ -102,15 +146,20 @@ export async function POST(req: Request) {
       );
     }
 
-    let parsedBody: unknown;
-    try {
-      parsedBody = await req.json();
-    } catch {
+    const parsed = await readBoundedJson(req);
+    if (parsed.kind === 'too_large') {
+      return NextResponse.json(
+        { error: 'Your request is too large. Shorten the message and try again.' },
+        { status: 413 }
+      );
+    }
+    if (parsed.kind === 'invalid') {
       return NextResponse.json(
         { error: 'Request body must be valid JSON.' },
         { status: 400 }
       );
     }
+    const parsedBody = parsed.value;
 
     if (!parsedBody || typeof parsedBody !== 'object' || Array.isArray(parsedBody)) {
       return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
