@@ -14,12 +14,8 @@ export const metadata: Metadata = {
     'Turn difficult client messages into clear, professional replies. Draft two options, choose your tone, and stay in control of every response.',
   applicationName: 'Tactfully',
   icons: {
-    icon: [
-      { url: '/icon.svg', type: 'image/svg+xml' },
-      { url: '/icon-light-32x32.png', sizes: '32x32', type: 'image/png', media: '(prefers-color-scheme: light)' },
-      { url: '/icon-dark-32x32.png', sizes: '32x32', type: 'image/png', media: '(prefers-color-scheme: dark)' },
-    ],
-    apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
+    icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],
+    apple: [{ url: '/apple-icon', sizes: '180x180', type: 'image/png' }],
   },
   openGraph: {
     type: 'website',
