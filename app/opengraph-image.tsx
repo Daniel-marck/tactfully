@@ -15,10 +15,15 @@ export default function OpenGraphImage() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <div style={{
-            width: 54, height: 54, borderRadius: 15, background: '#315D47',
-            color: '#FFFFFF', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', fontSize: 34, fontWeight: 700,
-          }}>T</div>
+            width: 54, height: 54, borderRadius: 15, background: '#234B3B',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg width="54" height="54" viewBox="0 0 180 180">
+              <path d="M42 38C42 27.954 50.954 20 61 20H119C129.046 20 137 27.954 137 38V105C137 115.046 129.046 123 119 123H83L54 148V123H61C50.954 123 42 115.046 42 105V38Z" fill="#F5F0E6"/>
+              <path d="M68 55H112V68H96.5V105H83.5V68H68V55Z" fill="#234B3B"/>
+              <circle cx="120" cy="139" r="7" fill="#C58A61"/>
+            </svg>
+          </div>
           <div style={{ fontSize: 32, fontWeight: 700, letterSpacing: -1 }}>
             tactfully<span style={{ color: '#78947D' }}>.</span>
           </div>
@@ -54,7 +59,7 @@ export default function OpenGraphImage() {
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', color: '#839087', fontSize: 15 }}>
           <div>Draft thoughtfully. Send confidently.</div>
-          <div>tactfully.app</div>
+          <div>Tactfully · Client communication assistant</div>
         </div>
       </div>
     ),
